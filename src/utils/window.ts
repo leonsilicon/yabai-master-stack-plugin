@@ -1,5 +1,5 @@
 import { getScreenSize } from '.';
-import { windowsData, refreshWindowsData } from '../state';
+import { windowsData } from '../state';
 import type { Window } from '../types';
 
 export function getWindowData({ processId, windowId }: {processId?: string, windowId?: string}): Window {
@@ -25,12 +25,24 @@ export function getWindowData({ processId, windowId }: {processId?: string, wind
 	return windowData;
 }
 
-export function getMainWindow(): Window | undefined {
+export function getRightmostWindows(): Window[] {
 	const screenSize = getScreenSize();
-	// Find the window on the right of the screen
-	const mainWindow = windowsData.find(({ frame }) => {
+	// Get all windows that's touching the right side of the screen
+	const rightmostWindows = windowsData.filter(({ frame }) => {
 		return frame.x + frame.w === screenSize.width;
-	});
+	})!;
 
-	return mainWindow;
+	return rightmostWindows;
+}
+
+export function isMainWindow(window: Window) {
+	let leftX = Number.MAX_SAFE_INTEGER;
+	for (const rightmostWin of getRightmostWindows()) {
+		if (rightmostWin.frame.x < leftX) {
+			leftX = rightmostWin.frame.x;
+		}
+	}
+
+	// Only a main window if it's x value is greater or equal than leftX 
+	return window.frame.x >= leftX;
 }
