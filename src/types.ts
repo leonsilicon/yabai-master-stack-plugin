@@ -25,3 +25,7 @@ export type Window = {
 	'zoom-fullscreen': number;
 	'native-fullscreen': number;
 }
+
+export type State = {
+	mainWindowIds: string[]
+}

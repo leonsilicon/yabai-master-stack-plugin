@@ -1,5 +1,5 @@
 import { getScreenSize } from '.';
-import { windowsData } from '../state';
+import { readState, windowsData } from '../state';
 import type { Window } from '../types';
 
 export function getWindowData({ processId, windowId }: {processId?: string, windowId?: string}): Window {
@@ -36,13 +36,10 @@ export function getRightmostWindows(): Window[] {
 }
 
 export function isMainWindow(window: Window) {
-	let leftX = Number.MAX_SAFE_INTEGER;
-	for (const rightmostWin of getRightmostWindows()) {
-		if (rightmostWin.frame.x < leftX) {
-			leftX = rightmostWin.frame.x;
-		}
-	}
+	const state = readState();
+	return state.mainWindowIds.includes(window.id.toString());
+}
 
-	// Only a main window if it's x value is greater or equal than leftX 
-	return window.frame.x >= leftX;
+export function getFocusedWindow(): Window | undefined {
+	return windowsData.find((w) => w.focused === 1);
 }
