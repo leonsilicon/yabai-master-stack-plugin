@@ -12,7 +12,8 @@ export function getScreenSize() {
 	const output = execa.commandSync("system_profiler SPDisplaysDataType | grep Resolution", { shell: true }).stdout;
   const matchGroups = output.match(/(\d+) x (\d+)/)!;
 	const width = Number(matchGroups[1]);
-	const height = Number(matchGroups[2]);
+	// Subtract bar and dock height
+	const height = Number(matchGroups[2]) - 23;
 
 	return (cachedScreenSize = { width, height });
 }

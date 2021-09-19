@@ -1,13 +1,6 @@
-import execa from 'execa';
 import { getScreenSize } from '.';
+import { windowsData, refreshWindowsData } from '../state';
 import type { Window } from '../types';
-
-export type WindowData = Window[] | undefined;
-let cachedWindowsData;
-export function getWindowsData(): Window[] {
-	const windowsData = JSON.parse(execa.commandSync('yabai -m query --windows').stdout) as Window[];
-	return (cachedWindowsData = windowsData);
-}
 
 export function getWindowData({ processId, windowId }: {processId?: string, windowId?: string}): Window {
 	if (processId === undefined && windowId === undefined) {
@@ -16,9 +9,9 @@ export function getWindowData({ processId, windowId }: {processId?: string, wind
 
 	let windowData: Window | undefined;
 	if (processId !== undefined) {
-		windowData = getWindowsData().find((window) => window.pid === Number(processId));
+		windowData = windowsData.find((window) => window.pid === Number(processId));
 	} else {
-		windowData = getWindowsData().find((window) => window.id === Number(windowId));
+		windowData = windowsData.find((window) => window.id === Number(windowId));
 	}
 
 	if (windowData === undefined) {
@@ -32,17 +25,12 @@ export function getWindowData({ processId, windowId }: {processId?: string, wind
 	return windowData;
 }
 
-export function getMainWindow() {
-	const windowsData = getWindowsData();
+export function getMainWindow(): Window | undefined {
 	const screenSize = getScreenSize();
 	// Find the window on the right of the screen
 	const mainWindow = windowsData.find(({ frame }) => {
 		return frame.x + frame.w === screenSize.width;
 	});
-
-	if (mainWindow === undefined) {
-		throw new Error('Could not locate main window.')
-	}
 
 	return mainWindow;
 }
