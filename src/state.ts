@@ -7,7 +7,7 @@ import path from 'path';
 export let windowsData: Window[] = []; 
 
 export function refreshWindowsData() {
-	windowsData = (JSON.parse(execa.commandSync('yabai -m query --windows').stdout) as Window[]).filter((win) => win.split !== "none");
+	windowsData = (JSON.parse(execa.commandSync('/usr/local/bin/yabai -m query --windows').stdout) as Window[]).filter((win) => win.split !== "none");
 }
 refreshWindowsData();
 

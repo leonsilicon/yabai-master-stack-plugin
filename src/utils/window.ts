@@ -97,7 +97,7 @@ export function moveWindowToStack(windowId: string) {
 	// If the stack exists and the window is already on the stack
 	if (windowsData.length > 2 && isWindowTouchingLeft(win)) {
 		if (win.split === 'vertical') {
-			execa.commandSync(`yabai -m window ${win.id} --toggle split`);
+			execa.commandSync(`/usr/local/bin/yabai -m window ${win.id} --toggle split`);
 		}
 		return;
 	}
@@ -106,17 +106,17 @@ export function moveWindowToStack(windowId: string) {
 	const stackWindow = getWidestWindowOnLeft();
 
 	if (stackWindow === undefined) return;
-	execa.commandSync(`yabai -m window ${windowId} --warp ${stackWindow.id}`);
+	execa.commandSync(`/usr/local/bin/yabai -m window ${windowId} --warp ${stackWindow.id}`);
 
 	win = getWindowData({ windowId })
 
 	if (windowsData.length === 2) {
 		if (win.split === 'horizontal') {
-			execa.commandSync(`yabai -m window ${stackWindow.id} --toggle split`);
+			execa.commandSync(`/usr/local/bin/yabai -m window ${stackWindow.id} --toggle split`);
 		}
 	} else {
 		if (win.split === 'vertical') {
-			execa.commandSync(`yabai -m window ${stackWindow.id} --toggle split`);
+			execa.commandSync(`/usr/local/bin/yabai -m window ${stackWindow.id} --toggle split`);
 		}
 	}
 }
@@ -128,11 +128,11 @@ export function moveWindowToMain(windowId: string) {
 	const mainWindow = getWidestWindowOnRight();
 
 	if (mainWindow === undefined) return;
-	execa.commandSync(`yabai -m window ${windowId} --warp ${mainWindow.id}`);
+	execa.commandSync(`/usr/local/bin/yabai -m window ${windowId} --warp ${mainWindow.id}`);
 
 	win = getWindowData({ windowId })
 	if (win.split === 'vertical') {
-		execa.commandSync(`yabai -m window ${mainWindow.id} --toggle split`);
+		execa.commandSync(`/usr/local/bin/yabai -m window ${mainWindow.id} --toggle split`);
 	}
 }
 
