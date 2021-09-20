@@ -138,6 +138,10 @@ export function getMainWindows() {
 	return windowsData.filter((w) => isWindowTouchingRight(w));
 }
 
+export function getStackWindows() {
+	return windowsData.filter((w) => isWindowTouchingLeft(w));
+}
+
 export function isMainWindow(window: Window) {
 	return isWindowTouchingRight(window);
 }
@@ -156,4 +160,56 @@ export function isValidLayout() {
 	}
 
 	return true;
+}
+
+export function updateWindows() {
+	if (isValidLayout()) {
+		console.log('Valid layout detected; no changes were made.')
+		return;
+	}
+
+	const numWindows = windowsData.length
+
+	if (numWindows > 2) {
+		const mainWindows = getMainWindows();
+		let curNumMainWindows = mainWindows.length;
+		const state = readState();
+
+		// If there are too many main windows, move them to stack
+		if (curNumMainWindows > state.numMainWindows) {
+			console.log('Too many main windows.')
+			while (curNumMainWindows > state.numMainWindows) {
+				const mainWindow = mainWindows.pop()!;
+				moveWindowToStack(mainWindow.id.toString());
+				curNumMainWindows -= 1;
+			}
+		}
+
+		// If there are windows that aren't touching either the left side or the right side 
+		// after the move, fill up main and then move the rest to stack
+		for (const window of windowsData) {
+			if (isMiddleWindow(window)) {
+				console.log('Middle window detected.');
+				if (curNumMainWindows < state.numMainWindows) {
+					console.log('Moving middle window to main.');
+					moveWindowToMain(window.id.toString())
+					curNumMainWindows += 1;
+				} else {
+					console.log('Moving middle window to stack.');
+					moveWindowToStack(window.id.toString());
+				}
+			}
+		}
+
+		const stackWindows = getStackWindows();
+		while (curNumMainWindows < state.numMainWindows) {
+			const stackWindow = stackWindows.pop()!;
+			moveWindowToMain(stackWindow.id.toString());
+		}
+
+	}
+
+	if (!isValidLayout()) {
+		throw new Error('Update layout ended with an invalid layout.');
+	}
 }

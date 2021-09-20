@@ -1,14 +1,10 @@
 import { readState } from '../state';
 import { getMainWindows, getWindowData, isValidLayout, moveWindowToMain, moveWindowToStack } from '../utils';
-import fs from 'fs';
+import { lockOrQuit, releaseLock } from '../utils/lock';
 
 function main() {
 	try {
-		if (fs.existsSync('handler.lock')) {
-			process.exit(1);
-		}
-		fs.writeFileSync('handler.lock', '');
-
+		lockOrQuit();
 		console.log('Starting to handle window_created.')
 
 		if (isValidLayout()) {
@@ -40,7 +36,7 @@ function main() {
 		}
 		console.log('Finished handling window_created.');
 	} finally {
-		fs.rmSync('handler.lock');
+		releaseLock();
 	}
 }
 
