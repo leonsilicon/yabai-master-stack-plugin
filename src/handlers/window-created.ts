@@ -1,32 +1,21 @@
-import execa from 'execa';
-import { refreshWindowsData, windowsData } from '../state';
-import { getWindowData } from '../utils';
+import { readState } from '../state';
+import { getMainWindows, getWindowData, moveWindowToMain, moveWindowToStack } from '../utils';
 
 const processId = process.env.YABAI_PROCESS_ID as string;
 const windowId = process.env.YABAI_WINDOW_ID as string;
-const numWindows = windowsData.length
+const state = readState();
+const curNumMainWindows = getMainWindows().length;
+const window = getWindowData({ windowId, processId });
 
-// Resize the main window to the width
-if (numWindows === 2) {
-	// Make sure the split is horizontal
-	const window = getWindowData({ processId, windowId });
-	if (window.split === 'horizontal') {
-		execa.commandSync(`yabai -m window ${window.id} --toggle split`)
-	}
+// If the main can fit more windows
+if (curNumMainWindows > 1 && curNumMainWindows <= state.numMainWindows) {
+	// move the window to the main
+	console.log('Moving newly created window to main.');
+	moveWindowToMain(window.id.toString());
 } 
-// Reposition all the secondary windows
-else if (numWindows > 2) {
-	// Make sure the split is vertical
-	let window = getWindowData({ processId, windowId });
-
-	try {
-		execa.commandSync(`yabai -m window ${window.id} --warp first`);
-	} catch(e) {}
-
-	refreshWindowsData();
-	window = getWindowData({ processId, windowId });
-
-	if (window.split === 'vertical') {
-		execa.commandSync(`yabai -m window ${window.id} --toggle split`)
-	}
+// if there are too many windows on the main
+else {
+	console.log('Moving newly created window to stack.');
+	// move the window to the stack
+	moveWindowToStack(window.id.toString());
 }

@@ -27,5 +27,5 @@ export type Window = {
 }
 
 export type State = {
-	mainWindowIds: string[]
+	numMainWindows: number;
 }

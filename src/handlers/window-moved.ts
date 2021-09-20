@@ -1,24 +1,45 @@
 import execa from 'execa';
-import { windowsData } from '../state';
-import { getWindowData, isMainWindow } from '../utils';
+import { readState, windowsData } from '../state';
+import { getMainWindows, getWindowData, isMainWindow, isWindowTouchingLeft, isWindowTouchingRight, moveWindowToMain, moveWindowToStack } from '../utils';
+import lockfile from 'proper-lockfile';
 
-const processId = process.env.YABAI_PROCESS_ID as string;
-const windowId = process.env.YABAI_WINDOW_ID as string;
 const numWindows = windowsData.length
 
-// Reposition all the secondary windows
-if (numWindows > 2) {
-	// Make sure the split is vertical
-	let window = getWindowData({ processId, windowId });
+/*
+lockfile.lockSync('window-moved-handler.lock');
 
-	// Only check the split orientation if the window is not a main window
-	if (isMainWindow(window)) {
-		if (window.split === 'horizontal') {
-			execa.commandSync(`yabai -m window ${window.id} --toggle split`)
+if (numWindows > 2) {
+	const mainWindows = getMainWindows();
+	let curNumMainWindows = mainWindows.length;
+	const state = readState();
+
+	// If there are too many main windows, move them to stack
+	if (curNumMainWindows > state.numMainWindows) {
+		console.log('Too many main windows.')
+		while (curNumMainWindows > state.numMainWindows) {
+			const mainWindow = mainWindows.pop()!;
+			moveWindowToStack(mainWindow.id.toString());
+			curNumMainWindows -= 1;
 		}
-	} else {
-		if (window.split === 'vertical') {
-			execa.commandSync(`yabai -m window ${window.id} --toggle split`)
+		curNumMainWindows -= 1;
+	}
+
+	// If there are windows that aren't touching either the left side or the right side 
+	// after the move, fill up main and then move the rest to stack
+	for (const window of windowsData) {
+		if (!isWindowTouchingRight(window) && !isWindowTouchingLeft(window)) {
+			console.log('Middle window detected.');
+			if (curNumMainWindows < state.numMainWindows) {
+				console.log('Moving middle window to main.');
+				moveWindowToMain(window.id.toString())
+				curNumMainWindows += 1;
+			} else {
+				console.log('Moving middle window to stack.');
+				moveWindowToStack(window.id.toString());
+			}
 		}
 	}
 }
+
+lockfile.unlockSync('window-moved-handler.lock');
+*/
