@@ -127,7 +127,9 @@ export function moveWindowToMain(windowId: string) {
 	// Find a window that's touching the right side of the screen
 	const mainWindow = getWidestWindowOnRight();
 
-	if (!mainWindow) return;
+	if (mainWindow === undefined) return;
+	execa.commandSync(`yabai -m window ${windowId} --warp ${mainWindow.id}`);
+
 	win = getWindowData({ windowId })
 	if (win.split === 'vertical') {
 		execa.commandSync(`yabai -m window ${mainWindow.id} --toggle split`);
@@ -205,8 +207,8 @@ export function updateWindows() {
 		while (curNumMainWindows < state.numMainWindows) {
 			const stackWindow = stackWindows.pop()!;
 			moveWindowToMain(stackWindow.id.toString());
+			curNumMainWindows += 1;
 		}
-
 	}
 
 	if (!isValidLayout()) {
