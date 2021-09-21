@@ -182,16 +182,6 @@ export function updateWindows() {
 		let curNumMainWindows = mainWindows.length;
 		const state = readState();
 
-		// If there are too many main windows, move them to stack
-		if (curNumMainWindows > state.numMainWindows) {
-			console.log('Too many main windows.');
-			while (curNumMainWindows > state.numMainWindows) {
-				const mainWindow = mainWindows.pop()!;
-				moveWindowToStack(mainWindow.id.toString());
-				curNumMainWindows -= 1;
-			}
-		}
-
 		// If there are windows that aren't touching either the left side or the right side
 		// after the move, fill up main and then move the rest to stack
 		for (const window of windowsData) {
@@ -207,6 +197,17 @@ export function updateWindows() {
 				}
 			}
 		}
+
+		// If there are too many main windows, move them to stack
+		if (curNumMainWindows > state.numMainWindows) {
+			console.log('Too many main windows.');
+			while (curNumMainWindows > state.numMainWindows) {
+				const mainWindow = mainWindows.pop()!;
+				moveWindowToStack(mainWindow.id.toString());
+				curNumMainWindows -= 1;
+			}
+		}
+
 
 		const stackWindows = getStackWindows();
 		while (curNumMainWindows < state.numMainWindows) {

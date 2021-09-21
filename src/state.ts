@@ -17,6 +17,7 @@ export function refreshWindowsData() {
 refreshWindowsData();
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
+const stateLockPath = path.join(pkgDir.sync(__dirname)!, 'state.json.lock');
 
 const defaultState: State = { numMainWindows: 1 };
 const defaultStateJson = JSON.stringify(defaultState);
