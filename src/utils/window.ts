@@ -56,72 +56,31 @@ function getWindowRect(w: Window): WindowRect {
 	};
 }
 
-function doWindowsShareYCoordinates(w1: Window, w2: Window) {
-	const a = getWindowRect(w1);
-	const b = getWindowRect(w2);
-
-	return a.y1 < b.y2 && a.y2 > b.y1;
-}
-
-function doWindowsShareXCoordinates(w1: Window, w2: Window) {
-	const a = getWindowRect(w1);
-	const b = getWindowRect(w2);
-
-	return a.x1 < b.x2 && a.x2 > b.x1;
-}
-
-export function isWindowTouchingLeft(window: Window) {
-	// Check that the window is the furthest to the left
-	for (const w of windowsData) {
-		if (w === window) continue;
+export function getLeftmostWindow(windows: Window[]) {
+	let leftmostWindow = windows[0];
+	for (const w of windows) {
 		// If the windows are side-by-side and w is further left than window
-		if (doWindowsShareYCoordinates(w, window) && w.frame.x < window.frame.x) {
-			return false;
+		if (w.frame.x < leftmostWindow.frame.x) {
+			leftmostWindow = w;
 		}
 	}
-	return true;
+	return leftmostWindow;
 }
 
-export function isWindowTouchingRight(window: Window) {
-	for (const w of windowsData) {
-		if (w === window) continue;
-		// If the windows are side-by-side and w is further right than window
-		if (doWindowsShareYCoordinates(w, window) && w.frame.x > window.frame.x) {
-			return false;
+export function getRightmostWindow(windows: Window[]) {
+	let rightmostWindow = windows[0];
+	for (const w of windows) {
+		if (w.frame.x > rightmostWindow.frame.x) {
+			rightmostWindow = w;
 		}
 	}
-	return true;
+	return rightmostWindow;
 }
 
-/**
- * The widest window touching the right is always guaranteed to be a main window
- */
-export function getWidestWindowOnRight() {
-	let widestWindow: Window | undefined;
-	for (const w of windowsData) {
-		if (!isWindowTouchingRight(w)) continue;
-		if (widestWindow === undefined || w.frame.w > widestWindow.frame.w) {
-			widestWindow = w;
-		}
-	}
+const isWindowTouchingLeft = (window: Window) => window.frame.x <= 0;
 
-	return widestWindow;
-}
-
-/**
- * The widest window touching the left of the screen is always guaranteed to be a stack window
- */
-export function getWidestWindowOnLeft() {
-	let widestWindow: Window | undefined;
-	for (const w of windowsData) {
-		if (!isWindowTouchingLeft(w)) continue;
-		if (widestWindow === undefined || w.frame.w > widestWindow.frame.w) {
-			widestWindow = w;
-		}
-	}
-
-	return widestWindow;
-}
+export const getLeftmostStackWindow = () => getLeftmostWindow(windowsData);
+export const getRightmostMainWindow = () => getRightmostWindow(windowsData);
 
 export function moveWindowToStack(windowId: string) {
 	let win = getWindowData({ windowId });
@@ -129,15 +88,13 @@ export function moveWindowToStack(windowId: string) {
 	// If the stack exists and the window is already on the stack
 	if (windowsData.length > 2 && isWindowTouchingLeft(win)) {
 		if (win.split === 'vertical') {
-			execa.commandSync(
-				`${yabaiPath} -m window ${win.id} --toggle split`
-			);
+			execa.commandSync(`${yabaiPath} -m window ${win.id} --toggle split`);
 		}
 		return;
 	}
 
 	// Find a window that's touching the left side of the screen
-	const stackWindow = getWidestWindowOnLeft();
+	const stackWindow = getLeftmostStackWindow();
 
 	if (stackWindow === undefined) return;
 	execa.commandSync(
@@ -165,7 +122,7 @@ export function moveWindowToMain(windowId: string) {
 	let win = getWindowData({ windowId });
 
 	// Find a window that's touching the right side of the screen
-	const mainWindow = getWidestWindowOnRight();
+	const mainWindow = getRightmostMainWindow();
 
 	if (mainWindow === undefined) return;
 	execa.commandSync(
@@ -174,26 +131,30 @@ export function moveWindowToMain(windowId: string) {
 
 	win = getWindowData({ windowId });
 	if (win.split === 'vertical') {
-		execa.commandSync(
-			`${yabaiPath} -m window ${mainWindow.id} --toggle split`
-		);
+		execa.commandSync(`${yabaiPath} -m window ${mainWindow.id} --toggle split`);
 	}
 }
 
-export function getMainWindows() {
-	return windowsData.filter((w) => isWindowTouchingRight(w));
-}
-
+/**
+ * If the window's frame has an x of 0, it is a stack window
+ */
 export function getStackWindows() {
-	return windowsData.filter((w) => isWindowTouchingLeft(w));
+	return windowsData.filter((w) => w.frame.x === 0);
 }
 
-export function isMainWindow(window: Window) {
-	return isWindowTouchingRight(window);
+/**
+ * If the window's frame has an x equal to the rightmost window, it is a main window
+ */
+export function getMainWindows() {
+	const rightmostWindow = getRightmostWindow(windowsData);
+	return windowsData.filter((w) => w.frame.x === rightmostWindow.frame.x);
 }
+
+export const isMainWindow = (window: Window) => getMainWindows().includes(window);
+export const isStackWindow = (window: Window) => window.frame.x === 0;
 
 export function isMiddleWindow(window: Window) {
-	return !isWindowTouchingRight(window) && !isWindowTouchingLeft(window);
+	return !getStackWindows().includes(window) && !getMainWindows().includes(window);
 }
 
 export function isValidLayout() {
@@ -260,42 +221,29 @@ export function updateWindows() {
 	}
 }
 
-export function isWindowTouchingTop(window: Window) {
-	// Check that the window is the furthest to the top
-	for (const w of windowsData) {
-		if (w === window) continue;
-		// If the windows are above-and-below and w is further up than window
-		if (doWindowsShareXCoordinates(w, window) && w.frame.y < window.frame.y) {
-			return false;
+export function getTopWindow(windows: Window[]) {
+	let topWindow = windows[0];
+	for (const w of windows) {
+		if (w.frame.y < topWindow.frame.y) {
+			topWindow = w;
 		}
 	}
-	return true;
+	return topWindow;
 }
+export const isTopWindow = (windows: Window[], window: Window) => getTopWindow(windows).id === window.id;
 
-export function isWindowTouchingBottom(window: Window) {
-	// Check that the window is the furthest to the top
-	for (const w of windowsData) {
-		if (w === window) continue;
-		// If the windows are above-and-below and w is further down than window
-		if (doWindowsShareXCoordinates(w, window) && w.frame.y > window.frame.y) {
-			return false;
+export function getBottomWindow(windows: Window[]) {
+	let bottomWindow = windows[0];
+	for (const w of windows) {
+		if (w.frame.y > bottomWindow.frame.y) {
+			bottomWindow = w;
 		}
 	}
-	return true;
+	return bottomWindow;
 }
+export const isBottomWindow = (windows: Window[], window: Window) => getBottomWindow(windows).id === window.id;
 
-export function getTopStackWindow() {
-	return getStackWindows().find((w) => isWindowTouchingTop(w));
-}
-
-export function getBottomStackWindow() {
-	return getStackWindows().find((w) => isWindowTouchingBottom(w));
-}
-
-export function getTopMainWindow() {
-	return getMainWindows().find((w) => isWindowTouchingTop(w));
-}
-
-export function getBottomMainWindow() {
-	return getMainWindows().find((w) => isWindowTouchingBottom(w));
-}
+export const getTopStackWindow = () => getTopWindow(getStackWindows());
+export const getBottomStackWindow = () => getBottomWindow(getStackWindows());
+export const getTopMainWindow = () => getTopWindow(getMainWindows());
+export const getBottomMainWindow = () => getBottomWindow(getMainWindows());
