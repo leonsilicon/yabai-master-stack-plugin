@@ -1,4 +1,5 @@
 import execa from 'execa';
+import { yabaiPath } from '../config';
 import { readState, refreshWindowsData, windowsData } from '../state';
 import type { Window } from '../types';
 
@@ -129,7 +130,7 @@ export function moveWindowToStack(windowId: string) {
 	if (windowsData.length > 2 && isWindowTouchingLeft(win)) {
 		if (win.split === 'vertical') {
 			execa.commandSync(
-				`/usr/local/bin/yabai -m window ${win.id} --toggle split`
+				`${yabaiPath} -m window ${win.id} --toggle split`
 			);
 		}
 		return;
@@ -140,7 +141,7 @@ export function moveWindowToStack(windowId: string) {
 
 	if (stackWindow === undefined) return;
 	execa.commandSync(
-		`/usr/local/bin/yabai -m window ${windowId} --warp ${stackWindow.id}`
+		`${yabaiPath} -m window ${windowId} --warp ${stackWindow.id}`
 	);
 
 	win = getWindowData({ windowId });
@@ -148,13 +149,13 @@ export function moveWindowToStack(windowId: string) {
 	if (windowsData.length === 2) {
 		if (win.split === 'horizontal') {
 			execa.commandSync(
-				`/usr/local/bin/yabai -m window ${stackWindow.id} --toggle split`
+				`${yabaiPath} -m window ${stackWindow.id} --toggle split`
 			);
 		}
 	} else {
 		if (win.split === 'vertical') {
 			execa.commandSync(
-				`/usr/local/bin/yabai -m window ${stackWindow.id} --toggle split`
+				`${yabaiPath} -m window ${stackWindow.id} --toggle split`
 			);
 		}
 	}
@@ -168,13 +169,13 @@ export function moveWindowToMain(windowId: string) {
 
 	if (mainWindow === undefined) return;
 	execa.commandSync(
-		`/usr/local/bin/yabai -m window ${windowId} --warp ${mainWindow.id}`
+		`${yabaiPath} -m window ${windowId} --warp ${mainWindow.id}`
 	);
 
 	win = getWindowData({ windowId });
 	if (win.split === 'vertical') {
 		execa.commandSync(
-			`/usr/local/bin/yabai -m window ${mainWindow.id} --toggle split`
+			`${yabaiPath} -m window ${mainWindow.id} --toggle split`
 		);
 	}
 }

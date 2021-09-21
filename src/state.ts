@@ -3,13 +3,14 @@ import fs from 'fs';
 import type { State, Window } from './types';
 import pkgDir from 'pkg-dir';
 import path from 'path';
+import { yabaiPath } from './config';
 
 export let windowsData: Window[] = [];
 
 export function refreshWindowsData() {
 	windowsData = (
 		JSON.parse(
-			execa.commandSync('/usr/local/bin/yabai -m query --windows').stdout
+			execa.commandSync(`${yabaiPath} -m query --windows`).stdout
 		) as Window[]
 	).filter((win) => win.split !== 'none');
 }

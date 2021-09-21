@@ -1,4 +1,5 @@
 import execa from 'execa';
+import { yabaiPath } from '../config';
 import {
 	getFocusedWindow,
 	getTopMainWindow,
@@ -15,18 +16,18 @@ if (focusedWindow !== undefined) {
 			// Focus on the top stack window
 			const topStackWindow = getTopStackWindow();
 			if (topStackWindow !== undefined) {
-				execa.commandSync(`yabai -m window --focus ${topStackWindow.id}`);
+				execa.commandSync(`${yabaiPath} -m window --focus ${topStackWindow.id}`);
 			}
 		} else {
 			// Focus on the top main window
 			const topMainWindow = getTopMainWindow();
 			if (topMainWindow !== undefined) {
-				execa.commandSync(`yabai -m window --focus ${topMainWindow.id}`);
+				execa.commandSync(`${yabaiPath} -m window --focus ${topMainWindow.id}`);
 			}
 		}
 	}
 	// Otherwise, just focus south
 	else {
-		execa.commandSync(`yabai -m window --focus south`);
+		execa.commandSync(`${yabaiPath} -m window --focus south`);
 	}
 }
