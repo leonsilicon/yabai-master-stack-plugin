@@ -1,6 +1,6 @@
-import { readState, writeState } from "../state";
-import { updateWindows } from "../utils";
-import { lockOrQuit, releaseLock } from "../utils/lock";
+import { readState, writeState } from '../state';
+import { updateWindows } from '../utils';
+import { lockOrQuit, releaseLock } from '../utils/lock';
 
 function main() {
 	try {
@@ -9,7 +9,7 @@ function main() {
 		if (state.numMainWindows > 1) {
 			state.numMainWindows = state.numMainWindows - 1;
 			writeState(state);
-			console.log('Decreasing main window count.')
+			console.log('Decreasing main window count.');
 			updateWindows();
 		}
 	} finally {

@@ -3,7 +3,7 @@ export type Window = {
 	pid: number;
 	app: string;
 	title: string;
-	frame: { x: number, y: number; w: number; h: number },
+	frame: { x: number; y: number; w: number; h: number };
 	level: number;
 	role: string;
 	subrole: string;
@@ -24,8 +24,8 @@ export type Window = {
 	'zoom-parent': number;
 	'zoom-fullscreen': number;
 	'native-fullscreen': number;
-}
+};
 
 export type State = {
 	numMainWindows: number;
-}
+};

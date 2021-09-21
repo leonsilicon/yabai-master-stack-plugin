@@ -1,6 +1,6 @@
-import { readState, windowsData, writeState } from "../state";
-import { updateWindows } from "../utils";
-import { lockOrQuit, releaseLock } from "../utils/lock";
+import { readState, windowsData, writeState } from '../state';
+import { updateWindows } from '../utils';
+import { lockOrQuit, releaseLock } from '../utils/lock';
 
 function main() {
 	try {
@@ -9,7 +9,7 @@ function main() {
 		if (state.numMainWindows < windowsData.length) {
 			state.numMainWindows += 1;
 			writeState(state);
-			console.log('Increasing main window count.')
+			console.log('Increasing main window count.');
 			updateWindows();
 		}
 	} finally {

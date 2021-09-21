@@ -1,11 +1,17 @@
 import { readState } from '../state';
-import { getMainWindows, getWindowData, isValidLayout, moveWindowToMain, moveWindowToStack } from '../utils';
+import {
+	getMainWindows,
+	getWindowData,
+	isValidLayout,
+	moveWindowToMain,
+	moveWindowToStack,
+} from '../utils';
 import { lockOrQuit, releaseLock } from '../utils/lock';
 
 function main() {
 	try {
 		lockOrQuit();
-		console.log('Starting to handle window_created.')
+		console.log('Starting to handle window_created.');
 
 		if (isValidLayout()) {
 			console.log('Valid layout detected; no changes were made.');
@@ -23,7 +29,7 @@ function main() {
 			// move the window to the main
 			console.log('Moving newly created window to main.');
 			moveWindowToMain(window.id.toString());
-		} 
+		}
 		// if there are too many windows on the main
 		else {
 			console.log('Moving newly created window to stack.');
@@ -40,4 +46,4 @@ function main() {
 	}
 }
 
-main()
+main();
