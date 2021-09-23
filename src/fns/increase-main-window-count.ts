@@ -14,7 +14,6 @@ async function main() {
 		});
 		if (state.numMainWindows < wm.windowsData.length) {
 			state.numMainWindows += 1;
-			wm.expectedNumMainWindows += 1;
 			await writeState(state);
 			console.log('Increasing main window count.');
 			await wm.updateWindows();
