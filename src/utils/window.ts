@@ -187,15 +187,24 @@ export function createWindowsManager({
 		// In the event that the windows get badly rearranged and all the windows span the entire width of
 		// the screen, split the top-right window vertically and then move the windows into the split
 		createStack() {
-			const topRightWindow = this.getTopRightWindow();
+			console.log('Creating stack...');
+			let topRightWindow = this.getTopRightWindow();
+			console.log(`Top-right window: ${topRightWindow.app}`);
+
 			if (topRightWindow.split === 'horizontal') {
 				this.executeYabaiCommand(
 					`${yabaiPath} -m window ${topRightWindow.id} --toggle split`
 				);
+				topRightWindow = this.getTopRightWindow();
 			}
 
 			// Get the top-left window
 			const topLeftWindow = this.getTopLeftWindow();
+			console.log(`Top-left window: ${topLeftWindow.app}`);
+
+			if (topRightWindow === topLeftWindow) {
+				throw new Error('Top-right window should never equal top-left window.');
+			}
 
 			for (const window of this.windowsData) {
 				if (window === topRightWindow || window === topLeftWindow) continue;
@@ -204,6 +213,7 @@ export function createWindowsManager({
 				);
 			}
 
+			this.expectedCurrentNumMainWindows = 1;
 			this.columnizeStackWindows();
 		},
 		/**
