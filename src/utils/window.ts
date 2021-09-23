@@ -127,27 +127,34 @@ export function createWindowsManager({
 		 * The top-left window is the window with the lowest y-coordinate and the lowest x-coordinate.
 		 */
 		getTopLeftWindow() {
-			let topLeftWindow = this.windowsData[0];
-			for (const window of this.windowsData) {
-				if (
-					window.frame.y <= topLeftWindow.frame.y &&
-					window.frame.x < topLeftWindow.frame.x
-				) {
+			const leftWindows = this.windowsData.filter(
+				(window) => window.frame.x === 0
+			);
+			let topLeftWindow = leftWindows[0];
+			for (const window of leftWindows) {
+				if (window.frame.y <= topLeftWindow.frame.y) {
 					topLeftWindow = window;
 				}
 			}
 			return topLeftWindow;
 		},
 		/*
-		 * The top-right window is the rightmost window with the lowest x-coordinate.
+		 * The top-right window is the rightmost window with the lowest y-coordinate.
 		 */
 		getTopRightWindow() {
-			let topRightWindow = this.windowsData[0];
+			let lowestYCoordinate = this.windowsData[0].frame.y;
 			for (const window of this.windowsData) {
-				if (
-					window.frame.y <= topRightWindow.frame.y &&
-					window.frame.x > topRightWindow.frame.x
-				) {
+				if (window.frame.y < lowestYCoordinate) {
+					lowestYCoordinate = window.frame.y;
+				}
+			}
+
+			const topWindows = this.windowsData.filter(
+				(window) => window.frame.y === lowestYCoordinate
+			);
+			let topRightWindow = topWindows[0];
+			for (const window of topWindows) {
+				if (window.frame.x > topRightWindow.frame.x) {
 					topRightWindow = window;
 				}
 			}
@@ -196,6 +203,8 @@ export function createWindowsManager({
 					`${yabaiPath} -m window ${window.id} --warp ${topLeftWindow.id}`
 				);
 			}
+
+			this.columnizeStackWindows();
 		},
 		/**
 		 * If the top-right window has a x-coordinate of 0, or if the stack dividing
