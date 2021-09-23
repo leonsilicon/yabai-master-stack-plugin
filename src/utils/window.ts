@@ -12,7 +12,7 @@ function getDistanceBetweenPoints(
 	);
 }
 
-export function createWindowsManager({ displayId }: { displayId: number }) {
+export function createWindowsManager({ display }: { display: Display }) {
 	const windowsData = (
 		JSON.parse(
 			execa.commandSync(`${yabaiPath} -m query --windows`).stdout
@@ -49,17 +49,6 @@ export function createWindowsManager({ displayId }: { displayId: number }) {
 		},
 		getFnWindowId() {
 			return process.argv[2] ?? this.getFocusedWindow();
-		},
-		getDisplayData() {
-			const display = (
-				JSON.parse(
-					execa.commandSync(`${yabaiPath} -m query --displays`).stdout
-				) as Display[]
-			).find((display) => display.id === displayId);
-			if (display === undefined) {
-				throw new Error(`Display with ${displayId} not found!`);
-			}
-			return display;
 		},
 		/**
 		 * There is always a line dividing the main windows from the secondary windows. To find this line,
@@ -115,7 +104,6 @@ export function createWindowsManager({ displayId }: { displayId: number }) {
 		getTopRightWindow() {
 			let topRightWindow = windowsData[0];
 			let minDistance = Infinity;
-			const display = this.getDisplayData();
 			const displayTopRightCorner = [
 				display.frame.x + display.frame.w,
 				display.frame.y,
@@ -143,7 +131,6 @@ export function createWindowsManager({ displayId }: { displayId: number }) {
 		getBottomRightWindow() {
 			let bottomRightWindow = windowsData[0];
 			let minDistance = Infinity;
-			const display = this.getDisplayData();
 			const displayBottomRightCorner = [
 				display.frame.x + display.frame.w,
 				display.frame.y + display.frame.h,

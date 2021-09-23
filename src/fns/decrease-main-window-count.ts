@@ -1,5 +1,6 @@
 import { readState, writeState } from '../state';
 import { createWindowsManager } from '../utils';
+import { getFocusedDisplay } from '../utils/display';
 import { lockOrQuit, releaseLock } from '../utils/lock';
 
 function main() {
@@ -10,7 +11,7 @@ function main() {
 			state.numMainWindows = state.numMainWindows - 1;
 			writeState(state);
 			console.log('Decreasing main window count.');
-			const wm = createWindowsManager();
+			const wm = createWindowsManager({ display: getFocusedDisplay() });
 			wm.updateWindows();
 		}
 	} finally {
