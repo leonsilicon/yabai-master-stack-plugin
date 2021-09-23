@@ -293,12 +293,14 @@ export function createWindowsManager({
 		getStackWindows() {
 			return this.windowsData.filter((window) => this.isStackWindow(window));
 		},
-		async isValidLayout(): Promise<
-			{ status: true } | { status: false; reason: string }
-		> {
+		async isValidLayout(props?: {
+			targetNumMainWindows?: number;
+		}): Promise<{ status: true } | { status: false; reason: string }> {
+			const targetNumMainWindows =
+				props?.targetNumMainWindows ?? this.expectedCurrentNumMainWindows;
 			console.log('Starting valid layout check...');
 			const curNumMainWindows = this.getMainWindows().length;
-			if (this.expectedCurrentNumMainWindows !== curNumMainWindows) {
+			if (targetNumMainWindows !== curNumMainWindows) {
 				return {
 					status: false,
 					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${this.expectedCurrentNumMainWindows})`,
@@ -323,7 +325,7 @@ export function createWindowsManager({
 			targetNumMainWindows: number;
 		}) {
 			console.log('updateWindows() called');
-			const layoutValidity = await this.isValidLayout();
+			const layoutValidity = await this.isValidLayout({ targetNumMainWindows });
 			if (layoutValidity.status === true) {
 				console.log('Valid layout detected; no changes were made.');
 				return;
@@ -402,7 +404,9 @@ export function createWindowsManager({
 			}
 
 			// Note: the following should never be called
-			if ((await this.isValidLayout()).status === false) {
+			if (
+				(await this.isValidLayout({ targetNumMainWindows })).status === false
+			) {
 				throw new Error(
 					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
 				);
