@@ -3,10 +3,9 @@ import { createWindowsManager } from '../utils';
 import { lockOrQuit, releaseLock } from '../utils/lock';
 
 function main() {
-	const state = readState();
-	const wm = createWindowsManager({ numMainWindows: state.numMainWindows });
 	try {
 		lockOrQuit();
+		const wm = createWindowsManager();
 		console.log('Starting to handle window_created.');
 
 		if (wm.isValidLayout()) {
@@ -19,6 +18,7 @@ function main() {
 		const curNumMainWindows = wm.getMainWindows().length;
 		const window = wm.getWindowData({ windowId, processId });
 
+		const state = readState();
 		// If the main can fit more windows
 		if (curNumMainWindows > 1 && curNumMainWindows <= state.numMainWindows) {
 			// move the window to the main
@@ -31,6 +31,7 @@ function main() {
 			// move the window to the stack
 			wm.moveWindowToStack(window.id.toString());
 		}
+		wm.updateWindows();
 
 		if (!wm.isValidLayout()) {
 			throw new Error('window_created handler ended with an invalid layout.');

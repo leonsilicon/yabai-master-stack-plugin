@@ -51,20 +51,32 @@ export function createWindowsManager() {
 		 */
 		getDividingLineXCoordinate() {
 			const topRightWindow = this.getTopRightWindow();
+
+			// If there are two windows or less, the dividing line is the x-value of the top-right window
+			if (windowsData.length <= 2) return topRightWindow.frame.x;
+
 			const bottomRightWindow = this.getBottomRightWindow();
-			const maximumX = Math.min(
+
+			// If the top-right window is equal to the bottom-right window, it means there
+			// is only one main window (which is the top-right and bottom-left window).
+			if (topRightWindow === bottomRightWindow) {
+				return topRightWindow.frame.x;
+			}
+
+			const maximumDividingLineXCoordinate = Math.min(
 				topRightWindow.frame.x,
 				bottomRightWindow.frame.x
 			);
 
+			// Sorting eligible windows from right to left
 			const eligibleWindows = windowsData
-				.filter((window) => window.frame.x <= maximumX)
-				.sort((window1, window2) => window1.frame.x - window2.frame.x);
+				.filter((window) => window.frame.x <= maximumDividingLineXCoordinate)
+				.sort((window1, window2) => window2.frame.x - window1.frame.x);
 
-			for (let i = eligibleWindows.length - 1; i > 0; i -= 1) {
+			for (let i = 0; i < eligibleWindows.length - 1; i += 1) {
 				const curWindow = eligibleWindows[i];
-				const prevWindow = eligibleWindows[i - 1];
-				if (curWindow.frame.x === prevWindow.frame.x) {
+				const nextWindow = eligibleWindows[i + 1];
+				if (curWindow.frame.x === nextWindow.frame.x) {
 					return curWindow.frame.x;
 				}
 			}

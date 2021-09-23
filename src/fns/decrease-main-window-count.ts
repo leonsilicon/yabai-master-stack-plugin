@@ -10,10 +10,8 @@ function main() {
 			state.numMainWindows = state.numMainWindows - 1;
 			writeState(state);
 			console.log('Decreasing main window count.');
-			const windowsManager = createWindowsManager({
-				numMainWindows: state.numMainWindows,
-			});
-			windowsManager.updateWindows();
+			const wm = createWindowsManager();
+			wm.updateWindows();
 		}
 	} finally {
 		releaseLock();

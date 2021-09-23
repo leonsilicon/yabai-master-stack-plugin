@@ -1,10 +1,8 @@
 import execa from 'execa';
 import { yabaiPath } from '../config';
-import { readState } from '../state';
 import { createWindowsManager } from '../utils';
 
-const { numMainWindows } = readState();
-const wm = createWindowsManager({ numMainWindows });
+const wm = createWindowsManager();
 const focusedWindow = wm.getFocusedWindow();
 if (focusedWindow !== undefined) {
 	// If the focused window is the highest window
