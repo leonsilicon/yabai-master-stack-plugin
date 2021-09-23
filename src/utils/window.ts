@@ -66,10 +66,6 @@ export function createWindowsManager({ display }: { display: Display }) {
 			if (windowsData.length <= 2) return topRightWindow.frame.x;
 
 			const bottomRightWindow = this.getBottomRightWindow();
-			if (topRightWindow !== bottomRightWindow) {
-				console.log(topRightWindow, bottomRightWindow);
-				throw new Error('sus');
-			}
 
 			// If the top-right window is equal to the bottom-right window, it means there
 			// is only one main window (which is the top-right and bottom-left window).
