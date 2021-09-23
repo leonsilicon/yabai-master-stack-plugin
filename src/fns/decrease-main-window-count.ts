@@ -1,26 +1,26 @@
 import { readState, writeState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
-import { handleMainError } from '../utils/error';
+import { handleMasterError } from '../utils/error';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
-async function main() {
+async function master() {
 	try {
 		await acquireHandlerLock();
 		const state = await readState();
-		if (state.numMainWindows > 1) {
+		if (state.numMasterWindows > 1) {
 			const wm = createWindowsManager({
 				display: getFocusedDisplay(),
-				expectedCurrentNumMainWindows: state.numMainWindows,
+				expectedCurrentNumMasterWindows: state.numMasterWindows,
 			});
-			state.numMainWindows -= 1;
+			state.numMasterWindows -= 1;
 			await writeState(state);
-			console.log('Decreasing main window count.');
-			await wm.updateWindows({ targetNumMainWindows: state.numMainWindows });
+			console.log('Decreasing master window count.');
+			await wm.updateWindows({ targetNumMasterWindows: state.numMasterWindows });
 		}
 	} finally {
 		await releaseLock();
 	}
 }
 
-main().catch(handleMainError);
+master().catch(handleMasterError);

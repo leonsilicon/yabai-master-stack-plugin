@@ -2,20 +2,20 @@ import { yabaiPath } from '../config';
 import { readState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
-import { handleMainError } from '../utils/error';
+import { handleMasterError } from '../utils/error';
 
-async function main() {
+async function master() {
 	const state = await readState();
 	const wm = createWindowsManager({
 		display: getFocusedDisplay(),
-		expectedCurrentNumMainWindows: state.numMainWindows,
+		expectedCurrentNumMasterWindows: state.numMasterWindows,
 	});
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
-		// If the focused window is the lowest main window
+		// If the focused window is the lowest master window
 		if (
-			wm.isMainWindow(focusedWindow) &&
-			wm.isBottomWindow(wm.getMainWindows(), focusedWindow)
+			wm.isMasterWindow(focusedWindow) &&
+			wm.isBottomWindow(wm.getMasterWindows(), focusedWindow)
 		) {
 			// Focus on the top stack window
 			const topStackWindow = wm.getTopStackWindow();
@@ -28,11 +28,11 @@ async function main() {
 			wm.isStackWindow(focusedWindow) &&
 			wm.isBottomWindow(wm.getStackWindows(), focusedWindow)
 		) {
-			// Focus on the top main window
-			const topMainWindow = wm.getTopMainWindow();
-			if (topMainWindow !== undefined) {
+			// Focus on the top master window
+			const topMasterWindow = wm.getTopMasterWindow();
+			if (topMasterWindow !== undefined) {
 				wm.executeYabaiCommand(
-					`${yabaiPath} -m window --focus ${topMainWindow.id}`
+					`${yabaiPath} -m window --focus ${topMasterWindow.id}`
 				);
 			}
 		}
@@ -45,4 +45,4 @@ async function main() {
 	}
 }
 
-main().catch(handleMainError);
+master().catch(handleMasterError);

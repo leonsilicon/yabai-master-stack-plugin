@@ -27,7 +27,7 @@ export type Window = {
 };
 
 export type State = {
-	numMainWindows: number;
+	numMasterWindows: number;
 };
 
 export type Display = {

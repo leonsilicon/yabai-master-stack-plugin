@@ -6,16 +6,16 @@ import type { Display, Window } from '../types';
 /**
  * Creates a windows manager.
  * @param props
- * @param props.expectedCurrentNumMainWindows The expected current number of main
- * windows active on the screen (used as part of a heuristic for determining the main
+ * @param props.expectedCurrentNumMasterWindows The expected current number of master
+ * windows active on the screen (used as part of a heuristic for determining the master
  * windows).
  */
 export function createWindowsManager({
 	display: _,
-	expectedCurrentNumMainWindows,
+	expectedCurrentNumMasterWindows,
 }: {
 	display: Display;
-	expectedCurrentNumMainWindows: number;
+	expectedCurrentNumMasterWindows: number;
 }) {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
@@ -29,7 +29,7 @@ export function createWindowsManager({
 	}
 
 	const windowsManager = {
-		expectedCurrentNumMainWindows,
+		expectedCurrentNumMasterWindows,
 		windowsData: getWindowsData(),
 		refreshWindowsData() {
 			const newWindowsData = getWindowsData();
@@ -70,13 +70,13 @@ export function createWindowsManager({
 			return process.argv[2] ?? this.getFocusedWindow();
 		},
 		/**
-		 * There is always a line dividing the main windows from the secondary windows. To find this line,
-		 * we use two main observations:
+		 * There is always a line dividing the master windows from the secondary windows. To find this line,
+		 * we use two master observations:
 		 * 1. The top-right window is always on the right side of the dividing line.
-		 * 2. If there is more than one main window, the dividing line must cross the left side of two
+		 * 2. If there is more than one master window, the dividing line must cross the left side of two
 		 * windows
 		 * Using these observations, we can loop through the windows in descending x-coordinate starting from the top-right window
-		 * and for each pair of windows that share x-coordinates, we check if the numMainWindows is less
+		 * and for each pair of windows that share x-coordinates, we check if the numMasterWindows is less
 		 * than the number of windows we've iterated through, and if so, return the x-coordinate of the currently
 		 * processed window
 		 */
@@ -84,7 +84,7 @@ export function createWindowsManager({
 			const topRightWindow = this.getTopRightWindow();
 			console.log(`Top-right window: ${topRightWindow.app}`);
 
-			if (this.expectedCurrentNumMainWindows === 1)
+			if (this.expectedCurrentNumMasterWindows === 1)
 				return topRightWindow.frame.x;
 
 			const nonStackWindows = this.windowsData.filter(
@@ -101,7 +101,7 @@ export function createWindowsManager({
 			// If there are enough windows that are to the right of the top-right window, then return
 			// the top-right window's x-coordinate
 			if (
-				numWindowsToRightOfTopRightWindow >= this.expectedCurrentNumMainWindows
+				numWindowsToRightOfTopRightWindow >= this.expectedCurrentNumMasterWindows
 			) {
 				return topRightWindow.frame.x;
 			}
@@ -113,7 +113,7 @@ export function createWindowsManager({
 				if (
 					curWindow.frame.x === nextWindow.frame.x &&
 					numWindowsToRightOfTopRightWindow + i + 2 >=
-						this.expectedCurrentNumMainWindows
+						this.expectedCurrentNumMasterWindows
 				) {
 					return curWindow.frame.x;
 				}
@@ -172,17 +172,17 @@ export function createWindowsManager({
 			}
 			return widestStackWindow;
 		},
-		getWidestMainWindow() {
-			let widestMainWindow: Window | undefined;
-			for (const window of this.getMainWindows()) {
+		getWidestMasterWindow() {
+			let widestMasterWindow: Window | undefined;
+			for (const window of this.getMasterWindows()) {
 				if (
-					widestMainWindow === undefined ||
-					window.frame.w > widestMainWindow.frame.w
+					widestMasterWindow === undefined ||
+					window.frame.w > widestMasterWindow.frame.w
 				) {
-					widestMainWindow = window;
+					widestMasterWindow = window;
 				}
 			}
-			return widestMainWindow;
+			return widestMasterWindow;
 		},
 		// In the event that the windows get badly rearranged and all the windows span the entire width of
 		// the screen, split the top-right window vertically and then move the windows into the split
@@ -213,7 +213,7 @@ export function createWindowsManager({
 				);
 			}
 
-			this.expectedCurrentNumMainWindows = 1;
+			this.expectedCurrentNumMasterWindows = 1;
 			this.columnizeStackWindows();
 		},
 		/**
@@ -230,7 +230,7 @@ export function createWindowsManager({
 		 */
 		columnizeStackWindows() {
 			const stackWindows = this.windowsData.filter(
-				(window) => !this.isMainWindow(window)
+				(window) => !this.isMasterWindow(window)
 			);
 			for (const stackWindow of stackWindows) {
 				const window = this.getUpdatedWindowData(stackWindow);
@@ -281,26 +281,26 @@ export function createWindowsManager({
 				}
 			}
 		},
-		moveWindowToMain(window: Window) {
+		moveWindowToMaster(window: Window) {
 			// Find a window that's touching the right side of the screen
-			const mainWindow = this.getWidestMainWindow();
+			const masterWindow = this.getWidestMasterWindow();
 
-			if (mainWindow === undefined) return;
+			if (masterWindow === undefined) return;
 			this.executeYabaiCommand(
-				`${yabaiPath} -m window ${window.id} --warp ${mainWindow.id}`
+				`${yabaiPath} -m window ${window.id} --warp ${masterWindow.id}`
 			);
 			window = this.getUpdatedWindowData(window);
 
 			if (window.split === 'vertical') {
 				this.executeYabaiCommand(
-					`${yabaiPath} -m window ${mainWindow.id} --toggle split`
+					`${yabaiPath} -m window ${masterWindow.id} --toggle split`
 				);
 			}
 		},
 		/**
-		 * A window which is to the right of the dividing line is considered a main window.
+		 * A window which is to the right of the dividing line is considered a master window.
 		 */
-		isMainWindow(window: Window) {
+		isMasterWindow(window: Window) {
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			return window.frame.x >= dividingLineXCoordinate;
 		},
@@ -308,12 +308,12 @@ export function createWindowsManager({
 			return window.frame.x === 0;
 		},
 		isMiddleWindow(window: Window) {
-			return !this.isStackWindow(window) && !this.isMainWindow(window);
+			return !this.isStackWindow(window) && !this.isMasterWindow(window);
 		},
 		getMiddleWindows() {
 			return this.windowsData.filter((window) => this.isMiddleWindow(window));
 		},
-		getMainWindows() {
+		getMasterWindows() {
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			return this.windowsData.filter(
 				(window) => window.frame.x >= dividingLineXCoordinate
@@ -326,22 +326,22 @@ export function createWindowsManager({
 			return this.windowsData.filter((window) => this.isStackWindow(window));
 		},
 		async isValidLayout(props?: {
-			targetNumMainWindows?: number;
+			targetNumMasterWindows?: number;
 		}): Promise<{ status: true } | { status: false; reason: string }> {
-			const targetNumMainWindows =
-				props?.targetNumMainWindows ?? this.expectedCurrentNumMainWindows;
+			const targetNumMasterWindows =
+				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows;
 			console.log('Starting valid layout check...');
-			const curNumMainWindows = this.getMainWindows().length;
-			if (targetNumMainWindows !== curNumMainWindows) {
+			const curNumMasterWindows = this.getMasterWindows().length;
+			if (targetNumMasterWindows !== curNumMasterWindows) {
 				return {
 					status: false,
-					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${this.expectedCurrentNumMainWindows})`,
+					reason: `Number of master windows does not equal expected number of master windows (${curNumMasterWindows}/${this.expectedCurrentNumMasterWindows})`,
 				};
 			}
 
 			for (const window of this.windowsData) {
 				if (this.isMiddleWindow(window)) {
-					console.log(this.isStackWindow(window), this.isMainWindow(window));
+					console.log(this.isStackWindow(window), this.isMasterWindow(window));
 					return {
 						status: false,
 						reason: `A middle window (${window.app}) was detected.`,
@@ -352,12 +352,12 @@ export function createWindowsManager({
 			return { status: true };
 		},
 		async updateWindows({
-			targetNumMainWindows,
+			targetNumMasterWindows,
 		}: {
-			targetNumMainWindows: number;
+			targetNumMasterWindows: number;
 		}) {
 			console.log('updateWindows() called');
-			const layoutValidity = await this.isValidLayout({ targetNumMainWindows });
+			const layoutValidity = await this.isValidLayout({ targetNumMasterWindows });
 			if (layoutValidity.status === true) {
 				console.log('Valid layout detected; no changes were made.');
 				return;
@@ -368,53 +368,53 @@ export function createWindowsManager({
 			const numWindows = this.windowsData.length;
 
 			// If the stack is supposed to exist but doesn't exist
-			if (targetNumMainWindows !== numWindows && !this.doesStackExist()) {
+			if (targetNumMasterWindows !== numWindows && !this.doesStackExist()) {
 				console.log('Stack does not exist, creating it...');
 				this.createStack();
 			}
 
 			if (numWindows > 2) {
-				const mainWindows = this.getMainWindows();
-				console.log(`Main windows: ${mainWindows.map((window) => window.app)}`);
-				let curNumMainWindows = mainWindows.length;
+				const masterWindows = this.getMasterWindows();
+				console.log(`Master windows: ${masterWindows.map((window) => window.app)}`);
+				let curNumMasterWindows = masterWindows.length;
 
-				// If there are too many main windows, move them to stack
-				if (curNumMainWindows > targetNumMainWindows) {
+				// If there are too many master windows, move them to stack
+				if (curNumMasterWindows > targetNumMasterWindows) {
 					console.log(
-						`Too many main windows (${curNumMainWindows}/${targetNumMainWindows}).`
+						`Too many master windows (${curNumMasterWindows}/${targetNumMasterWindows}).`
 					);
-					// Sort the windows by y-coordinate and x-coordinate so we remove the bottom-left main windows first
-					mainWindows.sort((window1, window2) =>
+					// Sort the windows by y-coordinate and x-coordinate so we remove the bottom-left master windows first
+					masterWindows.sort((window1, window2) =>
 						window1.frame.y !== window2.frame.y
 							? window1.frame.y - window2.frame.y
 							: window1.frame.x - window2.frame.x
 					);
-					while (curNumMainWindows > targetNumMainWindows) {
+					while (curNumMasterWindows > targetNumMasterWindows) {
 						// Remove the window with the greatest y-coordinate first
-						const mainWindow = mainWindows.pop()!;
-						console.log(`Moving main window ${mainWindow.app} to stack.`);
-						this.moveWindowToStack(mainWindow);
-						curNumMainWindows -= 1;
+						const masterWindow = masterWindows.pop()!;
+						console.log(`Moving master window ${masterWindow.app} to stack.`);
+						this.moveWindowToStack(masterWindow);
+						curNumMasterWindows -= 1;
 					}
 				}
 
 				// If there are windows that aren't touching either the left side or the right side
-				// after the move, fill up main and then move the rest to stack
+				// after the move, fill up master and then move the rest to stack
 				let middleWindows;
 				while ((middleWindows = this.getMiddleWindows()).length > 0) {
 					const middleWindow = middleWindows[0];
 					console.log(`Middle window ${middleWindow.app} detected.`);
-					if (curNumMainWindows < targetNumMainWindows) {
-						console.log(`Moving middle window ${middleWindow.app} to main.`);
-						this.moveWindowToMain(middleWindow);
-						curNumMainWindows += 1;
+					if (curNumMasterWindows < targetNumMasterWindows) {
+						console.log(`Moving middle window ${middleWindow.app} to master.`);
+						this.moveWindowToMaster(middleWindow);
+						curNumMasterWindows += 1;
 					} else {
 						console.log(`Moving middle window ${middleWindow.app} to stack.`);
 						this.moveWindowToStack(middleWindow);
 					}
 				}
 
-				// If there are still not enough main windows, move some of the stack windows to main
+				// If there are still not enough master windows, move some of the stack windows to master
 				const stackWindows = this.getStackWindows();
 				// Sort the stack windows by reverse y-coordinate and reverse x-coordinate to move the
 				// bottom-rightmost windows first
@@ -424,20 +424,20 @@ export function createWindowsManager({
 						: window2.frame.y - window1.frame.y
 				);
 
-				while (curNumMainWindows < targetNumMainWindows) {
+				while (curNumMasterWindows < targetNumMasterWindows) {
 					console.log(
-						`Not enough main windows (${curNumMainWindows}/${targetNumMainWindows})`
+						`Not enough master windows (${curNumMasterWindows}/${targetNumMasterWindows})`
 					);
 					const stackWindow = stackWindows.pop()!;
-					console.log(`Moving stack window ${stackWindow.app} to main.`);
-					this.moveWindowToMain(stackWindow);
-					curNumMainWindows += 1;
+					console.log(`Moving stack window ${stackWindow.app} to master.`);
+					this.moveWindowToMaster(stackWindow);
+					curNumMasterWindows += 1;
 				}
 			}
 
 			// Note: the following should never be called
 			if (
-				(await this.isValidLayout({ targetNumMainWindows })).status === false
+				(await this.isValidLayout({ targetNumMasterWindows })).status === false
 			) {
 				throw new Error(
 					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
@@ -446,7 +446,7 @@ export function createWindowsManager({
 				console.log('updateLayout() was successful.');
 			}
 
-			this.expectedCurrentNumMainWindows = targetNumMainWindows;
+			this.expectedCurrentNumMasterWindows = targetNumMasterWindows;
 		},
 		getTopWindow(windows: Window[]) {
 			let topWindow = windows[0];
@@ -478,11 +478,11 @@ export function createWindowsManager({
 		getBottomStackWindow() {
 			return this.getBottomWindow(this.getStackWindows());
 		},
-		getTopMainWindow() {
-			return this.getTopWindow(this.getMainWindows());
+		getTopMasterWindow() {
+			return this.getTopWindow(this.getMasterWindows());
 		},
-		getBottomMainWindow() {
-			return this.getBottomWindow(this.getMainWindows());
+		getBottomMasterWindow() {
+			return this.getBottomWindow(this.getMasterWindows());
 		},
 	};
 

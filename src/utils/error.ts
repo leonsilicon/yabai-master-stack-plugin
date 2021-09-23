@@ -1,4 +1,4 @@
-export function handleMainError(error: Error & { code?: string }) {
+export function handleMasterError(error: Error & { code?: string }) {
 	if (error.code === 'ELOCKED') {
 		console.log('Lock found...aborting');
 	} else {

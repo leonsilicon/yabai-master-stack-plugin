@@ -8,7 +8,7 @@ import type { State } from './types';
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
 const stateLockPath = path.join(pkgDir.sync(__dirname)!, 'state.json.lock');
 
-const defaultState: State = { numMainWindows: 1 };
+const defaultState: State = { numMasterWindows: 1 };
 const defaultStateJson = JSON.stringify(defaultState);
 
 let release: () => Promise<void> | undefined;

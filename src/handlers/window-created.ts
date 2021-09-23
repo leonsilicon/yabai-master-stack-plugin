@@ -1,16 +1,16 @@
 import { readState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
-import { handleMainError } from '../utils/error';
+import { handleMasterError } from '../utils/error';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
-async function main() {
+async function master() {
 	try {
 		await acquireHandlerLock();
 		const state = await readState();
 		const wm = createWindowsManager({
 			display: getFocusedDisplay(),
-			expectedCurrentNumMainWindows: state.numMainWindows,
+			expectedCurrentNumMasterWindows: state.numMasterWindows,
 		});
 		console.log('Starting to handle window_created.');
 
@@ -21,26 +21,26 @@ async function main() {
 
 		const processId = process.env.YABAI_PROCESS_ID as string;
 		const windowId = process.env.YABAI_WINDOW_ID as string;
-		const curNumMainWindows = wm.getMainWindows().length;
+		const curNumMasterWindows = wm.getMasterWindows().length;
 		const window = wm.getWindowData({ windowId, processId });
 
-		if (curNumMainWindows > 1 && curNumMainWindows <= state.numMainWindows) {
-			// move the window to the main
-			console.log('Moving newly created window to main.');
-			wm.moveWindowToMain(window);
+		if (curNumMasterWindows > 1 && curNumMasterWindows <= state.numMasterWindows) {
+			// move the window to the master
+			console.log('Moving newly created window to master.');
+			wm.moveWindowToMaster(window);
 		}
-		// if there are too many windows on the main
+		// if there are too many windows on the master
 		else {
 			console.log('Moving newly created window to stack.');
 			// move the window to the stack
 			wm.moveWindowToStack(window);
 		}
 
-		await wm.updateWindows({ targetNumMainWindows: state.numMainWindows });
+		await wm.updateWindows({ targetNumMasterWindows: state.numMasterWindows });
 		console.log('Finished handling window_created.');
 	} finally {
 		await releaseLock();
 	}
 }
 
-main().catch(handleMainError);
+master().catch(handleMasterError);
