@@ -5,6 +5,7 @@ import { handleMainError } from '../utils/error';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
 async function main() {
+	return;
 	try {
 		await acquireHandlerLock();
 		const state = await readState();

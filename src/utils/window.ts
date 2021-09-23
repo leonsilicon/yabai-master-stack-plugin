@@ -190,9 +190,7 @@ export function createWindowsManager({
 		 */
 		doesStackExist() {
 			const topRightWindow = this.getTopRightWindow();
-			return !(
-				topRightWindow.frame.x === 0 || this.getDividingLineXCoordinate() === 0
-			);
+			return topRightWindow.frame.x !== 0;
 		},
 		moveWindowToStack(window: Window) {
 			// If there's only two windows, make sure that the window stack exists
@@ -285,6 +283,8 @@ export function createWindowsManager({
 		async isValidLayout(): Promise<
 			{ status: true } | { status: false; reason: string }
 		> {
+			console.log('Starting valid layout check...');
+			await new Promise((r) => setTimeout(r, 2000));
 			const curNumMainWindows = this.getMainWindows().length;
 			if (this.expectedNumMainWindows !== curNumMainWindows) {
 				return {
@@ -295,9 +295,10 @@ export function createWindowsManager({
 
 			for (const window of this.windowsData) {
 				if (this.isMiddleWindow(window)) {
+					console.log(this.isStackWindow(window), this.isMainWindow(window));
 					return {
 						status: false,
-						reason: `A middle window (${window}) was detected.`,
+						reason: `A middle window (${window.app}) was detected.`,
 					};
 				}
 			}
@@ -327,6 +328,7 @@ export function createWindowsManager({
 
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
+				console.log(`Main windows: ${mainWindows.map((window) => window.app)}`);
 				let curNumMainWindows = mainWindows.length;
 
 				// If there are too many main windows, move them to stack
