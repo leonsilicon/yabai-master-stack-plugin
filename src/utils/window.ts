@@ -101,7 +101,8 @@ export function createWindowsManager({
 			// If there are enough windows that are to the right of the top-right window, then return
 			// the top-right window's x-coordinate
 			if (
-				numWindowsToRightOfTopRightWindow >= this.expectedCurrentNumMasterWindows
+				numWindowsToRightOfTopRightWindow >=
+				this.expectedCurrentNumMasterWindows
 			) {
 				return topRightWindow.frame.x;
 			}
@@ -335,7 +336,7 @@ export function createWindowsManager({
 			if (targetNumMasterWindows !== curNumMasterWindows) {
 				return {
 					status: false,
-					reason: `Number of master windows does not equal expected number of master windows (${curNumMasterWindows}/${this.expectedCurrentNumMasterWindows})`,
+					reason: `Number of master windows does not equal expected number of master windows (${curNumMasterWindows}/${targetNumMasterWindows})`,
 				};
 			}
 
@@ -357,7 +358,9 @@ export function createWindowsManager({
 			targetNumMasterWindows: number;
 		}) {
 			console.log('updateWindows() called');
-			const layoutValidity = await this.isValidLayout({ targetNumMasterWindows });
+			const layoutValidity = await this.isValidLayout({
+				targetNumMasterWindows,
+			});
 			if (layoutValidity.status === true) {
 				console.log('Valid layout detected; no changes were made.');
 				return;
@@ -375,7 +378,9 @@ export function createWindowsManager({
 
 			if (numWindows > 2) {
 				const masterWindows = this.getMasterWindows();
-				console.log(`Master windows: ${masterWindows.map((window) => window.app)}`);
+				console.log(
+					`Master windows: ${masterWindows.map((window) => window.app)}`
+				);
 				let curNumMasterWindows = masterWindows.length;
 
 				// If there are too many master windows, move them to stack
@@ -389,9 +394,11 @@ export function createWindowsManager({
 							? window1.frame.y - window2.frame.y
 							: window1.frame.x - window2.frame.x
 					);
+
 					while (curNumMasterWindows > targetNumMasterWindows) {
 						// Remove the window with the greatest y-coordinate first
 						const masterWindow = masterWindows.pop()!;
+
 						console.log(`Moving master window ${masterWindow.app} to stack.`);
 						this.moveWindowToStack(masterWindow);
 						curNumMasterWindows -= 1;
