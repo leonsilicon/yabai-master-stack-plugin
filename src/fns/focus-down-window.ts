@@ -1,5 +1,3 @@
-import execa from 'execa';
-
 import { yabaiPath } from '../config';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
@@ -15,7 +13,9 @@ if (focusedWindow !== undefined) {
 		// Focus on the top stack window
 		const topStackWindow = wm.getTopStackWindow();
 		if (topStackWindow !== undefined) {
-			execa.commandSync(`${yabaiPath} -m window --focus ${topStackWindow.id}`);
+			wm.executeYabaiCommand(
+				`${yabaiPath} -m window --focus ${topStackWindow.id}`
+			);
 		}
 	} else if (
 		wm.isStackWindow(focusedWindow) &&
@@ -24,11 +24,15 @@ if (focusedWindow !== undefined) {
 		// Focus on the top main window
 		const topMainWindow = wm.getTopMainWindow();
 		if (topMainWindow !== undefined) {
-			execa.commandSync(`${yabaiPath} -m window --focus ${topMainWindow.id}`);
+			wm.executeYabaiCommand(
+				`${yabaiPath} -m window --focus ${topMainWindow.id}`
+			);
 		}
 	}
 	// Otherwise, just focus south
 	else {
-		execa.commandSync(`${yabaiPath} -m window --focus south`);
+		wm.executeYabaiCommand(`${yabaiPath} -m window --focus south`);
 	}
+} else {
+	wm.executeYabaiCommand(`${yabaiPath} -m window --focus first`);
 }
