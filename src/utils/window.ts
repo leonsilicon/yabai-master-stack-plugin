@@ -249,19 +249,29 @@ export function createWindowsManager({ display }: { display: Display }) {
 		getStackWindows() {
 			return windowsData.filter((w) => this.isStackWindow(w));
 		},
-		isValidLayout() {
+		isValidLayout(): { status: true } | { status: false; reason: string } {
 			const state = readState();
 			const curNumMainWindows = this.getMainWindows().length;
-			if (state.numMainWindows !== curNumMainWindows) return false;
-
-			for (const window of windowsData) {
-				if (this.isMiddleWindow(window)) return false;
+			if (state.numMainWindows !== curNumMainWindows) {
+				return {
+					status: false,
+					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${state.numMainWindows})`,
+				};
 			}
 
-			return true;
+			for (const window of windowsData) {
+				if (this.isMiddleWindow(window)) {
+					return {
+						status: false,
+						reason: `A middle window (${window}) was detected.`,
+					};
+				}
+			}
+
+			return { status: true };
 		},
 		updateWindows() {
-			if (this.isValidLayout()) {
+			if (this.isValidLayout().status === true) {
 				console.log('Valid layout detected; no changes were made.');
 				return;
 			}
@@ -271,19 +281,23 @@ export function createWindowsManager({ display }: { display: Display }) {
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
 				let curNumMainWindows = mainWindows.length;
+				console.log('num', curNumMainWindows);
 				const state = readState();
 
 				// If there are too many main windows, move them to stack
 				if (curNumMainWindows > state.numMainWindows) {
-					console.log('Too many main windows.');
+					console.log(
+						`Too many main windows (${curNumMainWindows}/${state.numMainWindows}).`
+					);
 					// Sort the windows by reverse y-coordinate and x-coordinate so we remove the bottom-left main windows first
 					mainWindows.sort((window1, window2) =>
-						window2.frame.y !== window1.frame.y
+						window1.frame.y !== window2.frame.y
 							? window2.frame.y - window1.frame.y
 							: window1.frame.x - window2.frame.x
 					);
 					while (curNumMainWindows > state.numMainWindows) {
 						const mainWindow = mainWindows.pop()!;
+						console.log(`Moving main window ${mainWindow.app} to stack.`);
 						this.moveWindowToStack(mainWindow.id.toString());
 						curNumMainWindows -= 1;
 					}
@@ -293,13 +307,13 @@ export function createWindowsManager({ display }: { display: Display }) {
 				// after the move, fill up main and then move the rest to stack
 				for (const window of windowsData) {
 					if (this.isMiddleWindow(window)) {
-						console.log('Middle window detected.');
+						console.log(`Middle window ${window.app} detected.`);
 						if (curNumMainWindows < state.numMainWindows) {
-							console.log('Moving middle window to main.');
+							console.log(`Moving middle window ${window.app} to main.`);
 							this.moveWindowToMain(window.id.toString());
 							curNumMainWindows += 1;
 						} else {
-							console.log('Moving middle window to stack.');
+							console.log(`Moving middle window ${window.app} to stack.`);
 							this.moveWindowToStack(window.id.toString());
 						}
 					}
@@ -316,14 +330,18 @@ export function createWindowsManager({ display }: { display: Display }) {
 				);
 				while (curNumMainWindows < state.numMainWindows) {
 					const stackWindow = stackWindows.pop()!;
+					console.log(`Moving stack window ${stackWindow.app} to main.`);
 					this.moveWindowToMain(stackWindow.id.toString());
 					curNumMainWindows += 1;
 				}
 			}
 
 			// Note: the following should never be called
-			if (!this.isValidLayout()) {
-				throw new Error('updateLayout() ended with an invalid layout.');
+			const layoutValidity = this.isValidLayout();
+			if (layoutValidity.status === false) {
+				throw new Error(
+					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
+				);
 			}
 		},
 		getTopWindow(windows: Window[]) {

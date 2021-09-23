@@ -9,7 +9,7 @@ function main() {
 		const wm = createWindowsManager({ display: getFocusedDisplay() });
 		console.log('Starting to handle window_created.');
 
-		if (wm.isValidLayout()) {
+		if (wm.isValidLayout().status === true) {
 			console.log('Valid layout detected; no changes were made.');
 			return;
 		}
@@ -32,10 +32,6 @@ function main() {
 			wm.moveWindowToStack(window.id.toString());
 		}
 		wm.updateWindows();
-
-		if (!wm.isValidLayout()) {
-			throw new Error('window_created handler ended with an invalid layout.');
-		}
 		console.log('Finished handling window_created.');
 	} finally {
 		releaseLock();
