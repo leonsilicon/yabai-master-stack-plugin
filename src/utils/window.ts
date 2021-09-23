@@ -271,7 +271,6 @@ export function createWindowsManager({ display }: { display: Display }) {
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
 				let curNumMainWindows = mainWindows.length;
-				console.log('num main windows: ', mainWindows.length);
 				const state = readState();
 
 				// If there are too many main windows, move them to stack
