@@ -13,15 +13,27 @@ function getDistanceBetweenPoints(
 }
 
 export function createWindowsManager({ display }: { display: Display }) {
-	const windowsData = (
-		JSON.parse(
-			execa.commandSync(`${yabaiPath} -m query --windows`).stdout
-		) as Window[]
-	).filter((win) => win.split !== 'none');
-
 	type GetWindowDataProps = { processId?: string; windowId?: string };
+
+	function getWindowsData() {
+		const windowsData = (
+			JSON.parse(
+				execa.commandSync(`${yabaiPath} -m query --windows`).stdout
+			) as Window[]
+		).filter((win) => win.split !== 'none');
+		return windowsData;
+	}
+
 	const windowsManager = {
-		windowsData,
+		windowsData: getWindowsData(),
+		refreshWindowsData() {
+			this.windowsData = getWindowsData();
+		},
+		executeYabaiCommand(command: string) {
+			const result = execa.commandSync(command);
+			this.refreshWindowsData();
+			return result;
+		},
 		getDisplayDimensions() {},
 		getWindowData({ processId, windowId }: GetWindowDataProps): Window {
 			if (processId === undefined && windowId === undefined) {
@@ -29,7 +41,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			}
 
 			let windowData: Window | undefined;
-			windowData = windowsData.find(
+			windowData = this.windowsData.find(
 				(window) =>
 					window.pid === Number(processId) || window.id === Number(windowId)
 			);
@@ -45,7 +57,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			return windowData;
 		},
 		getFocusedWindow(): Window | undefined {
-			return windowsData.find((w) => w.focused === 1);
+			return this.windowsData.find((w) => w.focused === 1);
 		},
 		getFnWindowId() {
 			return process.argv[2] ?? this.getFocusedWindow();
@@ -63,7 +75,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			const topRightWindow = this.getTopRightWindow();
 
 			// If there are two windows or less, the dividing line is the x-value of the top-right window
-			if (windowsData.length <= 2) return topRightWindow.frame.x;
+			if (this.windowsData.length <= 2) return topRightWindow.frame.x;
 
 			const bottomRightWindow = this.getBottomRightWindow();
 
@@ -79,7 +91,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			);
 
 			// Sorting eligible windows from right to left
-			const eligibleWindows = windowsData
+			const eligibleWindows = this.windowsData
 				.filter((window) => window.frame.x <= maximumDividingLineXCoordinate)
 				.sort((window1, window2) => window2.frame.x - window1.frame.x);
 
@@ -98,13 +110,13 @@ export function createWindowsManager({ display }: { display: Display }) {
 		 * the top-right corner of the display.
 		 */
 		getTopRightWindow() {
-			let topRightWindow = windowsData[0];
+			let topRightWindow = this.windowsData[0];
 			let minDistance = Infinity;
 			const displayTopRightCorner = [
 				display.frame.x + display.frame.w,
 				display.frame.y,
 			] as const;
-			for (const window of windowsData) {
+			for (const window of this.windowsData) {
 				const windowTopRightCorner = [
 					window.frame.x + window.frame.w,
 					window.frame.y,
@@ -125,13 +137,13 @@ export function createWindowsManager({ display }: { display: Display }) {
 		 * from the bottom-right corner of the display.
 		 */
 		getBottomRightWindow() {
-			let bottomRightWindow = windowsData[0];
+			let bottomRightWindow = this.windowsData[0];
 			let minDistance = Infinity;
 			const displayBottomRightCorner = [
 				display.frame.x + display.frame.w,
 				display.frame.y + display.frame.h,
 			] as const;
-			for (const window of windowsData) {
+			for (const window of this.windowsData) {
 				const windowBottomRightCorner = [
 					window.frame.x + window.frame.w,
 					window.frame.y + window.frame.h,
@@ -175,9 +187,11 @@ export function createWindowsManager({ display }: { display: Display }) {
 			let win = this.getWindowData({ windowId });
 
 			// If the stack exists and the window is already on the stack
-			if (windowsData.length > 2 && this.isStackWindow(win)) {
+			if (this.windowsData.length > 2 && this.isStackWindow(win)) {
 				if (win.split === 'vertical') {
-					execa.commandSync(`${yabaiPath} -m window ${win.id} --toggle split`);
+					this.executeYabaiCommand(
+						`${yabaiPath} -m window ${win.id} --toggle split`
+					);
 				}
 				return;
 			}
@@ -186,25 +200,28 @@ export function createWindowsManager({ display }: { display: Display }) {
 			const stackWindow = this.getWidestStackWindow();
 			if (stackWindow === undefined) return;
 
-			execa.commandSync(
+			this.executeYabaiCommand(
 				`${yabaiPath} -m window ${windowId} --warp ${stackWindow.id}`
 			);
 
 			win = this.getWindowData({ windowId });
+			this.refreshWindowsData();
 
-			if (windowsData.length === 2) {
+			if (this.windowsData.length === 2) {
 				if (win.split === 'horizontal') {
-					execa.commandSync(
+					this.executeYabaiCommand(
 						`${yabaiPath} -m window ${stackWindow.id} --toggle split`
 					);
 				}
 			} else {
 				if (win.split === 'vertical') {
-					execa.commandSync(
+					this.executeYabaiCommand(
 						`${yabaiPath} -m window ${stackWindow.id} --toggle split`
 					);
 				}
 			}
+
+			this.refreshWindowsData();
 		},
 		moveWindowToMain(windowId: string) {
 			let win = this.getWindowData({ windowId });
@@ -213,13 +230,13 @@ export function createWindowsManager({ display }: { display: Display }) {
 			const mainWindow = this.getWidestMainWindow();
 
 			if (mainWindow === undefined) return;
-			execa.commandSync(
+			this.executeYabaiCommand(
 				`${yabaiPath} -m window ${windowId} --warp ${mainWindow.id}`
 			);
 
 			win = this.getWindowData({ windowId });
 			if (win.split === 'vertical') {
-				execa.commandSync(
+				this.executeYabaiCommand(
 					`${yabaiPath} -m window ${mainWindow.id} --toggle split`
 				);
 			}
@@ -239,7 +256,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 		},
 		getMainWindows() {
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
-			return windowsData.filter(
+			return this.windowsData.filter(
 				(window) => window.frame.x >= dividingLineXCoordinate
 			);
 		},
@@ -247,7 +264,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 		 * If the window's frame has an x of 0, it is a stack window
 		 */
 		getStackWindows() {
-			return windowsData.filter((w) => this.isStackWindow(w));
+			return this.windowsData.filter((window) => this.isStackWindow(window));
 		},
 		isValidLayout(): { status: true } | { status: false; reason: string } {
 			const state = readState();
@@ -259,7 +276,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 				};
 			}
 
-			for (const window of windowsData) {
+			for (const window of this.windowsData) {
 				if (this.isMiddleWindow(window)) {
 					return {
 						status: false,
@@ -276,7 +293,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 				return;
 			}
 
-			const numWindows = windowsData.length;
+			const numWindows = this.windowsData.length;
 
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
@@ -305,7 +322,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 
 				// If there are windows that aren't touching either the left side or the right side
 				// after the move, fill up main and then move the rest to stack
-				for (const window of windowsData) {
+				for (const window of this.windowsData) {
 					if (this.isMiddleWindow(window)) {
 						console.log(`Middle window ${window.app} detected.`);
 						if (curNumMainWindows < state.numMainWindows) {
