@@ -305,6 +305,7 @@ export function createWindowsManager({
 			return { status: true };
 		},
 		async updateWindows() {
+			console.log('updateWindows() called');
 			const layoutValidity = await this.isValidLayout();
 			if (layoutValidity.status === true) {
 				console.log('Valid layout detected; no changes were made.');
@@ -333,13 +334,14 @@ export function createWindowsManager({
 					console.log(
 						`Too many main windows (${curNumMainWindows}/${this.expectedNumMainWindows}).`
 					);
-					// Sort the windows by reverse y-coordinate and x-coordinate so we remove the bottom-left main windows first
+					// Sort the windows by y-coordinate and x-coordinate so we remove the bottom-left main windows first
 					mainWindows.sort((window1, window2) =>
 						window1.frame.y !== window2.frame.y
-							? window2.frame.y - window1.frame.y
+							? window1.frame.y - window2.frame.y
 							: window1.frame.x - window2.frame.x
 					);
 					while (curNumMainWindows > this.expectedNumMainWindows) {
+						// Remove the window with the greatest y-coordinate first
 						const mainWindow = mainWindows.pop()!;
 						console.log(`Moving main window ${mainWindow.app} to stack.`);
 						this.moveWindowToStack(mainWindow);
@@ -360,6 +362,7 @@ export function createWindowsManager({
 					} else {
 						console.log(`Moving middle window ${middleWindow.app} to stack.`);
 						this.moveWindowToStack(middleWindow);
+						curNumMainWindows -= 1;
 					}
 				}
 
