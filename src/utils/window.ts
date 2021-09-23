@@ -187,7 +187,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			let win = this.getWindowData({ windowId });
 
 			// If the stack exists and the window is already on the stack
-			if (this.windowsData.length > 2 && this.isStackWindow(win)) {
+			if (this.windowsData.length > 2 && !this.isMainWindow(win)) {
 				if (win.split === 'vertical') {
 					this.executeYabaiCommand(
 						`${yabaiPath} -m window ${win.id} --toggle split`
@@ -254,6 +254,9 @@ export function createWindowsManager({ display }: { display: Display }) {
 		isMiddleWindow(window: Window) {
 			return !this.isStackWindow(window) && !this.isMainWindow(window);
 		},
+		getMiddleWindows() {
+			return this.windowsData.filter((window) => this.isMiddleWindow(window));
+		},
 		getMainWindows() {
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			return this.windowsData.filter(
@@ -298,7 +301,6 @@ export function createWindowsManager({ display }: { display: Display }) {
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
 				let curNumMainWindows = mainWindows.length;
-				console.log('num', curNumMainWindows);
 				const state = readState();
 
 				// If there are too many main windows, move them to stack
@@ -322,17 +324,17 @@ export function createWindowsManager({ display }: { display: Display }) {
 
 				// If there are windows that aren't touching either the left side or the right side
 				// after the move, fill up main and then move the rest to stack
-				for (const window of this.windowsData) {
-					if (this.isMiddleWindow(window)) {
-						console.log(`Middle window ${window.app} detected.`);
-						if (curNumMainWindows < state.numMainWindows) {
-							console.log(`Moving middle window ${window.app} to main.`);
-							this.moveWindowToMain(window.id.toString());
-							curNumMainWindows += 1;
-						} else {
-							console.log(`Moving middle window ${window.app} to stack.`);
-							this.moveWindowToStack(window.id.toString());
-						}
+				let middleWindows;
+				while ((middleWindows = this.getMiddleWindows()).length !== 0) {
+					const middleWindow = middleWindows[0];
+					console.log(`Middle window ${middleWindow.app} detected.`);
+					if (curNumMainWindows < state.numMainWindows) {
+						console.log(`Moving middle window ${middleWindow.app} to main.`);
+						this.moveWindowToMain(middleWindow.id.toString());
+						curNumMainWindows += 1;
+					} else {
+						console.log(`Moving middle window ${middleWindow.app} to stack.`);
+						this.moveWindowToStack(middleWindow.id.toString());
 					}
 				}
 

@@ -1,19 +1,17 @@
-import fs from 'fs';
 import path from 'path';
 import pkgDir from 'pkg-dir';
+import lockfile from 'proper-lockfile';
 
 const handlerLockPath = path.join(pkgDir.sync(__dirname)!, 'handler.lock');
 export function acquireHandlerLock() {
-	if (fs.existsSync(handlerLockPath)) {
-		throw new Error('Failed to acquire handler lock.');
+	const isLocked = lockfile.checkSync(handlerLockPath);
+	if (isLocked) {
+		throw new Error('Could not acquire handler lock file.');
+	} else {
+		lockfile.lockSync(handlerLockPath);
 	}
-	fs.writeFileSync(handlerLockPath, '');
 }
 
 export function releaseLock() {
-	try {
-		fs.rmSync(handlerLockPath);
-	} catch {
-		console.error('Failed to release lock: lock not found.');
-	}
+	lockfile.unlockSync(handlerLockPath);
 }
