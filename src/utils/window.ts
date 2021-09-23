@@ -3,12 +3,19 @@ import execa from 'execa';
 import { yabaiPath } from '../config';
 import type { Display, Window } from '../types';
 
+/**
+ * Creates a windows manager.
+ * @param props
+ * @param props.expectedCurrentNumMainWindows The expected current number of main
+ * windows active on the screen (used as part of a heuristic for determining the main
+ * windows).
+ */
 export function createWindowsManager({
 	display: _,
-	numMainWindows: expectedNumMainWindows,
+	expectedCurrentNumMainWindows,
 }: {
 	display: Display;
-	numMainWindows: number;
+	expectedCurrentNumMainWindows: number;
 }) {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
@@ -22,7 +29,7 @@ export function createWindowsManager({
 	}
 
 	const windowsManager = {
-		expectedNumMainWindows,
+		expectedCurrentNumMainWindows,
 		windowsData: getWindowsData(),
 		refreshWindowsData() {
 			const newWindowsData = getWindowsData();
@@ -77,19 +84,25 @@ export function createWindowsManager({
 			const topRightWindow = this.getTopRightWindow();
 			console.log(`Top-right window: ${topRightWindow.app}`);
 
-			if (this.expectedNumMainWindows === 1) return topRightWindow.frame.x;
+			if (this.expectedCurrentNumMainWindows === 1)
+				return topRightWindow.frame.x;
 
-			// Get all the windows to the left of the top-right window
-			const eligibleWindows = this.windowsData
+			const nonStackWindows = this.windowsData.filter(
+				(window) => !this.isStackWindow(window)
+			);
+			// Get all the windows to the left of the top-right window which are not a stack window
+			const eligibleWindows = nonStackWindows
 				.filter((window) => window.frame.x <= topRightWindow.frame.x)
 				.sort((window1, window2) => window2.frame.x - window1.frame.x);
 
 			const numWindowsToRightOfTopRightWindow =
-				this.windowsData.length - eligibleWindows.length;
+				nonStackWindows.length - eligibleWindows.length;
 
 			// If there are enough windows that are to the right of the top-right window, then return
 			// the top-right window's x-coordinate
-			if (numWindowsToRightOfTopRightWindow >= this.expectedNumMainWindows) {
+			if (
+				numWindowsToRightOfTopRightWindow >= this.expectedCurrentNumMainWindows
+			) {
 				return topRightWindow.frame.x;
 			}
 
@@ -100,7 +113,7 @@ export function createWindowsManager({
 				if (
 					curWindow.frame.x === nextWindow.frame.x &&
 					numWindowsToRightOfTopRightWindow + i + 2 >=
-						this.expectedNumMainWindows
+						this.expectedCurrentNumMainWindows
 				) {
 					return curWindow.frame.x;
 				}
@@ -285,10 +298,10 @@ export function createWindowsManager({
 		> {
 			console.log('Starting valid layout check...');
 			const curNumMainWindows = this.getMainWindows().length;
-			if (this.expectedNumMainWindows !== curNumMainWindows) {
+			if (this.expectedCurrentNumMainWindows !== curNumMainWindows) {
 				return {
 					status: false,
-					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${this.expectedNumMainWindows})`,
+					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${this.expectedCurrentNumMainWindows})`,
 				};
 			}
 
@@ -304,7 +317,11 @@ export function createWindowsManager({
 
 			return { status: true };
 		},
-		async updateWindows() {
+		async updateWindows({
+			targetNumMainWindows,
+		}: {
+			targetNumMainWindows: number;
+		}) {
 			console.log('updateWindows() called');
 			const layoutValidity = await this.isValidLayout();
 			if (layoutValidity.status === true) {
@@ -317,10 +334,7 @@ export function createWindowsManager({
 			const numWindows = this.windowsData.length;
 
 			// If the stack is supposed to exist but doesn't exist
-			if (
-				this.expectedNumMainWindows !== numWindows &&
-				!this.doesStackExist()
-			) {
+			if (targetNumMainWindows !== numWindows && !this.doesStackExist()) {
 				console.log('Stack does not exist, creating it...');
 				this.createStack();
 			}
@@ -331,9 +345,9 @@ export function createWindowsManager({
 				let curNumMainWindows = mainWindows.length;
 
 				// If there are too many main windows, move them to stack
-				if (curNumMainWindows > this.expectedNumMainWindows) {
+				if (curNumMainWindows > targetNumMainWindows) {
 					console.log(
-						`Too many main windows (${curNumMainWindows}/${this.expectedNumMainWindows}).`
+						`Too many main windows (${curNumMainWindows}/${targetNumMainWindows}).`
 					);
 					// Sort the windows by y-coordinate and x-coordinate so we remove the bottom-left main windows first
 					mainWindows.sort((window1, window2) =>
@@ -341,7 +355,7 @@ export function createWindowsManager({
 							? window1.frame.y - window2.frame.y
 							: window1.frame.x - window2.frame.x
 					);
-					while (curNumMainWindows > this.expectedNumMainWindows) {
+					while (curNumMainWindows > targetNumMainWindows) {
 						// Remove the window with the greatest y-coordinate first
 						const mainWindow = mainWindows.pop()!;
 						console.log(`Moving main window ${mainWindow.app} to stack.`);
@@ -356,7 +370,7 @@ export function createWindowsManager({
 				while ((middleWindows = this.getMiddleWindows()).length > 0) {
 					const middleWindow = middleWindows[0];
 					console.log(`Middle window ${middleWindow.app} detected.`);
-					if (curNumMainWindows < this.expectedNumMainWindows) {
+					if (curNumMainWindows < targetNumMainWindows) {
 						console.log(`Moving middle window ${middleWindow.app} to main.`);
 						this.moveWindowToMain(middleWindow);
 						curNumMainWindows += 1;
@@ -376,9 +390,9 @@ export function createWindowsManager({
 						: window2.frame.y - window1.frame.y
 				);
 
-				while (curNumMainWindows < this.expectedNumMainWindows) {
+				while (curNumMainWindows < targetNumMainWindows) {
 					console.log(
-						`Not enough main windows (${curNumMainWindows}/${this.expectedNumMainWindows})`
+						`Not enough main windows (${curNumMainWindows}/${targetNumMainWindows})`
 					);
 					const stackWindow = stackWindows.pop()!;
 					console.log(`Moving stack window ${stackWindow.app} to main.`);
@@ -395,6 +409,8 @@ export function createWindowsManager({
 			} else {
 				console.log('updateLayout() was successful.');
 			}
+
+			this.expectedCurrentNumMainWindows = targetNumMainWindows;
 		},
 		getTopWindow(windows: Window[]) {
 			let topWindow = windows[0];
