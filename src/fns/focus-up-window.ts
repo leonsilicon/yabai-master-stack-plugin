@@ -4,7 +4,7 @@ import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
 import { handleMasterError } from '../utils/error';
 
-async function master() {
+async function main() {
 	const state = await readState();
 	const wm = createWindowsManager({
 		display: getFocusedDisplay(),
@@ -42,4 +42,4 @@ async function master() {
 	}
 }
 
-master().catch(handleMasterError);
+main().catch(handleMasterError);

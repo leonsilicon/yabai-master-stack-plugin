@@ -4,7 +4,7 @@ import { getFocusedDisplay } from '../utils/display';
 import { handleMasterError } from '../utils/error';
 import { releaseLock } from '../utils/lock';
 
-async function master() {
+async function main() {
 	try {
 		await releaseLock();
 		const state = await readState();
@@ -20,4 +20,4 @@ async function master() {
 	}
 }
 
-master().catch(handleMasterError);
+main().catch(handleMasterError);
