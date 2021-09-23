@@ -13,6 +13,7 @@ function main() {
 			return;
 		}
 
+		/*
 		const processId = process.env.YABAI_PROCESS_ID as string;
 		const windowId = process.env.YABAI_WINDOW_ID as string;
 		const curNumMainWindows = wm.getMainWindows().length;
@@ -31,6 +32,7 @@ function main() {
 			// move the window to the stack
 			wm.moveWindowToStack(window.id.toString());
 		}
+		*/
 		wm.updateWindows();
 
 		if (!wm.isValidLayout()) {

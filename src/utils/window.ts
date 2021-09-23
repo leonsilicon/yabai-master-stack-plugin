@@ -1,9 +1,18 @@
 import execa from 'execa';
 import { yabaiPath } from '../config';
 import { readState } from '../state';
-import type { Window } from '../types';
+import type { Display, Window } from '../types';
 
-export function createWindowsManager() {
+function getDistanceBetweenPoints(
+	p1: readonly [number, number],
+	p2: readonly [number, number]
+) {
+	return Math.sqrt(
+		(p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1])
+	);
+}
+
+export function createWindowsManager({ displayId }: { displayId: number }) {
 	const windowsData = (
 		JSON.parse(
 			execa.commandSync(`${yabaiPath} -m query --windows`).stdout
@@ -13,6 +22,7 @@ export function createWindowsManager() {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 	const windowsManager = {
 		windowsData,
+		getDisplayDimensions() {},
 		getWindowData({ processId, windowId }: GetWindowDataProps): Window {
 			if (processId === undefined && windowId === undefined) {
 				throw new Error('Must provide at least one of processId or windowId');
@@ -40,6 +50,17 @@ export function createWindowsManager() {
 		getFnWindowId() {
 			return process.argv[2] ?? this.getFocusedWindow();
 		},
+		getDisplayData() {
+			const display = (
+				JSON.parse(
+					execa.commandSync(`${yabaiPath} -m query --displays`).stdout
+				) as Display[]
+			).find((display) => display.id === displayId);
+			if (display === undefined) {
+				throw new Error(`Display with ${displayId} not found!`);
+			}
+			return display;
+		},
 		/**
 		 * There is always a line dividing the main windows from the secondary windows. To find this line,
 		 * we use two main observations:
@@ -56,6 +77,10 @@ export function createWindowsManager() {
 			if (windowsData.length <= 2) return topRightWindow.frame.x;
 
 			const bottomRightWindow = this.getBottomRightWindow();
+			if (topRightWindow !== bottomRightWindow) {
+				console.log(topRightWindow, bottomRightWindow);
+				throw new Error('sus');
+			}
 
 			// If the top-right window is equal to the bottom-right window, it means there
 			// is only one main window (which is the top-right and bottom-left window).
@@ -84,30 +109,56 @@ export function createWindowsManager() {
 			throw new Error("Could not find the dividing line's x-coordinate.");
 		},
 		/**
-		 * The top-right window is the window with the lowest y-coordinate and the largest x-coordinate
+		 * The top-right window is the window whose top-right corner is the minimum distance from
+		 * the top-right corner of the display.
 		 */
 		getTopRightWindow() {
 			let topRightWindow = windowsData[0];
+			let minDistance = Infinity;
+			const display = this.getDisplayData();
+			const displayTopRightCorner = [
+				display.frame.x + display.frame.w,
+				display.frame.y,
+			] as const;
 			for (const window of windowsData) {
-				if (
-					window.frame.x >= topRightWindow.frame.x &&
-					window.frame.y <= topRightWindow.frame.y
-				) {
+				const windowTopRightCorner = [
+					window.frame.x + window.frame.w,
+					window.frame.y,
+				] as const;
+				const distance = getDistanceBetweenPoints(
+					displayTopRightCorner,
+					windowTopRightCorner
+				);
+				if (distance < minDistance) {
+					minDistance = distance;
 					topRightWindow = window;
 				}
 			}
 			return topRightWindow;
 		},
 		/**
-		 * The bottom-right window is the window with the largest y-coordinate and the largest x-coordinate
+		 * The bottom-right window is the window whose bottom-right corner is the minimum distance
+		 * from the bottom-right corner of the display.
 		 */
 		getBottomRightWindow() {
 			let bottomRightWindow = windowsData[0];
+			let minDistance = Infinity;
+			const display = this.getDisplayData();
+			const displayBottomRightCorner = [
+				display.frame.x + display.frame.w,
+				display.frame.y + display.frame.h,
+			] as const;
 			for (const window of windowsData) {
-				if (
-					window.frame.x >= bottomRightWindow.frame.x &&
-					window.frame.y >= bottomRightWindow.frame.y
-				) {
+				const windowBottomRightCorner = [
+					window.frame.x + window.frame.w,
+					window.frame.y + window.frame.h,
+				] as const;
+				const distance = getDistanceBetweenPoints(
+					displayBottomRightCorner,
+					windowBottomRightCorner
+				);
+				if (distance < minDistance) {
+					minDistance = distance;
 					bottomRightWindow = window;
 				}
 			}
@@ -237,6 +288,7 @@ export function createWindowsManager() {
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
 				let curNumMainWindows = mainWindows.length;
+				console.log('num main windows: ', mainWindows.length);
 				const state = readState();
 
 				// If there are too many main windows, move them to stack

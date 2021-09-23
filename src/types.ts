@@ -29,3 +29,16 @@ export type Window = {
 export type State = {
 	numMainWindows: number;
 };
+
+export type Display = {
+	id: number;
+	uuid: string;
+	index: number;
+	spaces: number[];
+	frame: {
+		x: number;
+		y: number;
+		w: number;
+		h: number;
+	};
+};
