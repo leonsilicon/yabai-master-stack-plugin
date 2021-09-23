@@ -10,6 +10,13 @@ module.exports = {
 		'prettier',
 	],
 	plugins: ['@typescript-eslint', 'simple-import-sort', 'import', 'unicorn'],
+	parserOptions: {
+		parser: '@typescript-eslint/parser',
+		project: ['./tsconfig.eslint.json'],
+		tsconfigRootDir: __dirname,
+		ecmaVersion: 2018,
+		sourceType: 'module',
+	},
 	rules: {
 		// eslint rules
 		'no-unused-vars': 'off',
@@ -86,6 +93,7 @@ module.exports = {
 		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/no-non-null-assertion': 'off',
 		'@typescript-eslint/consistent-type-imports': 'error',
+		'@typescript-eslint/no-floating-promises': 'error',
 
 		// eslint-plugin-unicorn
 		'unicorn/prefer-module': 'off',

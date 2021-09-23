@@ -3,13 +3,13 @@ import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
-function main() {
+async function main() {
 	try {
-		acquireHandlerLock();
+		await acquireHandlerLock();
 		const wm = createWindowsManager({ display: getFocusedDisplay() });
 		console.log('Starting to handle window_created.');
 
-		if (wm.isValidLayout().status === true) {
+		if ((await wm.isValidLayout()).status === true) {
 			console.log('Valid layout detected; no changes were made.');
 			return;
 		}
@@ -19,7 +19,7 @@ function main() {
 		const curNumMainWindows = wm.getMainWindows().length;
 		const window = wm.getWindowData({ windowId, processId });
 
-		const state = readState();
+		const state = await readState();
 		if (curNumMainWindows > 1 && curNumMainWindows <= state.numMainWindows) {
 			// move the window to the main
 			console.log('Moving newly created window to main.');
@@ -31,11 +31,11 @@ function main() {
 			// move the window to the stack
 			wm.moveWindowToStack(window.id.toString());
 		}
-		wm.updateWindows();
+		await wm.updateWindows();
 		console.log('Finished handling window_created.');
 	} finally {
-		releaseLock();
+		await releaseLock();
 	}
 }
 
-main();
+void main();

@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "rimraf dist && tsc --outDir dist",
+    "lint": "eslint --fix src",
     "prettier": "prettier --write src"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
     "@types/lockfile": "^1.0.2",
     "@types/node": "^16.9.3",
     "@types/proper-lockfile": "^4.1.2",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.1",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",

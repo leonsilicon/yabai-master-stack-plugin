@@ -1,4 +1,5 @@
 import execa from 'execa';
+
 import { yabaiPath } from '../config';
 import { readState } from '../state';
 import type { Display, Window } from '../types';
@@ -34,14 +35,12 @@ export function createWindowsManager({ display }: { display: Display }) {
 			this.refreshWindowsData();
 			return result;
 		},
-		getDisplayDimensions() {},
 		getWindowData({ processId, windowId }: GetWindowDataProps): Window {
 			if (processId === undefined && windowId === undefined) {
 				throw new Error('Must provide at least one of processId or windowId');
 			}
 
-			let windowData: Window | undefined;
-			windowData = this.windowsData.find(
+			const windowData = this.windowsData.find(
 				(window) =>
 					window.pid === Number(processId) || window.id === Number(windowId)
 			);
@@ -111,7 +110,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 		 */
 		getTopRightWindow() {
 			let topRightWindow = this.windowsData[0];
-			let minDistance = Infinity;
+			let minDistance = Number.POSITIVE_INFINITY;
 			const displayTopRightCorner = [
 				display.frame.x + display.frame.w,
 				display.frame.y,
@@ -138,7 +137,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 		 */
 		getBottomRightWindow() {
 			let bottomRightWindow = this.windowsData[0];
-			let minDistance = Infinity;
+			let minDistance = Number.POSITIVE_INFINITY;
 			const displayBottomRightCorner = [
 				display.frame.x + display.frame.w,
 				display.frame.y + display.frame.h,
@@ -269,8 +268,10 @@ export function createWindowsManager({ display }: { display: Display }) {
 		getStackWindows() {
 			return this.windowsData.filter((window) => this.isStackWindow(window));
 		},
-		isValidLayout(): { status: true } | { status: false; reason: string } {
-			const state = readState();
+		async isValidLayout(): Promise<
+			{ status: true } | { status: false; reason: string }
+		> {
+			const state = await readState();
 			const curNumMainWindows = this.getMainWindows().length;
 			if (state.numMainWindows !== curNumMainWindows) {
 				return {
@@ -290,8 +291,9 @@ export function createWindowsManager({ display }: { display: Display }) {
 
 			return { status: true };
 		},
-		updateWindows() {
-			if (this.isValidLayout().status === true) {
+		async updateWindows() {
+			const layoutValidity = await this.isValidLayout();
+			if (layoutValidity.status === true) {
 				console.log('Valid layout detected; no changes were made.');
 				return;
 			}
@@ -301,7 +303,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
 				let curNumMainWindows = mainWindows.length;
-				const state = readState();
+				const state = await readState();
 
 				// If there are too many main windows, move them to stack
 				if (curNumMainWindows > state.numMainWindows) {
@@ -325,7 +327,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 				// If there are windows that aren't touching either the left side or the right side
 				// after the move, fill up main and then move the rest to stack
 				let middleWindows;
-				while ((middleWindows = this.getMiddleWindows()).length !== 0) {
+				while ((middleWindows = this.getMiddleWindows()).length > 0) {
 					const middleWindow = middleWindows[0];
 					console.log(`Middle window ${middleWindow.app} detected.`);
 					if (curNumMainWindows < state.numMainWindows) {
@@ -356,8 +358,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 			}
 
 			// Note: the following should never be called
-			const layoutValidity = this.isValidLayout();
-			if (layoutValidity.status === false) {
+			if ((await this.isValidLayout()).status === false) {
 				throw new Error(
 					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
 				);

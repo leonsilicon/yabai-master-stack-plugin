@@ -3,20 +3,20 @@ import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
-function main() {
+async function main() {
 	try {
-		acquireHandlerLock();
-		const state = readState();
+		await acquireHandlerLock();
+		const state = await readState();
 		if (state.numMainWindows > 1) {
-			state.numMainWindows = state.numMainWindows - 1;
-			writeState(state);
+			state.numMainWindows -= 1;
+			await writeState(state);
 			console.log('Decreasing main window count.');
 			const wm = createWindowsManager({ display: getFocusedDisplay() });
-			wm.updateWindows();
+			await wm.updateWindows();
 		}
 	} finally {
-		releaseLock();
+		await releaseLock();
 	}
 }
 
-main();
+void main();

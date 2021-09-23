@@ -1,8 +1,9 @@
 import fs from 'fs';
-import type { State, Window } from './types';
-import pkgDir from 'pkg-dir';
 import path from 'path';
+import pkgDir from 'pkg-dir';
 import lockfile from 'proper-lockfile';
+
+import type { State } from './types';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
 const stateLockPath = path.join(pkgDir.sync(__dirname)!, 'state.json.lock');
@@ -10,36 +11,32 @@ const stateLockPath = path.join(pkgDir.sync(__dirname)!, 'state.json.lock');
 const defaultState: State = { numMainWindows: 1 };
 const defaultStateJson = JSON.stringify(defaultState);
 
-function acquireStateLock() {
-	const isLocked = lockfile.checkSync(stateLockPath);
-	if (isLocked) {
-		throw new Error('State is locked.');
-	} else {
-		lockfile.lockSync(stateLockPath)
-	}
+let release: () => Promise<void> | undefined;
+async function acquireStateLock() {
+	release = await lockfile.lock(stateLockPath);
 }
 
-function releaseStateLock() {
-	lockfile.unlockSync(stateLockPath);
+async function releaseStateLock() {
+	await release?.();
 }
 
 export async function writeState(state: State) {
-	acquireStateLock();
+	await acquireStateLock();
 	if (!fs.existsSync(stateFilePath)) {
-		fs.writeFileSync(stateFilePath, defaultStateJson);
+		await fs.promises.writeFile(stateFilePath, defaultStateJson);
 	}
 
-	fs.writeFileSync(stateFilePath, JSON.stringify(state));
-	releaseStateLock();
+	await fs.promises.writeFile(stateFilePath, JSON.stringify(state));
+	await releaseStateLock();
 }
 
-export function readState(): State {
-	acquireStateLock();
+export async function readState(): Promise<State> {
+	await acquireStateLock();
 	if (!fs.existsSync(stateFilePath)) {
-		fs.writeFileSync(stateFilePath, defaultStateJson);
+		await fs.promises.writeFile(stateFilePath, defaultStateJson);
 	}
-	const data = fs.readFileSync(stateFilePath).toString();
-	releaseStateLock();
+	const data = await fs.promises.readFile(stateFilePath).toString();
+	await releaseStateLock();
 
 	return JSON.parse(data);
 }

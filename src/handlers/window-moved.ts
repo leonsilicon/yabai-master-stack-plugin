@@ -2,16 +2,16 @@ import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
-function main() {
+async function main() {
 	try {
 		const wm = createWindowsManager({ display: getFocusedDisplay() });
-		acquireHandlerLock();
+		await acquireHandlerLock();
 		console.log('Starting to handle window_moved.');
-		wm.updateWindows();
+		await wm.updateWindows();
 		console.log('Finished handling window_moved.');
 	} finally {
-		releaseLock();
+		await releaseLock();
 	}
 }
 
-main();
+void main();

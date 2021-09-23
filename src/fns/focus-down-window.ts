@@ -1,4 +1,5 @@
 import execa from 'execa';
+
 import { yabaiPath } from '../config';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
