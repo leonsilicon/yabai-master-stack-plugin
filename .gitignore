@@ -1,4 +1,7 @@
 node_modules
 dist
 state.json
+
+# Locks
 handler.lock
+state.json.lock

@@ -13,6 +13,9 @@ const defaultStateJson = JSON.stringify(defaultState);
 
 let release: () => Promise<void> | undefined;
 async function acquireStateLock() {
+	if (!fs.existsSync(stateLockPath)) {
+		await fs.promises.writeFile(stateLockPath, '');
+	}
 	release = await lockfile.lock(stateLockPath);
 }
 
@@ -35,7 +38,7 @@ export async function readState(): Promise<State> {
 	if (!fs.existsSync(stateFilePath)) {
 		await fs.promises.writeFile(stateFilePath, defaultStateJson);
 	}
-	const data = await fs.promises.readFile(stateFilePath).toString();
+	const data = (await fs.promises.readFile(stateFilePath)).toString();
 	await releaseStateLock();
 
 	return JSON.parse(data);

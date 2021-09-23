@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import pkgDir from 'pkg-dir';
 import lockfile from 'proper-lockfile';
@@ -5,6 +6,9 @@ import lockfile from 'proper-lockfile';
 const handlerLockPath = path.join(pkgDir.sync(__dirname)!, 'handler.lock');
 let release: () => Promise<void> | undefined;
 export async function acquireHandlerLock() {
+	if (!fs.existsSync(handlerLockPath)) {
+		await fs.promises.writeFile(handlerLockPath, '');
+	}
 	release = await lockfile.lock(handlerLockPath);
 }
 
