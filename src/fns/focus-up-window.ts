@@ -1,36 +1,30 @@
 import execa from 'execa';
 import { yabaiPath } from '../config';
-import {
-	getBottomMainWindow,
-	getBottomStackWindow,
-	getFocusedWindow,
-	getMainWindows,
-	getStackWindows,
-	isMainWindow,
-	isStackWindow,
-	isTopWindow,
-} from '../utils';
+import { readState } from '../state';
+import { createWindowsManager } from '../utils';
 
-const focusedWindow = getFocusedWindow();
+const { numMainWindows } = readState();
+const wm = createWindowsManager({ numMainWindows });
+const focusedWindow = wm.getFocusedWindow();
 if (focusedWindow !== undefined) {
 	// If the focused window is the highest window
 	if (
-		isMainWindow(focusedWindow) &&
-		isTopWindow(getMainWindows(), focusedWindow)
+		wm.isMainWindow(focusedWindow) &&
+		wm.isTopWindow(wm.getMainWindows(), focusedWindow)
 	) {
 		// Focus on the bottom stack window
-		const bottomStackWindow = getBottomStackWindow();
+		const bottomStackWindow = wm.getBottomStackWindow();
 		if (bottomStackWindow !== undefined) {
 			execa.commandSync(
 				`${yabaiPath} -m window --focus ${bottomStackWindow.id}`
 			);
 		}
 	} else if (
-		isStackWindow(focusedWindow) &&
-		isTopWindow(getStackWindows(), focusedWindow)
+		wm.isStackWindow(focusedWindow) &&
+		wm.isTopWindow(wm.getStackWindows(), focusedWindow)
 	) {
 		// Focus on the bottom main window
-		const bottomMainWindow = getBottomMainWindow();
+		const bottomMainWindow = wm.getBottomMainWindow();
 		if (bottomMainWindow !== undefined) {
 			execa.commandSync(
 				`${yabaiPath} -m window --focus ${bottomMainWindow.id}`

@@ -12,5 +12,9 @@ export function lockOrQuit() {
 }
 
 export function releaseLock() {
-	fs.rmSync(handlerLockPath);
+	try {
+		fs.rmSync(handlerLockPath);
+	} catch {
+		console.error('Failed to release lock: lock not found.')
+	}
 }
