@@ -205,6 +205,23 @@ export function createWindowsManager({
 			const topRightWindow = this.getTopRightWindow();
 			return topRightWindow.frame.x !== 0;
 		},
+		/**
+		 * Turns the stack into a column by making sure the split direction of all the stack windows
+		 * is horizontal
+		 */
+		columnizeStackWindows() {
+			const stackWindows = this.windowsData.filter(
+				(window) => !this.isMainWindow(window)
+			);
+			for (const stackWindow of stackWindows) {
+				const window = this.getUpdatedWindowData(stackWindow);
+				if (window.split === 'vertical') {
+					this.executeYabaiCommand(
+						`${yabaiPath} -m window ${window.id} --toggle split`
+					);
+				}
+			}
+		},
 		moveWindowToStack(window: Window) {
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
@@ -216,19 +233,15 @@ export function createWindowsManager({
 				return;
 			}
 
-			// If the stack exists and the window is already on the stack
-			if (this.windowsData.length > 2 && !this.isMainWindow(window)) {
-				if (window.split === 'vertical') {
-					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${window.id} --toggle split`
-					);
-				}
-				return;
-			}
+			this.columnizeStackWindows();
 
 			// Find a window that's touching the left side of the screen
 			const stackWindow = this.getWidestStackWindow();
-			if (stackWindow === undefined) return;
+
+			if (stackWindow === undefined) {
+				console.log('No stack windows available.');
+				return;
+			}
 
 			this.executeYabaiCommand(
 				`${yabaiPath} -m window ${window.id} --warp ${stackWindow.id}`
@@ -265,10 +278,10 @@ export function createWindowsManager({
 				);
 			}
 		},
+		/**
+		 * A window which is to the right of the dividing line is considered a main window.
+		 */
 		isMainWindow(window: Window) {
-			/**
-			 * A window which is to the right of the dividing line is considered a main window.
-			 */
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			return window.frame.x >= dividingLineXCoordinate;
 		},
