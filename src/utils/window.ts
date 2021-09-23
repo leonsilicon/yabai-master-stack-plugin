@@ -284,7 +284,6 @@ export function createWindowsManager({
 			{ status: true } | { status: false; reason: string }
 		> {
 			console.log('Starting valid layout check...');
-			await new Promise((r) => setTimeout(r, 2000));
 			const curNumMainWindows = this.getMainWindows().length;
 			if (this.expectedNumMainWindows !== curNumMainWindows) {
 				return {
@@ -364,7 +363,6 @@ export function createWindowsManager({
 					} else {
 						console.log(`Moving middle window ${middleWindow.app} to stack.`);
 						this.moveWindowToStack(middleWindow);
-						curNumMainWindows -= 1;
 					}
 				}
 
@@ -377,7 +375,11 @@ export function createWindowsManager({
 						? window2.frame.x - window1.frame.x
 						: window2.frame.y - window1.frame.y
 				);
+
 				while (curNumMainWindows < this.expectedNumMainWindows) {
+					console.log(
+						`Not enough main windows (${curNumMainWindows}/${this.expectedNumMainWindows})`
+					);
 					const stackWindow = stackWindows.pop()!;
 					console.log(`Moving stack window ${stackWindow.app} to main.`);
 					this.moveWindowToMain(stackWindow);
