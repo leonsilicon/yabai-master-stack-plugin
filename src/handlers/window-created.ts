@@ -1,11 +1,11 @@
 import { readState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
-import { lockOrQuit, releaseLock } from '../utils/lock';
+import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
 function main() {
 	try {
-		lockOrQuit();
+		acquireHandlerLock();
 		const wm = createWindowsManager({ display: getFocusedDisplay() });
 		console.log('Starting to handle window_created.');
 
