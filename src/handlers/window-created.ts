@@ -27,13 +27,13 @@ async function main() {
 		if (curNumMainWindows > 1 && curNumMainWindows <= state.numMainWindows) {
 			// move the window to the main
 			console.log('Moving newly created window to main.');
-			wm.moveWindowToMain(window.id.toString());
+			wm.moveWindowToMain(window);
 		}
 		// if there are too many windows on the main
 		else {
 			console.log('Moving newly created window to stack.');
 			// move the window to the stack
-			wm.moveWindowToStack(window.id.toString());
+			wm.moveWindowToStack(window);
 		}
 
 		await wm.updateWindows();

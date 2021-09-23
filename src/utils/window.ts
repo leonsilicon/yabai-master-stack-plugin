@@ -1,7 +1,6 @@
 import execa from 'execa';
 
 import { yabaiPath } from '../config';
-import { readState } from '../state';
 import type { Display, Window } from '../types';
 
 export function createWindowsManager({
@@ -26,7 +25,11 @@ export function createWindowsManager({
 		expectedNumMainWindows,
 		windowsData: getWindowsData(),
 		refreshWindowsData() {
-			this.windowsData = getWindowsData();
+			const newWindowsData = getWindowsData();
+			this.windowsData = newWindowsData;
+		},
+		getUpdatedWindowData(window: Window) {
+			return this.windowsData.find((win) => window.id === win.id)!;
 		},
 		executeYabaiCommand(command: string) {
 			const result = execa.commandSync(command);
@@ -182,29 +185,31 @@ export function createWindowsManager({
 			}
 		},
 		/**
-		 * If the dividing x-coordinate is 0, then the stack does not exist
+		 * If the top-right window has a x-coordinate of 0, or if the stack dividing
+		 * line is equal to 0, then the stack does not exist
 		 */
 		doesStackExist() {
-			return this.getDividingLineXCoordinate() !== 0;
+			const topRightWindow = this.getTopRightWindow();
+			return !(
+				topRightWindow.frame.x === 0 || this.getDividingLineXCoordinate() === 0
+			);
 		},
-		moveWindowToStack(windowId: string) {
-			let win = this.getWindowData({ windowId });
-
+		moveWindowToStack(window: Window) {
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
-				if (win.split === 'horizontal') {
+				if (window.split === 'horizontal') {
 					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${win.id} --toggle split`
+						`${yabaiPath} -m window ${window.id} --toggle split`
 					);
 				}
 				return;
 			}
 
 			// If the stack exists and the window is already on the stack
-			if (this.windowsData.length > 2 && !this.isMainWindow(win)) {
-				if (win.split === 'vertical') {
+			if (this.windowsData.length > 2 && !this.isMainWindow(window)) {
+				if (window.split === 'vertical') {
 					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${win.id} --toggle split`
+						`${yabaiPath} -m window ${window.id} --toggle split`
 					);
 				}
 				return;
@@ -215,41 +220,35 @@ export function createWindowsManager({
 			if (stackWindow === undefined) return;
 
 			this.executeYabaiCommand(
-				`${yabaiPath} -m window ${windowId} --warp ${stackWindow.id}`
+				`${yabaiPath} -m window ${window.id} --warp ${stackWindow.id}`
 			);
-
-			win = this.getWindowData({ windowId });
-			this.refreshWindowsData();
+			window = this.getUpdatedWindowData(window);
 
 			if (this.windowsData.length === 2) {
-				if (win.split === 'horizontal') {
+				if (window.split === 'horizontal') {
 					this.executeYabaiCommand(
 						`${yabaiPath} -m window ${stackWindow.id} --toggle split`
 					);
 				}
 			} else {
-				if (win.split === 'vertical') {
+				if (window.split === 'vertical') {
 					this.executeYabaiCommand(
 						`${yabaiPath} -m window ${stackWindow.id} --toggle split`
 					);
 				}
 			}
-
-			this.refreshWindowsData();
 		},
-		moveWindowToMain(windowId: string) {
-			let win = this.getWindowData({ windowId });
-
+		moveWindowToMain(window: Window) {
 			// Find a window that's touching the right side of the screen
 			const mainWindow = this.getWidestMainWindow();
 
 			if (mainWindow === undefined) return;
 			this.executeYabaiCommand(
-				`${yabaiPath} -m window ${windowId} --warp ${mainWindow.id}`
+				`${yabaiPath} -m window ${window.id} --warp ${mainWindow.id}`
 			);
+			window = this.getUpdatedWindowData(window);
 
-			win = this.getWindowData({ windowId });
-			if (win.split === 'vertical') {
+			if (window.split === 'vertical') {
 				this.executeYabaiCommand(
 					`${yabaiPath} -m window ${mainWindow.id} --toggle split`
 				);
@@ -286,12 +285,11 @@ export function createWindowsManager({
 		async isValidLayout(): Promise<
 			{ status: true } | { status: false; reason: string }
 		> {
-			const state = await readState();
 			const curNumMainWindows = this.getMainWindows().length;
-			if (state.numMainWindows !== curNumMainWindows) {
+			if (this.expectedNumMainWindows !== curNumMainWindows) {
 				return {
 					status: false,
-					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${state.numMainWindows})`,
+					reason: `Number of main windows does not equal expected number of main windows (${curNumMainWindows}/${this.expectedNumMainWindows})`,
 				};
 			}
 
@@ -311,6 +309,8 @@ export function createWindowsManager({
 			if (layoutValidity.status === true) {
 				console.log('Valid layout detected; no changes were made.');
 				return;
+			} else {
+				console.log('Invalid layout detected...updating windows.');
 			}
 
 			const numWindows = this.windowsData.length;
@@ -320,6 +320,7 @@ export function createWindowsManager({
 				this.expectedNumMainWindows !== numWindows &&
 				!this.doesStackExist()
 			) {
+				console.log('Stack does not exist, creating it...');
 				this.createStack();
 			}
 
@@ -341,7 +342,7 @@ export function createWindowsManager({
 					while (curNumMainWindows > this.expectedNumMainWindows) {
 						const mainWindow = mainWindows.pop()!;
 						console.log(`Moving main window ${mainWindow.app} to stack.`);
-						this.moveWindowToStack(mainWindow.id.toString());
+						this.moveWindowToStack(mainWindow);
 						curNumMainWindows -= 1;
 					}
 				}
@@ -354,11 +355,11 @@ export function createWindowsManager({
 					console.log(`Middle window ${middleWindow.app} detected.`);
 					if (curNumMainWindows < this.expectedNumMainWindows) {
 						console.log(`Moving middle window ${middleWindow.app} to main.`);
-						this.moveWindowToMain(middleWindow.id.toString());
+						this.moveWindowToMain(middleWindow);
 						curNumMainWindows += 1;
 					} else {
 						console.log(`Moving middle window ${middleWindow.app} to stack.`);
-						this.moveWindowToStack(middleWindow.id.toString());
+						this.moveWindowToStack(middleWindow);
 					}
 				}
 
@@ -374,7 +375,7 @@ export function createWindowsManager({
 				while (curNumMainWindows < this.expectedNumMainWindows) {
 					const stackWindow = stackWindows.pop()!;
 					console.log(`Moving stack window ${stackWindow.app} to main.`);
-					this.moveWindowToMain(stackWindow.id.toString());
+					this.moveWindowToMain(stackWindow);
 					curNumMainWindows += 1;
 				}
 			}
@@ -384,6 +385,8 @@ export function createWindowsManager({
 				throw new Error(
 					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
 				);
+			} else {
+				console.log('updateLayout() was successful.');
 			}
 		},
 		getTopWindow(windows: Window[]) {
