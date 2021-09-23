@@ -10,7 +10,7 @@ async function main() {
 		const state = await readState();
 		const wm = createWindowsManager({
 			display: getFocusedDisplay(),
-			numMainWindows: state.numMainWindows,
+			expectedCurrentNumMainWindows: state.numMainWindows,
 		});
 		console.log('Starting to handle window_created.');
 
@@ -36,7 +36,7 @@ async function main() {
 			wm.moveWindowToStack(window);
 		}
 
-		await wm.updateWindows();
+		await wm.updateWindows({ targetNumMainWindows: state.numMainWindows });
 		console.log('Finished handling window_created.');
 	} finally {
 		await releaseLock();

@@ -12,9 +12,9 @@ async function main() {
 		await writeState(state);
 		const wm = createWindowsManager({
 			display: getFocusedDisplay(),
-			numMainWindows: state.numMainWindows,
+			expectedCurrentNumMainWindows: state.numMainWindows,
 		});
-		await wm.updateWindows();
+		await wm.updateWindows({ targetNumMainWindows: state.numMainWindows });
 	} catch {
 		// empty
 	}

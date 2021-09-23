@@ -10,13 +10,13 @@ async function main() {
 		const state = await readState();
 		const wm = createWindowsManager({
 			display: getFocusedDisplay(),
-			numMainWindows: state.numMainWindows,
+			expectedCurrentNumMainWindows: state.numMainWindows,
 		});
 		if (state.numMainWindows < wm.windowsData.length) {
 			state.numMainWindows += 1;
 			await writeState(state);
 			console.log('Increasing main window count.');
-			await wm.updateWindows();
+			await wm.updateWindows({ targetNumMainWindows: state.numMainWindows });
 		}
 	} finally {
 		await releaseLock();

@@ -9,14 +9,14 @@ async function main() {
 		await acquireHandlerLock();
 		const state = await readState();
 		if (state.numMainWindows > 1) {
+			const wm = createWindowsManager({
+				display: getFocusedDisplay(),
+				expectedCurrentNumMainWindows: state.numMainWindows,
+			});
 			state.numMainWindows -= 1;
 			await writeState(state);
 			console.log('Decreasing main window count.');
-			const wm = createWindowsManager({
-				display: getFocusedDisplay(),
-				numMainWindows: state.numMainWindows,
-			});
-			await wm.updateWindows();
+			await wm.updateWindows({ targetNumMainWindows: state.numMainWindows });
 		}
 	} finally {
 		await releaseLock();

@@ -8,7 +8,7 @@ async function main() {
 	const state = await readState();
 	const wm = createWindowsManager({
 		display: getFocusedDisplay(),
-		numMainWindows: state.numMainWindows,
+		expectedCurrentNumMainWindows: state.numMainWindows,
 	});
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
