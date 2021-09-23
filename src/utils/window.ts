@@ -4,16 +4,13 @@ import { yabaiPath } from '../config';
 import { readState } from '../state';
 import type { Display, Window } from '../types';
 
-function getDistanceBetweenPoints(
-	p1: readonly [number, number],
-	p2: readonly [number, number]
-) {
-	return Math.sqrt(
-		(p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1])
-	);
-}
-
-export function createWindowsManager({ display }: { display: Display }) {
+export function createWindowsManager({
+	display: _,
+	numMainWindows: expectedNumMainWindows,
+}: {
+	display: Display;
+	numMainWindows: number;
+}) {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
 	function getWindowsData() {
@@ -26,6 +23,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 	}
 
 	const windowsManager = {
+		expectedNumMainWindows,
 		windowsData: getWindowsData(),
 		refreshWindowsData() {
 			this.windowsData = getWindowsData();
@@ -65,98 +63,79 @@ export function createWindowsManager({ display }: { display: Display }) {
 		 * There is always a line dividing the main windows from the secondary windows. To find this line,
 		 * we use two main observations:
 		 * 1. The top-right window is always on the right side of the dividing line.
-		 * 2. The bottom-right window is always on the right side of the dividing line.
-		 * Using these observations, we use the heuristic that the dividing line is created by the first pair
-		 * of windows which both start at an x-coordinate that is equal or less than both the top-right and
-		 * bottom-right windows.
+		 * 2. If there is more than one main window, the dividing line must cross the left side of two
+		 * windows
+		 * Using these observations, we can loop through the windows in descending x-coordinate starting from the top-right window
+		 * and for each pair of windows that share x-coordinates, we check if the numMainWindows is less
+		 * than the number of windows we've iterated through, and if so, return the x-coordinate of the currently
+		 * processed window
 		 */
 		getDividingLineXCoordinate() {
 			const topRightWindow = this.getTopRightWindow();
+			console.log(`Top-right window: ${topRightWindow.app}`);
 
-			// If there are two windows or less, the dividing line is the x-value of the top-right window
-			if (this.windowsData.length <= 2) return topRightWindow.frame.x;
+			if (this.expectedNumMainWindows === 1) return topRightWindow.frame.x;
 
-			const bottomRightWindow = this.getBottomRightWindow();
+			// Get all the windows to the left of the top-right window
+			const eligibleWindows = this.windowsData
+				.filter((window) => window.frame.x <= topRightWindow.frame.x)
+				.sort((window1, window2) => window2.frame.x - window1.frame.x);
 
-			// If the top-right window is equal to the bottom-right window, it means there
-			// is only one main window (which is the top-right and bottom-left window).
-			if (topRightWindow === bottomRightWindow) {
+			const numWindowsToRightOfTopRightWindow =
+				this.windowsData.length - eligibleWindows.length;
+
+			// If there are enough windows that are to the right of the top-right window, then return
+			// the top-right window's x-coordinate
+			if (numWindowsToRightOfTopRightWindow >= this.expectedNumMainWindows) {
 				return topRightWindow.frame.x;
 			}
 
-			const maximumDividingLineXCoordinate = Math.min(
-				topRightWindow.frame.x,
-				bottomRightWindow.frame.x
-			);
-
-			// Sorting eligible windows from right to left
-			const eligibleWindows = this.windowsData
-				.filter((window) => window.frame.x <= maximumDividingLineXCoordinate)
-				.sort((window1, window2) => window2.frame.x - window1.frame.x);
-
+			// Otherwise, iterate through the eligible windows in order and find pairs of windows
 			for (let i = 0; i < eligibleWindows.length - 1; i += 1) {
 				const curWindow = eligibleWindows[i];
 				const nextWindow = eligibleWindows[i + 1];
-				if (curWindow.frame.x === nextWindow.frame.x) {
+				if (
+					curWindow.frame.x === nextWindow.frame.x &&
+					numWindowsToRightOfTopRightWindow + i + 2 >=
+						this.expectedNumMainWindows
+				) {
 					return curWindow.frame.x;
 				}
 			}
 
-			throw new Error("Could not find the dividing line's x-coordinate.");
+			// If a pair of windows could not be found (which means all the windows are side-by-side), just
+			// return the top-right window's x-coordinate
+			return topRightWindow.frame.x;
 		},
 		/**
-		 * The top-right window is the window whose top-right corner is the minimum distance from
-		 * the top-right corner of the display.
+		 * The top-left window is the window with the lowest y-coordinate and the lowest x-coordinate.
+		 */
+		getTopLeftWindow() {
+			let topLeftWindow = this.windowsData[0];
+			for (const window of this.windowsData) {
+				if (
+					window.frame.y <= topLeftWindow.frame.y &&
+					window.frame.x < topLeftWindow.frame.x
+				) {
+					topLeftWindow = window;
+				}
+			}
+			return topLeftWindow;
+		},
+		/*
+		 * The top-right window is the rightmost window with the lowest x-coordinate.
 		 */
 		getTopRightWindow() {
 			let topRightWindow = this.windowsData[0];
-			let minDistance = Number.POSITIVE_INFINITY;
-			const displayTopRightCorner = [
-				display.frame.x + display.frame.w,
-				display.frame.y,
-			] as const;
 			for (const window of this.windowsData) {
-				const windowTopRightCorner = [
-					window.frame.x + window.frame.w,
-					window.frame.y,
-				] as const;
-				const distance = getDistanceBetweenPoints(
-					displayTopRightCorner,
-					windowTopRightCorner
-				);
-				if (distance < minDistance) {
-					minDistance = distance;
+				if (
+					window.frame.y <= topRightWindow.frame.y &&
+					window.frame.x > topRightWindow.frame.x
+				) {
 					topRightWindow = window;
 				}
 			}
 			return topRightWindow;
-		},
-		/**
-		 * The bottom-right window is the window whose bottom-right corner is the minimum distance
-		 * from the bottom-right corner of the display.
-		 */
-		getBottomRightWindow() {
-			let bottomRightWindow = this.windowsData[0];
-			let minDistance = Number.POSITIVE_INFINITY;
-			const displayBottomRightCorner = [
-				display.frame.x + display.frame.w,
-				display.frame.y + display.frame.h,
-			] as const;
-			for (const window of this.windowsData) {
-				const windowBottomRightCorner = [
-					window.frame.x + window.frame.w,
-					window.frame.y + window.frame.h,
-				] as const;
-				const distance = getDistanceBetweenPoints(
-					displayBottomRightCorner,
-					windowBottomRightCorner
-				);
-				if (distance < minDistance) {
-					minDistance = distance;
-					bottomRightWindow = window;
-				}
-			}
-			return bottomRightWindow;
 		},
 		getWidestStackWindow() {
 			let widestStackWindow: Window | undefined;
@@ -182,8 +161,44 @@ export function createWindowsManager({ display }: { display: Display }) {
 			}
 			return widestMainWindow;
 		},
+		// In the event that the windows get badly rearranged and all the windows span the entire width of
+		// the screen, split the top-right window vertically and then move the windows into the split
+		createStack() {
+			const topRightWindow = this.getTopRightWindow();
+			if (topRightWindow.split === 'horizontal') {
+				this.executeYabaiCommand(
+					`${yabaiPath} -m window ${topRightWindow.id} --toggle split`
+				);
+			}
+
+			// Get the top-left window
+			const topLeftWindow = this.getTopLeftWindow();
+
+			for (const window of this.windowsData) {
+				if (window === topRightWindow || window === topLeftWindow) continue;
+				this.executeYabaiCommand(
+					`${yabaiPath} -m window ${window.id} --warp ${topLeftWindow.id}`
+				);
+			}
+		},
+		/**
+		 * If the dividing x-coordinate is 0, then the stack does not exist
+		 */
+		doesStackExist() {
+			return this.getDividingLineXCoordinate() !== 0;
+		},
 		moveWindowToStack(windowId: string) {
 			let win = this.getWindowData({ windowId });
+
+			// If there's only two windows, make sure that the window stack exists
+			if (this.windowsData.length === 2) {
+				if (win.split === 'horizontal') {
+					this.executeYabaiCommand(
+						`${yabaiPath} -m window ${win.id} --toggle split`
+					);
+				}
+				return;
+			}
 
 			// If the stack exists and the window is already on the stack
 			if (this.windowsData.length > 2 && !this.isMainWindow(win)) {
@@ -300,15 +315,22 @@ export function createWindowsManager({ display }: { display: Display }) {
 
 			const numWindows = this.windowsData.length;
 
+			// If the stack is supposed to exist but doesn't exist
+			if (
+				this.expectedNumMainWindows !== numWindows &&
+				!this.doesStackExist()
+			) {
+				this.createStack();
+			}
+
 			if (numWindows > 2) {
 				const mainWindows = this.getMainWindows();
 				let curNumMainWindows = mainWindows.length;
-				const state = await readState();
 
 				// If there are too many main windows, move them to stack
-				if (curNumMainWindows > state.numMainWindows) {
+				if (curNumMainWindows > this.expectedNumMainWindows) {
 					console.log(
-						`Too many main windows (${curNumMainWindows}/${state.numMainWindows}).`
+						`Too many main windows (${curNumMainWindows}/${this.expectedNumMainWindows}).`
 					);
 					// Sort the windows by reverse y-coordinate and x-coordinate so we remove the bottom-left main windows first
 					mainWindows.sort((window1, window2) =>
@@ -316,7 +338,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 							? window2.frame.y - window1.frame.y
 							: window1.frame.x - window2.frame.x
 					);
-					while (curNumMainWindows > state.numMainWindows) {
+					while (curNumMainWindows > this.expectedNumMainWindows) {
 						const mainWindow = mainWindows.pop()!;
 						console.log(`Moving main window ${mainWindow.app} to stack.`);
 						this.moveWindowToStack(mainWindow.id.toString());
@@ -330,7 +352,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 				while ((middleWindows = this.getMiddleWindows()).length > 0) {
 					const middleWindow = middleWindows[0];
 					console.log(`Middle window ${middleWindow.app} detected.`);
-					if (curNumMainWindows < state.numMainWindows) {
+					if (curNumMainWindows < this.expectedNumMainWindows) {
 						console.log(`Moving middle window ${middleWindow.app} to main.`);
 						this.moveWindowToMain(middleWindow.id.toString());
 						curNumMainWindows += 1;
@@ -349,7 +371,7 @@ export function createWindowsManager({ display }: { display: Display }) {
 						? window2.frame.x - window1.frame.x
 						: window2.frame.y - window1.frame.y
 				);
-				while (curNumMainWindows < state.numMainWindows) {
+				while (curNumMainWindows < this.expectedNumMainWindows) {
 					const stackWindow = stackWindows.pop()!;
 					console.log(`Moving stack window ${stackWindow.app} to main.`);
 					this.moveWindowToMain(stackWindow.id.toString());

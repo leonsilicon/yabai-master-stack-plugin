@@ -1,6 +1,7 @@
 import { readState, writeState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
+import { handleMainError } from '../utils/error';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
 async function main() {
@@ -11,7 +12,10 @@ async function main() {
 			state.numMainWindows -= 1;
 			await writeState(state);
 			console.log('Decreasing main window count.');
-			const wm = createWindowsManager({ display: getFocusedDisplay() });
+			const wm = createWindowsManager({
+				display: getFocusedDisplay(),
+				numMainWindows: state.numMainWindows,
+			});
 			await wm.updateWindows();
 		}
 	} finally {
@@ -19,4 +23,4 @@ async function main() {
 	}
 }
 
-void main();
+main().catch(handleMainError);

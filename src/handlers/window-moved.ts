@@ -1,11 +1,17 @@
+import { readState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
+import { handleMainError } from '../utils/error';
 import { acquireHandlerLock, releaseLock } from '../utils/lock';
 
 async function main() {
 	try {
-		const wm = createWindowsManager({ display: getFocusedDisplay() });
 		await acquireHandlerLock();
+		const state = await readState();
+		const wm = createWindowsManager({
+			display: getFocusedDisplay(),
+			numMainWindows: state.numMainWindows,
+		});
 		console.log('Starting to handle window_moved.');
 		await wm.updateWindows();
 		console.log('Finished handling window_moved.');
@@ -14,4 +20,4 @@ async function main() {
 	}
 }
 
-void main();
+main().catch(handleMainError);
