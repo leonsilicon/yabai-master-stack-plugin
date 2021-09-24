@@ -11,7 +11,7 @@ import type { Display, Window } from '../types';
  * windows).
  */
 export function createWindowsManager({
-	display: _,
+	display,
 	expectedCurrentNumMasterWindows,
 }: {
 	display: Display;
@@ -243,6 +243,15 @@ export function createWindowsManager({
 			}
 		},
 		moveWindowToStack(window: Window) {
+			// Use a small heuristic that helps prevent "glitchy" window rearrangements
+			try {
+				this.executeYabaiCommand(
+					`${yabaiPath} -m window ${window.id} warp west`
+				);
+			} catch {
+				/* empty */
+			}
+
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
 				if (window.split === 'horizontal') {
@@ -258,8 +267,7 @@ export function createWindowsManager({
 			// Find a window that's touching the left side of the screen
 			const stackWindow = this.getWidestStackWindow();
 
-			if (stackWindow === undefined) {
-				console.log('No stack windows available.');
+			if (stackWindow === undefined || stackWindow.id === window.id) {
 				return;
 			}
 
@@ -283,10 +291,19 @@ export function createWindowsManager({
 			}
 		},
 		moveWindowToMaster(window: Window) {
+			// Use a small heuristic that helps prevent "glitchy" window rearrangements
+			try {
+				this.executeYabaiCommand(
+					`${yabaiPath} -m window ${window.id} warp east`
+				);
+			} catch {
+				/* empty */
+			}
+
 			// Find a window that's touching the right side of the screen
 			const masterWindow = this.getWidestMasterWindow();
 
-			if (masterWindow === undefined) return;
+			if (masterWindow === undefined || masterWindow.id === window.id) return;
 			this.executeYabaiCommand(
 				`${yabaiPath} -m window ${window.id} --warp ${masterWindow.id}`
 			);
@@ -388,7 +405,7 @@ export function createWindowsManager({
 					console.log(
 						`Too many master windows (${curNumMasterWindows}/${targetNumMasterWindows}).`
 					);
-					// Sort the windows by y-coordinate and x-coordinate so we remove the bottom-left master windows first
+					// Sort the windows from bottom to top and then right to left
 					masterWindows.sort((window1, window2) =>
 						window1.frame.y !== window2.frame.y
 							? window1.frame.y - window2.frame.y
