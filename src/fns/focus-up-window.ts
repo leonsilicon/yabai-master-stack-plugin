@@ -6,9 +6,10 @@ import { handleMasterError } from '../utils/error';
 
 async function main() {
 	const state = await readState();
+	const display = getFocusedDisplay();
 	const wm = createWindowsManager({
-		display: getFocusedDisplay(),
-		expectedCurrentNumMasterWindows: state.numMasterWindows,
+		display,
+		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
 	});
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {

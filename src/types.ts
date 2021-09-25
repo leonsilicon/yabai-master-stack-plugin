@@ -27,7 +27,9 @@ export type Window = {
 };
 
 export type State = {
-	numMasterWindows: number;
+	[displayId: string]: {
+		numMasterWindows: number;
+	};
 };
 
 export type Display = {

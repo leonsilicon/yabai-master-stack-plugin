@@ -8,15 +8,18 @@ async function main() {
 	try {
 		await acquireHandlerLock();
 		const state = await readState();
-		if (state.numMasterWindows > 1) {
+		const display = getFocusedDisplay();
+		if (state[display.id].numMasterWindows > 1) {
 			const wm = createWindowsManager({
-				display: getFocusedDisplay(),
-				expectedCurrentNumMasterWindows: state.numMasterWindows,
+				display,
+				expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
 			});
-			state.numMasterWindows -= 1;
+			state[display.id].numMasterWindows -= 1;
 			await writeState(state);
 			console.log('Decreasing master window count.');
-			await wm.updateWindows({ targetNumMasterWindows: state.numMasterWindows });
+			await wm.updateWindows({
+				targetNumMasterWindows: state[display.id].numMasterWindows,
+			});
 		}
 	} finally {
 		await releaseLock();

@@ -1,4 +1,4 @@
-import { readState, writeState } from '../state';
+import { readState, resetState } from '../state';
 import { createWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
 import { handleMasterError } from '../utils/error';
@@ -7,14 +7,16 @@ import { releaseLock } from '../utils/lock';
 async function main() {
 	try {
 		await releaseLock();
+		await resetState();
 		const state = await readState();
-		state.numMasterWindows = 1;
-		await writeState(state);
+		const display = getFocusedDisplay();
 		const wm = createWindowsManager({
-			display: getFocusedDisplay(),
-			expectedCurrentNumMasterWindows: state.numMasterWindows,
+			display,
+			expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
 		});
-		await wm.updateWindows({ targetNumMasterWindows: state.numMasterWindows });
+		await wm.updateWindows({
+			targetNumMasterWindows: state[display.id].numMasterWindows,
+		});
 	} catch {
 		// empty
 	}

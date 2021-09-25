@@ -24,7 +24,9 @@ export function createWindowsManager({
 			JSON.parse(
 				execa.commandSync(`${yabaiPath} -m query --windows`).stdout
 			) as Window[]
-		).filter((win) => win.split !== 'none');
+		).filter(
+			(window) => window.split !== 'none' && window.display === display.index
+		);
 		return windowsData;
 	}
 
