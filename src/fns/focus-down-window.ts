@@ -19,10 +19,11 @@ async function main() {
 			wm.isBottomWindow(wm.getMasterWindows(), focusedWindow)
 		) {
 			// Focus on the top stack window
-			const topStackWindow = wm.getTopStackWindow();
-			if (topStackWindow !== undefined) {
+			const windowToFocus = wm.getTopStackWindow() ?? wm.getTopMasterWindow();
+			console.log(`Focusing on the window ${windowToFocus?.app}`);
+			if (windowToFocus !== undefined) {
 				wm.executeYabaiCommand(
-					`${yabaiPath} -m window --focus ${topStackWindow.id}`
+					`${yabaiPath} -m window --focus ${windowToFocus.id}`
 				);
 			}
 		} else if (
@@ -30,15 +31,20 @@ async function main() {
 			wm.isBottomWindow(wm.getStackWindows(), focusedWindow)
 		) {
 			// Focus on the top master window
-			const topMasterWindow = wm.getTopMasterWindow();
-			if (topMasterWindow !== undefined) {
+			const windowToFocus = wm.getTopMasterWindow();
+			console.log(`Focusing on the window ${windowToFocus?.app}`);
+			if (windowToFocus !== undefined) {
 				wm.executeYabaiCommand(
-					`${yabaiPath} -m window --focus ${topMasterWindow.id}`
+					`${yabaiPath} -m window --focus ${windowToFocus.id}`
 				);
 			}
 		}
 		// Otherwise, just focus south
 		else {
+			console.log(
+				wm.isStackWindow(focusedWindow),
+				wm.isBottomWindow(wm.getStackWindows(), focusedWindow)
+			);
 			wm.executeYabaiCommand(`${yabaiPath} -m window --focus south`);
 		}
 	} else {

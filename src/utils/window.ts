@@ -130,8 +130,8 @@ export function createWindowsManager({
 		 * The top-left window is the window with the lowest y-coordinate and the lowest x-coordinate.
 		 */
 		getTopLeftWindow() {
-			const leftWindows = this.windowsData.filter(
-				(window) => window.frame.x === 0
+			const leftWindows = this.windowsData.filter((window) =>
+				this.isStackWindow(window)
 			);
 			let topLeftWindow = leftWindows[0];
 			for (const window of leftWindows) {
@@ -324,8 +324,11 @@ export function createWindowsManager({
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			return window.frame.x >= dividingLineXCoordinate;
 		},
+		/**
+		 * If the window's frame has an x equal to the x of the display, it is a stack window
+		 */
 		isStackWindow(window: Window) {
-			return window.frame.x === 0;
+			return window.frame.x === display.frame.x;
 		},
 		isMiddleWindow(window: Window) {
 			return !this.isStackWindow(window) && !this.isMasterWindow(window);
@@ -339,9 +342,6 @@ export function createWindowsManager({
 				(window) => window.frame.x >= dividingLineXCoordinate
 			);
 		},
-		/**
-		 * If the window's frame has an x of 0, it is a stack window
-		 */
 		getStackWindows() {
 			return this.windowsData.filter((window) => this.isStackWindow(window));
 		},
@@ -475,6 +475,9 @@ export function createWindowsManager({
 			this.expectedCurrentNumMasterWindows = targetNumMasterWindows;
 		},
 		getTopWindow(windows: Window[]) {
+			if (windows.length === 0) {
+				throw new Error('List of windows provided was empty.');
+			}
 			let topWindow = windows[0];
 			for (const w of windows) {
 				if (w.frame.y < topWindow.frame.y) {
@@ -487,6 +490,10 @@ export function createWindowsManager({
 			return this.getTopWindow(windows).id === window.id;
 		},
 		getBottomWindow(windows: Window[]) {
+			if (windows.length === 0) {
+				throw new Error('List of windows provided was empty.');
+			}
+
 			let bottomWindow = windows[0];
 			for (const w of windows) {
 				if (w.frame.y > bottomWindow.frame.y) {
