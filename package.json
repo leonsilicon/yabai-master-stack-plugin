@@ -6,7 +6,8 @@
   "scripts": {
     "build": "rimraf dist && tsc --outDir dist",
     "lint": "eslint --fix src",
-    "prettier": "prettier --write src"
+    "prettier": "prettier --write src",
+    "tc": "tsc --noEmit"
   },
   "dependencies": {
     "execa": "^5.1.1",
