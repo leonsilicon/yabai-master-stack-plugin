@@ -57,8 +57,8 @@ export function createWindowsManager({
 		getUpdatedWindowData(window: Window) {
 			return this.windowsData.find((win) => window.id === win.id)!;
 		},
-		executeYabaiCommand(command: string) {
-			const result = execa.commandSync(command);
+		async executeYabaiCommand(command: string) {
+			const result = await execa.command(`${yabaiPath} ${command}`);
 			this.refreshWindowsData();
 			return result;
 		},
@@ -213,15 +213,15 @@ export function createWindowsManager({
 		},
 		// In the event that the windows get badly rearranged and all the windows span the entire width of
 		// the screen, split the top-right window vertically and then move the windows into the split
-		createStack() {
+		async createStack() {
 			console.log('Creating stack...');
 			let topRightWindow = this.getTopRightWindow();
 			if (topRightWindow === undefined) return;
 			console.log(`Top-right window: ${topRightWindow.app}`);
 
 			if (topRightWindow.split === 'horizontal') {
-				this.executeYabaiCommand(
-					`${yabaiPath} -m window ${topRightWindow.id} --toggle split`
+				await this.executeYabaiCommand(
+					`-m window ${topRightWindow.id} --toggle split`
 				);
 				topRightWindow = this.getTopRightWindow();
 			}
@@ -236,13 +236,13 @@ export function createWindowsManager({
 
 			for (const window of this.windowsData) {
 				if (window === topRightWindow || window === topLeftWindow) continue;
-				this.executeYabaiCommand(
-					`${yabaiPath} -m window ${window.id} --warp ${topLeftWindow.id}`
+				await this.executeYabaiCommand(
+					`-m window ${window.id} --warp ${topLeftWindow.id}`
 				);
 			}
 
 			this.expectedCurrentNumMasterWindows = 1;
-			this.columnizeStackWindows();
+			await this.columnizeStackWindows();
 		},
 		/**
 		 * If the top-right window has a x-coordinate of 0, or if the stack dividing
@@ -257,43 +257,68 @@ export function createWindowsManager({
 		 * Turns the stack into a column by making sure the split direction of all the stack windows
 		 * is horizontal
 		 */
-		columnizeStackWindows() {
+		async columnizeStackWindows() {
+			// In this case, we want to columnize all the windows to the left of the dividing line
+			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
+
 			const stackWindows = this.windowsData.filter(
-				(window) => !this.isMasterWindow(window)
+				(window) => window.frame.x < dividingLineXCoordinate
 			);
 			for (const stackWindow of stackWindows) {
 				const window = this.getUpdatedWindowData(stackWindow);
 				if (window.split === 'vertical') {
-					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${window.id} --toggle split`
+					await this.executeYabaiCommand(
+						`-m window ${window.id} --toggle split`
 					);
 				}
 			}
 		},
-		moveWindowToStack(window: Window) {
+		/**
+		 * Turns the master section into a column by making sure the split direction of all the master windows
+		 * is horizontal
+		 */
+		async columnizeMasterWindows() {
+			// In this case, we want to columnize all the windows to the right of the dividing line
+			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
+
+			const masterWindows = this.windowsData.filter(
+				(window) => window.frame.x > dividingLineXCoordinate
+			);
+			for (const masterWindow of masterWindows) {
+				const window = this.getUpdatedWindowData(masterWindow);
+				if (window.split === 'vertical') {
+					await this.executeYabaiCommand(
+						`-m window ${window.id} --toggle split`
+					);
+				}
+			}
+		},
+		async moveWindowToStack(window: Window) {
 			console.log(`Moving window ${window.app} to stack.`);
-			/*
+
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
-				this.executeYabaiCommand(
-					`${yabaiPath} -m window ${window.id} warp west`
-				);
+				await this.executeYabaiCommand(`-m window ${window.id} warp west`);
 			} catch {
 				// empty
 			}
-			*/
+
+			await this.columnizeStackWindows();
 
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
 				if (window.split === 'horizontal') {
-					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${window.id} --toggle split`
+					await this.executeYabaiCommand(
+						`-m window ${window.id} --toggle split`
 					);
 				}
 				return;
 			}
 
-			this.columnizeStackWindows();
+			// Don't do anything if the window is already a stack window
+			if (this.isStackWindow(window)) {
+				return;
+			}
 
 			// Find a window that's touching the left side of the screen
 			const stackWindow = this.getWidestStackWindow();
@@ -302,51 +327,50 @@ export function createWindowsManager({
 				return;
 			}
 
-			this.executeYabaiCommand(
-				`${yabaiPath} -m window ${window.id} --warp ${stackWindow.id}`
+			await this.executeYabaiCommand(
+				`-m window ${window.id} --warp ${stackWindow.id}`
 			);
 			window = this.getUpdatedWindowData(window);
 
 			if (this.windowsData.length === 2) {
 				if (window.split === 'horizontal') {
-					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${window.id} --toggle split`
+					await this.executeYabaiCommand(
+						`-m window ${window.id} --toggle split`
 					);
 				}
 			} else {
 				if (window.split === 'vertical') {
-					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${window.id} --toggle split`
+					await this.executeYabaiCommand(
+						`-m window ${window.id} --toggle split`
 					);
 				}
 			}
 		},
-		moveWindowToMaster(window: Window) {
+		async moveWindowToMaster(window: Window) {
 			console.log(`Moving window ${window.app} to master.`);
-			/*
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
-				this.executeYabaiCommand(
-					`${yabaiPath} -m window ${window.id} warp east`
-				);
+				await this.executeYabaiCommand(`-m window ${window.id} warp east`);
 			} catch {
 				// empty
 			}
-			*/
+
+			await this.columnizeMasterWindows();
+
+			// If the window is already a master window, then don't do anything
+			if (this.isMasterWindow(window)) return;
 
 			// Find a window that's touching the right side of the screen
 			const masterWindow = this.getWidestMasterWindow();
 
 			if (masterWindow === undefined || masterWindow.id === window.id) return;
-			this.executeYabaiCommand(
-				`${yabaiPath} -m window ${window.id} --warp ${masterWindow.id}`
+			await this.executeYabaiCommand(
+				`-m window ${window.id} --warp ${masterWindow.id}`
 			);
 			window = this.getUpdatedWindowData(window);
 
 			if (window.split === 'vertical') {
-				this.executeYabaiCommand(
-					`${yabaiPath} -m window ${window.id} --toggle split`
-				);
+				await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
 			}
 		},
 		/**
@@ -453,7 +477,7 @@ export function createWindowsManager({
 			// If the stack is supposed to exist but doesn't exist
 			if (targetNumMasterWindows !== numWindows && !this.doesStackExist()) {
 				console.log('Stack does not exist, creating it...');
-				this.createStack();
+				await this.createStack();
 			}
 
 			if (numWindows > 2) {
@@ -480,7 +504,7 @@ export function createWindowsManager({
 						const masterWindow = masterWindows.pop()!;
 
 						console.log(`Moving master window ${masterWindow.app} to stack.`);
-						this.moveWindowToStack(masterWindow);
+						await this.moveWindowToStack(masterWindow);
 						curNumMasterWindows -= 1;
 					}
 				}
@@ -493,11 +517,11 @@ export function createWindowsManager({
 					console.log(`Middle window ${middleWindow.app} detected.`);
 					if (curNumMasterWindows < targetNumMasterWindows) {
 						console.log(`Moving middle window ${middleWindow.app} to master.`);
-						this.moveWindowToMaster(middleWindow);
+						await this.moveWindowToMaster(middleWindow);
 						curNumMasterWindows += 1;
 					} else {
 						console.log(`Moving middle window ${middleWindow.app} to stack.`);
-						this.moveWindowToStack(middleWindow);
+						await this.moveWindowToStack(middleWindow);
 					}
 				}
 
@@ -517,10 +541,7 @@ export function createWindowsManager({
 					);
 					const stackWindow = stackWindows.pop()!;
 					console.log(`Moving stack window ${stackWindow.app} to master.`);
-					await new Promise((r) => setTimeout(r, 2000));
-					this.moveWindowToMaster(stackWindow);
-					console.log('moved');
-					await new Promise((r) => setTimeout(r, 2000));
+					await this.moveWindowToMaster(stackWindow);
 					curNumMasterWindows += 1;
 				}
 			}

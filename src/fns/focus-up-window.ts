@@ -1,4 +1,3 @@
-import { yabaiPath } from '../config';
 import { createInitializedWindowsManager } from '../utils';
 import { releaseHandlerLock } from '../utils/handler';
 import { handleMasterError } from '../utils/main';
@@ -17,9 +16,7 @@ async function main() {
 				wm.getBottomStackWindow() ?? wm.getBottomMasterWindow();
 			console.log(`Focusing on the window ${windowToFocus.app}`);
 			if (windowToFocus !== undefined) {
-				wm.executeYabaiCommand(
-					`${yabaiPath} -m window --focus ${windowToFocus.id}`
-				);
+				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
 		} else if (
 			wm.isStackWindow(focusedWindow) &&
@@ -29,13 +26,11 @@ async function main() {
 			const windowToFocus = wm.getBottomMasterWindow();
 			console.log(`Focusing on the window ${windowToFocus.app}`);
 			if (windowToFocus !== undefined) {
-				wm.executeYabaiCommand(
-					`${yabaiPath} -m window --focus ${windowToFocus.id}`
-				);
+				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
 		} else {
 			// Otherwise, just focus north
-			wm.executeYabaiCommand(`${yabaiPath} -m window --focus north`);
+			await wm.executeYabaiCommand(`-m window --focus north`);
 		}
 	}
 }
