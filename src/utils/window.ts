@@ -1,3 +1,4 @@
+import delay from 'delay';
 import execa from 'execa';
 
 import { yabaiPath } from '../config';
@@ -226,22 +227,6 @@ export function createWindowsManager({
 				topRightWindow = this.getTopRightWindow();
 			}
 
-			// Get the top-left window
-			const topLeftWindow = this.getTopLeftWindow();
-			console.log(`Top-left window: ${topLeftWindow.app}`);
-
-			if (topRightWindow === topLeftWindow) {
-				throw new Error('Top-right window should never equal top-left window.');
-			}
-
-			for (const window of this.windowsData) {
-				if (window === topRightWindow || window === topLeftWindow) continue;
-				await this.executeYabaiCommand(
-					`-m window ${window.id} --warp ${topLeftWindow.id}`
-				);
-			}
-
-			this.expectedCurrentNumMasterWindows = 1;
 			await this.columnizeStackWindows();
 		},
 		/**
