@@ -1,14 +1,17 @@
 import path from 'path';
 import pkgDir from 'pkg-dir';
+import onExit from 'signal-exit';
 
 import { acquireLock, releaseLock } from './lock';
 
 const handlerLockPath = path.join(pkgDir.sync(__dirname)!, 'handler.lock');
 
-export async function acquireHandlerLock() {
-	await acquireLock(handlerLockPath);
+export function acquireHandlerLock() {
+	acquireLock(handlerLockPath);
 }
 
-export async function releaseHandlerLock() {
-	await releaseLock(handlerLockPath);
+export function releaseHandlerLock() {
+	releaseLock(handlerLockPath);
 }
+
+onExit(releaseHandlerLock);

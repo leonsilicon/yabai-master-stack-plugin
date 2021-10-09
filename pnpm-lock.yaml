@@ -3,6 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@types/lockfile': ^1.0.2
   '@types/node': ^16.9.3
+  '@types/signal-exit': ^3.0.1
   '@typescript-eslint/eslint-plugin': ^4.31.2
   '@typescript-eslint/parser': ^4.31.1
   delay: ^5.0.0
@@ -16,6 +17,7 @@ specifiers:
   pkg-dir: ^5.0.0
   prettier: ^2.4.1
   rimraf: ^3.0.2
+  signal-exit: ^3.0.5
   ts-node: ^10.2.1
   typescript: ^4.4.3
 
@@ -23,10 +25,12 @@ dependencies:
   delay: 5.0.0
   execa: 5.1.1
   pkg-dir: 5.0.0
+  signal-exit: 3.0.5
 
 devDependencies:
   '@types/lockfile': 1.0.2
   '@types/node': 16.10.1
+  '@types/signal-exit': 3.0.1
   '@typescript-eslint/eslint-plugin': 4.31.2_3815fab247b4312be6d1f55eb1f81298
   '@typescript-eslint/parser': 4.31.2_eslint@7.32.0+typescript@4.4.3
   eslint: 7.32.0
@@ -374,6 +378,10 @@ packages:
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
+    dev: true
+
+  /@types/signal-exit/3.0.1:
+    resolution: {integrity: sha512-OSitN9PP9E/c4tlt1Qdj3CAz5uHD9Da5rhUqlaKyQRCX1T7Zdpbk6YdeZbR2eiE2ce+NMBgVnMxGqpaPSNQDUQ==}
     dev: true
 
   /@typescript-eslint/eslint-plugin/4.31.2_3815fab247b4312be6d1f55eb1f81298:
@@ -2019,6 +2027,10 @@ packages:
 
   /signal-exit/3.0.4:
     resolution: {integrity: sha512-rqYhcAnZ6d/vTPGghdrw7iumdcbXpsk1b8IG/rz+VWV51DM0p7XCtMoJ3qhPLIbp3tvyt3pKRbaaEMZYpHto8Q==}
+    dev: false
+
+  /signal-exit/3.0.5:
+    resolution: {integrity: sha512-KWcOiKeQj6ZyXx7zq4YxSMgHRlod4czeBQZrPb8OKcohcqAXShm7E20kEMle9WBt26hFcAf0qLOcp5zmY7kOqQ==}
     dev: false
 
   /slash/3.0.0:

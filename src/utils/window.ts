@@ -4,7 +4,7 @@ import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
 import type { Display, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
-import { acquireHandlerLock } from './handler';
+import { acquireHandlerLock, releaseHandlerLock } from './handler';
 
 type CreateWindowsManagerProps = {
 	display: Display;
@@ -605,12 +605,17 @@ export function createWindowsManager({
 
 export async function createInitializedWindowsManager() {
 	await acquireHandlerLock();
-	const state = await readState();
-	const display = getFocusedDisplay();
-	const wm = createWindowsManager({
-		display,
-		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
-	});
-	await wm.validateState(state);
-	return { wm, state, display };
+	try {
+		const state = await readState();
+		const display = getFocusedDisplay();
+		const wm = createWindowsManager({
+			display,
+			expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
+		});
+		await wm.validateState(state);
+		return { wm, state, display };
+	} catch {
+		await releaseHandlerLock();
+		throw new Error('Failed to create windows manager.');
+	}
 }

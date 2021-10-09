@@ -3,9 +3,7 @@ import { releaseHandlerLock } from '../utils/handler';
 import { handleMasterError } from '../utils/main';
 
 async function main() {
-	console.log('here')
 	const { wm } = await createInitializedWindowsManager();
-	console.log('here2')
 	try {
 		const focusedWindow = wm.getFocusedWindow();
 		if (focusedWindow !== undefined) {
