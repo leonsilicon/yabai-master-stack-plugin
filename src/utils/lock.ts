@@ -14,7 +14,8 @@ export async function acquireLock(lockPath: string) {
 	try {
 		await fs.promises.mkdir(lockPath);
 	} catch (error: any) {
-		if (error.code === 'EEXISTS') {
+		console.log(error);
+		if (error.code === 'EEXIST') {
 			throw new Error('Could not acquire lock.');
 		}
 	}

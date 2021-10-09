@@ -448,10 +448,6 @@ export function createWindowsManager({
 				// Verify that there is no middle window
 				for (const window of this.windowsData) {
 					if (this.isMiddleWindow(window)) {
-						console.log(
-							this.isStackWindow(window),
-							this.isMasterWindow(window)
-						);
 						return {
 							status: false,
 							reason: `A middle window (${window.app}) was detected.`,
