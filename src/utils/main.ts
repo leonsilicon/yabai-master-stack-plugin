@@ -1,3 +1,5 @@
+import onExit from 'signal-exit';
+
 import { acquireHandlerLock, releaseHandlerLock } from './handler';
 
 export function handleMasterError(error: Error & { code?: string }) {
@@ -10,6 +12,9 @@ export function handleMasterError(error: Error & { code?: string }) {
 
 export function main(cb: () => Promise<void>) {
 	acquireHandlerLock();
+	onExit(() => {
+		releaseHandlerLock();
+	});
 	try {
 		cb().catch(handleMasterError);
 	} finally {
