@@ -1,11 +1,16 @@
 import fs from 'fs';
 
+const locks: Record<string, true> = {};
+
 export function releaseLock(lockPath: string) {
-	try {
-		fs.rmdirSync(lockPath);
-	} catch (error: any) {
-		if (error.code !== 'ENOENT') {
-			throw error;
+	if (locks[lockPath]) {
+		try {
+			fs.rmdirSync(lockPath);
+			console.log('\n\n\nLock released\n\n\n');
+		} catch (error: any) {
+			if (error.code !== 'ENOENT') {
+				throw error;
+			}
 		}
 	}
 }
@@ -13,6 +18,7 @@ export function releaseLock(lockPath: string) {
 export function acquireLock(lockPath: string) {
 	try {
 		fs.mkdirSync(lockPath);
+		locks[lockPath] = true;
 	} catch (error: any) {
 		if (error.code === 'EEXIST') {
 			throw new Error('Could not acquire lock.');
