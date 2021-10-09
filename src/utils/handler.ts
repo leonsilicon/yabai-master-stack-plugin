@@ -1,6 +1,9 @@
-import { acquireLock, releaseLock } from "./lock";
+import path from 'path';
+import pkgDir from 'pkg-dir';
 
-const handlerLockPath = 'handler.lock';
+import { acquireLock, releaseLock } from './lock';
+
+const handlerLockPath = path.join(pkgDir.sync(__dirname)!, 'handler.lock');
 
 export async function acquireHandlerLock() {
 	await acquireLock(handlerLockPath);
