@@ -258,26 +258,6 @@ export function createWindowsManager({
 				}
 			}
 		},
-		/**
-		 * Turns the master section into a column by making sure the split direction of all the master windows
-		 * is horizontal
-		 */
-		async columnizeMasterWindows() {
-			// In this case, we want to columnize all the windows to the right of the dividing line
-			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
-
-			const masterWindows = this.windowsData.filter(
-				(window) => window.frame.x >= dividingLineXCoordinate
-			);
-			for (const masterWindow of masterWindows) {
-				const window = this.getUpdatedWindowData(masterWindow);
-				if (window.split === 'vertical') {
-					await this.executeYabaiCommand(
-						`-m window ${window.id} --toggle split`
-					);
-				}
-			}
-		},
 		async moveWindowToStack(window: Window) {
 			console.log(`Moving window ${window.app} to stack.`);
 
@@ -339,8 +319,6 @@ export function createWindowsManager({
 			} catch {
 				// empty
 			}
-
-			await this.columnizeMasterWindows();
 
 			// If the window is already a master window, then don't do anything
 			if (this.isMasterWindow(window)) return;
