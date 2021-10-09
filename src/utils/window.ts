@@ -1,4 +1,3 @@
-import delay from 'delay';
 import execa from 'execa';
 
 import { yabaiPath } from '../config';

@@ -1,6 +1,5 @@
 import path from 'path';
 import pkgDir from 'pkg-dir';
-import onExit from 'signal-exit';
 
 import { acquireLock, releaseLock } from './lock';
 
@@ -13,5 +12,3 @@ export function acquireHandlerLock() {
 export function releaseHandlerLock() {
 	releaseLock(handlerLockPath);
 }
-
-onExit(releaseHandlerLock);

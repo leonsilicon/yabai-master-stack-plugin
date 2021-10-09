@@ -1,4 +1,5 @@
 import fs from 'fs';
+import onExit from 'signal-exit';
 
 const locks: Record<string, true> = {};
 
@@ -26,3 +27,9 @@ export function acquireLock(lockPath: string) {
 		}
 	}
 }
+
+onExit(() => {
+	for (const lock of Object.keys(locks)) {
+		releaseLock(lock);
+	}
+});
