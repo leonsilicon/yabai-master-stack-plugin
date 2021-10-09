@@ -21,8 +21,8 @@ function acquireStateLock() {
 	acquireLock(stateLockPath);
 }
 
-function releaseStateLock() {
-	releaseLock(stateLockPath);
+export function releaseStateLock(options?: { force: boolean }) {
+	releaseLock(stateLockPath, options);
 }
 
 export function resetState() {

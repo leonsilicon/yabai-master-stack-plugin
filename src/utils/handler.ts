@@ -9,6 +9,6 @@ export function acquireHandlerLock() {
 	acquireLock(handlerLockPath);
 }
 
-export function releaseHandlerLock() {
-	releaseLock(handlerLockPath);
+export function releaseHandlerLock(options?: { force?: boolean }) {
+	releaseLock(handlerLockPath, options);
 }

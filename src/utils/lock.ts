@@ -3,8 +3,8 @@ import onExit from 'signal-exit';
 
 const locks: Record<string, true> = {};
 
-export function releaseLock(lockPath: string) {
-	if (locks[lockPath]) {
+export function releaseLock(lockPath: string, options?: { force?: boolean }) {
+	if (options?.force || locks[lockPath]) {
 		try {
 			fs.rmdirSync(lockPath);
 		} catch (error: any) {
