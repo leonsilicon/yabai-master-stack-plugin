@@ -7,24 +7,24 @@ import { getDisplays } from './utils/display';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
 
-const displays = getDisplays();
-const defaultState: State = {};
-for (const display of displays) {
-	defaultState[display.id] = { numMasterWindows: 1 };
-}
-
-const defaultStateJson = JSON.stringify(defaultState);
-
-export function resetState() {
-	fs.writeFileSync(stateFilePath, defaultStateJson);
-}
-
 export function writeState(state: State) {
 	fs.writeFileSync(stateFilePath, JSON.stringify(state));
 }
 
-export function readState(): State {
-	const data = fs.readFileSync(stateFilePath).toString();
+export async function readState(): Promise<State> {
+	if (fs.existsSync(stateFilePath)) {
+		const data = fs.readFileSync(stateFilePath).toString();
+		return JSON.parse(data);
+	} else {
+		const defaultState: State = {};
+		const displays = await getDisplays();
 
-	return JSON.parse(data);
+		for (const display of displays) {
+			defaultState[display.id] = { numMasterWindows: 1 };
+		}
+
+		const defaultStateJson = JSON.stringify(defaultState);
+		fs.writeFileSync(stateFilePath, defaultStateJson);
+		return defaultState;
+	}
 }

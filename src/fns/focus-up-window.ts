@@ -2,7 +2,8 @@ import { createInitializedWindowsManager } from '../utils';
 import { main } from '../utils/main';
 
 main(async () => {
-	const { wm } = createInitializedWindowsManager();
+	console.log(`${process.pid} start up`);
+	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
 		// If the focused window is the highest window
@@ -32,4 +33,5 @@ main(async () => {
 			await wm.executeYabaiCommand(`-m window --focus north`);
 		}
 	}
+	console.log(`${process.pid} end up`);
 });

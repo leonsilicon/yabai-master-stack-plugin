@@ -2,7 +2,7 @@ import { createInitializedWindowsManager } from '../utils';
 import { main } from '../utils/main';
 
 main(async () => {
-	const { wm, state, display } = createInitializedWindowsManager();
+	const { wm, state, display } = await createInitializedWindowsManager();
 	console.log('Starting to handle window_created.');
 
 	if ((await wm.isValidLayout()).status === true) {

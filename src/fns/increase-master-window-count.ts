@@ -3,7 +3,7 @@ import { createInitializedWindowsManager } from '../utils';
 import { main } from '../utils/main';
 
 main(async () => {
-	const { wm, display, state } = createInitializedWindowsManager();
+	const { wm, display, state } = await createInitializedWindowsManager();
 	if (state[display.id].numMasterWindows < wm.windowsData.length) {
 		state[display.id].numMasterWindows += 1;
 		writeState(state);

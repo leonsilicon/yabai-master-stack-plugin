@@ -1,4 +1,6 @@
 import execa from 'execa';
+import getStream from 'get-stream';
+import { parse } from 'shell-quote';
 
 import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
@@ -23,14 +25,16 @@ export function createWindowsManager({
 }: CreateWindowsManagerProps) {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
-	function getWindowsData() {
-		const windowsData = (
-			JSON.parse(
-				execa.commandSync(`${yabaiPath} -m query --windows`).stdout
-			) as Window[]
-		).filter(
+	async function getWindowsData() {
+		console.log(`${process.pid} window 1`);
+		const yabaiStdout = execa(yabaiPath, ['-m', 'query', '--windows']).stdout!;
+		const yabaiOutput = await getStream(yabaiStdout);
+
+		console.log(`${process.pid} window 2`);
+		const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
 			(window) => window.split !== 'none' && window.display === display.index
 		);
+		console.log(`${process.pid} window 3`);
 		return windowsData;
 	}
 
@@ -48,18 +52,28 @@ export function createWindowsManager({
 			writeState(state);
 		},
 		expectedCurrentNumMasterWindows,
-		windowsData: getWindowsData(),
-		refreshWindowsData() {
-			const newWindowsData = getWindowsData();
+		windowsData: [] as Window[],
+		async initialize() {
+			this.windowsData = await getWindowsData();
+		},
+		async refreshWindowsData() {
+			console.log(`${process.pid} refresh 1`);
+			const newWindowsData = await getWindowsData();
+			console.log(`${process.pid} refresh 2`);
 			this.windowsData = newWindowsData;
+			console.log(`${process.pid} refresh 3`);
 		},
 		getUpdatedWindowData(window: Window) {
 			return this.windowsData.find((win) => window.id === win.id)!;
 		},
 		async executeYabaiCommand(command: string) {
-			const result = await execa.command(`${yabaiPath} ${command}`);
-			this.refreshWindowsData();
-			return result;
+			console.log(`${process.pid} yabai 1`);
+			const yabaiStdout = execa(yabaiPath, parse(command) as string[]).stdout!;
+			const yabaiOutput = await getStream(yabaiStdout);
+			console.log(`${process.pid} yabai 2`);
+			await this.refreshWindowsData();
+			console.log(`${process.pid} yabai 3`);
+			return yabaiOutput;
 		},
 		getWindowData({ processId, windowId }: GetWindowDataProps): Window {
 			if (processId === undefined && windowId === undefined) {
@@ -566,13 +580,14 @@ export function createWindowsManager({
 	return windowsManager;
 }
 
-export function createInitializedWindowsManager() {
-	const state = readState();
-	const display = getFocusedDisplay();
+export async function createInitializedWindowsManager() {
+	const state = await readState();
+	const display = await getFocusedDisplay();
 	const wm = createWindowsManager({
 		display,
 		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
 	});
+	await wm.initialize();
 	wm.validateState(state);
 	return { wm, state, display };
 }

@@ -10,14 +10,18 @@ export function handleMasterError(error: Error & { code?: string }) {
 	}
 }
 
+onExit(() => {
+	console.log(`${process.pid} exiting...`);
+	releaseHandlerLock();
+});
+
 export function main(cb: () => Promise<void>) {
 	acquireHandlerLock();
-	onExit(() => {
-		releaseHandlerLock();
-	});
-	try {
-		cb().catch(handleMasterError);
-	} finally {
-		releaseHandlerLock();
-	}
+	console.log(`${process.pid} running...`);
+	cb()
+		.catch(handleMasterError)
+		.finally(() => {
+			console.log(`${process.pid} ran.`);
+			releaseHandlerLock();
+		});
 }
