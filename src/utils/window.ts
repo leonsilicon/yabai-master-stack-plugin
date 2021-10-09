@@ -267,7 +267,7 @@ export function createWindowsManager({
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 
 			const masterWindows = this.windowsData.filter(
-				(window) => window.frame.x > dividingLineXCoordinate
+				(window) => window.frame.x >= dividingLineXCoordinate
 			);
 			for (const masterWindow of masterWindows) {
 				const window = this.getUpdatedWindowData(masterWindow);
