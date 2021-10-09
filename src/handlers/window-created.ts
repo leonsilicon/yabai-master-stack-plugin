@@ -1,7 +1,7 @@
 import { createInitializedWindowsManager } from '../utils';
-import { handleMasterError } from '../utils/main';
+import { main } from '../utils/main';
 
-async function main() {
+main(async () => {
 	const { wm, state, display } = createInitializedWindowsManager();
 	console.log('Starting to handle window_created.');
 
@@ -34,6 +34,4 @@ async function main() {
 		targetNumMasterWindows: state[display.id].numMasterWindows,
 	});
 	console.log('Finished handling window_created.');
-}
-
-main().catch(handleMasterError);
+});

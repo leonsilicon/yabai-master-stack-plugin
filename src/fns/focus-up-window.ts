@@ -1,7 +1,7 @@
 import { createInitializedWindowsManager } from '../utils';
-import { handleMasterError } from '../utils/main';
+import { main } from '../utils/main';
 
-async function main() {
+main(async () => {
 	const { wm } = createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
@@ -32,6 +32,4 @@ async function main() {
 			await wm.executeYabaiCommand(`-m window --focus north`);
 		}
 	}
-}
-
-main().catch(handleMasterError);
+});

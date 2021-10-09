@@ -1,8 +1,8 @@
 import { writeState } from '../state';
 import { createInitializedWindowsManager } from '../utils';
-import { handleMasterError } from '../utils/main';
+import { main } from '../utils/main';
 
-async function main() {
+main(async () => {
 	const { wm, state, display } = createInitializedWindowsManager();
 	// Update the state
 	state[display.id].numMasterWindows -= 1;
@@ -11,6 +11,4 @@ async function main() {
 	await wm.updateWindows({
 		targetNumMasterWindows: state[display.id].numMasterWindows,
 	});
-}
-
-main().catch(handleMasterError);
+});
