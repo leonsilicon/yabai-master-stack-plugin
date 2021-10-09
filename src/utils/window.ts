@@ -40,8 +40,13 @@ export function createWindowsManager({
 			if (this.windowsData.length < this.expectedCurrentNumMasterWindows) {
 				this.expectedCurrentNumMasterWindows = this.windowsData.length;
 				state[display.id].numMasterWindows = this.windowsData.length;
-				await writeState(state);
 			}
+
+			if (state[display.id].numMasterWindows <= 0) {
+				state[display.id].numMasterWindows = 1;
+			}
+
+			await writeState(state);
 		},
 		expectedCurrentNumMasterWindows,
 		windowsData: getWindowsData(),
@@ -296,13 +301,13 @@ export function createWindowsManager({
 			if (this.windowsData.length === 2) {
 				if (window.split === 'horizontal') {
 					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${stackWindow.id} --toggle split`
+						`${yabaiPath} -m window ${window.id} --toggle split`
 					);
 				}
 			} else {
 				if (window.split === 'vertical') {
 					this.executeYabaiCommand(
-						`${yabaiPath} -m window ${stackWindow.id} --toggle split`
+						`${yabaiPath} -m window ${window.id} --toggle split`
 					);
 				}
 			}
