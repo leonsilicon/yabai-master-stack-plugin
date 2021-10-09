@@ -3,7 +3,7 @@ import { releaseHandlerLock } from '../utils/handler';
 import { handleMasterError } from '../utils/main';
 
 async function main() {
-	const { wm } = await createInitializedWindowsManager();
+	const { wm } = createInitializedWindowsManager();
 	try {
 		const focusedWindow = wm.getFocusedWindow();
 		if (focusedWindow !== undefined) {
@@ -37,7 +37,7 @@ async function main() {
 			await wm.executeYabaiCommand(`-m window --focus first`);
 		}
 	} finally {
-		await releaseHandlerLock();
+		releaseHandlerLock();
 	}
 }
 

@@ -3,7 +3,7 @@ import { releaseHandlerLock } from '../utils/handler';
 import { handleMasterError } from '../utils/main';
 
 async function main() {
-	const { wm, state, display } = await createInitializedWindowsManager();
+	const { wm, state, display } = createInitializedWindowsManager();
 	try {
 		console.log('Starting to handle window_created.');
 
@@ -37,7 +37,7 @@ async function main() {
 		});
 		console.log('Finished handling window_created.');
 	} finally {
-		await releaseHandlerLock();
+		releaseHandlerLock();
 	}
 }
 

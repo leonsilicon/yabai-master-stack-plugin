@@ -36,7 +36,7 @@ export function createWindowsManager({
 	}
 
 	const windowsManager = {
-		async validateState(state: State) {
+		validateState(state: State) {
 			if (this.windowsData.length < this.expectedCurrentNumMasterWindows) {
 				this.expectedCurrentNumMasterWindows = this.windowsData.length;
 				state[display.id].numMasterWindows = this.windowsData.length;
@@ -46,7 +46,7 @@ export function createWindowsManager({
 				state[display.id].numMasterWindows = 1;
 			}
 
-			await writeState(state);
+			writeState(state);
 		},
 		expectedCurrentNumMasterWindows,
 		windowsData: getWindowsData(),
@@ -603,19 +603,19 @@ export function createWindowsManager({
 	return windowsManager;
 }
 
-export async function createInitializedWindowsManager() {
-	await acquireHandlerLock();
+export function createInitializedWindowsManager() {
+	acquireHandlerLock();
 	try {
-		const state = await readState();
+		const state = readState();
 		const display = getFocusedDisplay();
 		const wm = createWindowsManager({
 			display,
 			expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
 		});
-		await wm.validateState(state);
+		wm.validateState(state);
 		return { wm, state, display };
 	} catch {
-		await releaseHandlerLock();
+		releaseHandlerLock();
 		throw new Error('Failed to create windows manager.');
 	}
 }

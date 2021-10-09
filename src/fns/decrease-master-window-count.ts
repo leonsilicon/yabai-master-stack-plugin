@@ -4,17 +4,17 @@ import { releaseHandlerLock } from '../utils/handler';
 import { handleMasterError } from '../utils/main';
 
 async function main() {
-	const { wm, state, display } = await createInitializedWindowsManager();
+	const { wm, state, display } = createInitializedWindowsManager();
 	try {
 		// Update the state
 		state[display.id].numMasterWindows -= 1;
-		await writeState(state);
+		writeState(state);
 		console.log('Decreasing master window count.');
 		await wm.updateWindows({
 			targetNumMasterWindows: state[display.id].numMasterWindows,
 		});
 	} finally {
-		await releaseHandlerLock();
+		releaseHandlerLock();
 	}
 }
 

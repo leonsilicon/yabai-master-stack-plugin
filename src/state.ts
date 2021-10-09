@@ -17,30 +17,30 @@ for (const display of displays) {
 
 const defaultStateJson = JSON.stringify(defaultState);
 
-async function acquireStateLock() {
-	await acquireLock(stateLockPath);
+function acquireStateLock() {
+	acquireLock(stateLockPath);
 }
 
-async function releaseStateLock() {
-	await releaseLock(stateLockPath);
+function releaseStateLock() {
+	releaseLock(stateLockPath);
 }
 
-export async function resetState() {
-	await acquireStateLock();
-	await fs.promises.writeFile(stateFilePath, defaultStateJson);
-	await releaseStateLock();
+export function resetState() {
+	acquireStateLock();
+	fs.writeFileSync(stateFilePath, defaultStateJson);
+	releaseStateLock();
 }
 
-export async function writeState(state: State) {
-	await acquireStateLock();
-	await fs.promises.writeFile(stateFilePath, JSON.stringify(state));
-	await releaseStateLock();
+export function writeState(state: State) {
+	acquireStateLock();
+	fs.writeFileSync(stateFilePath, JSON.stringify(state));
+	releaseStateLock();
 }
 
-export async function readState(): Promise<State> {
-	await acquireStateLock();
-	const data = (await fs.promises.readFile(stateFilePath)).toString();
-	await releaseStateLock();
+export function readState(): State {
+	acquireStateLock();
+	const data = fs.readFileSync(stateFilePath).toString();
+	releaseStateLock();
 
 	return JSON.parse(data);
 }
