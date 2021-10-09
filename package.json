@@ -11,13 +11,11 @@
   },
   "dependencies": {
     "execa": "^5.1.1",
-    "pkg-dir": "^5.0.0",
-    "proper-lockfile": "^4.1.2"
+    "pkg-dir": "^5.0.0"
   },
   "devDependencies": {
     "@types/lockfile": "^1.0.2",
     "@types/node": "^16.9.3",
-    "@types/proper-lockfile": "^4.1.2",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.1",
     "eslint": "^7.32.0",

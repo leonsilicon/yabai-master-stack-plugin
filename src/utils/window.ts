@@ -4,7 +4,7 @@ import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
 import type { Display, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
-import { acquireHandlerLock } from './lock';
+import { acquireHandlerLock } from './handler';
 
 type CreateWindowsManagerProps = {
 	display: Display;
@@ -492,10 +492,10 @@ export function createWindowsManager({
 					);
 					const stackWindow = stackWindows.pop()!;
 					console.log(`Moving stack window ${stackWindow.app} to master.`);
-					await new Promise(r=>setTimeout(r, 2000))
+					await new Promise((r) => setTimeout(r, 2000));
 					this.moveWindowToMaster(stackWindow);
-					console.log('moved')
-					await new Promise(r=>setTimeout(r, 2000))
+					console.log('moved');
+					await new Promise((r) => setTimeout(r, 2000));
 					curNumMasterWindows += 1;
 				}
 			}

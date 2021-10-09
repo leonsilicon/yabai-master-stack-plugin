@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import pkgDir from 'pkg-dir';
-import lockfile from 'proper-lockfile';
 
 import type { State } from './types';
 import { getDisplays } from './utils/display';
+import { acquireLock, releaseLock } from './utils/lock';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
+const stateLockPath = path.join(pkgDir.sync(__dirname)!, 'state.json.lock');
 
 const displays = getDisplays();
 const defaultState: State = {};
@@ -16,16 +17,12 @@ for (const display of displays) {
 
 const defaultStateJson = JSON.stringify(defaultState);
 
-let release: () => Promise<void> | undefined;
 async function acquireStateLock() {
-	if (!fs.existsSync(stateFilePath)) {
-		await fs.promises.writeFile(stateFilePath, defaultStateJson);
-	}
-	release = await lockfile.lock(stateFilePath);
+	await acquireLock(stateLockPath);
 }
 
 async function releaseStateLock() {
-	await release?.();
+	await releaseLock(stateLockPath);
 }
 
 export async function resetState() {
