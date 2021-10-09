@@ -101,6 +101,11 @@ export function createWindowsManager({
 		 */
 		getDividingLineXCoordinate() {
 			const topRightWindow = this.getTopRightWindow();
+			if (topRightWindow === undefined) {
+				throw new Error(
+					'getDivingLineXCoordinate() was called when there are no windows.'
+				);
+			}
 			console.log(`Top-right window: ${topRightWindow.app}`);
 
 			if (this.expectedCurrentNumMasterWindows === 1)
@@ -161,7 +166,9 @@ export function createWindowsManager({
 		/*
 		 * The top-right window is the rightmost window with the lowest y-coordinate.
 		 */
-		getTopRightWindow() {
+		getTopRightWindow(): Window | undefined {
+			if (this.windowsData.length === 0) return undefined;
+
 			let lowestYCoordinate = this.windowsData[0].frame.y;
 			for (const window of this.windowsData) {
 				if (window.frame.y < lowestYCoordinate) {
@@ -209,6 +216,7 @@ export function createWindowsManager({
 		createStack() {
 			console.log('Creating stack...');
 			let topRightWindow = this.getTopRightWindow();
+			if (topRightWindow === undefined) return;
 			console.log(`Top-right window: ${topRightWindow.app}`);
 
 			if (topRightWindow.split === 'horizontal') {
@@ -242,6 +250,7 @@ export function createWindowsManager({
 		 */
 		doesStackExist() {
 			const topRightWindow = this.getTopRightWindow();
+			if (topRightWindow === undefined) return false;
 			return topRightWindow.frame.x !== 0;
 		},
 		/**
@@ -374,13 +383,19 @@ export function createWindowsManager({
 		async isValidLayout(props?: {
 			targetNumMasterWindows?: number;
 		}): Promise<{ status: true } | { status: false; reason: string }> {
-			const targetNumMasterWindows =
-				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows;
 			console.log('Starting valid layout check...');
 
-			// If targetNumMasterWindows is equal to the number of windows, all windows must be touching the left side
+			// If there are no windows, it is a valid layout
+			if (this.windowsData.length === 0) {
+				return { status: true };
+			}
+
+			const targetNumMasterWindows =
+				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows;
+
+			// If targetNumMasterWindows is greater or equal to the number of windows, all windows must be touching the left side
 			if (
-				targetNumMasterWindows === this.windowsData.length &&
+				targetNumMasterWindows >= this.windowsData.length &&
 				!this.windowsData.every((window) =>
 					this.isWindowTouchingLeftEdge(window)
 				)
@@ -388,29 +403,34 @@ export function createWindowsManager({
 				return {
 					status: false,
 					reason:
-						'The number of main windows is equal to the number of windows and not all windows are touching the left edge.',
+						'The number of main windows is greater or equal to the number of windows and not all windows are touching the left edge.',
 				};
-			}
-
-			const curNumMasterWindows = this.getMasterWindows().length;
-			if (targetNumMasterWindows !== curNumMasterWindows) {
-				return {
-					status: false,
-					reason: `Number of master windows does not equal expected number of master windows (${curNumMasterWindows}/${targetNumMasterWindows})`,
-				};
-			}
-
-			for (const window of this.windowsData) {
-				if (this.isMiddleWindow(window)) {
-					console.log(this.isStackWindow(window), this.isMasterWindow(window));
+			} else {
+				// Verify that the number of master windows equals the target number of master windows
+				const curNumMasterWindows = this.getMasterWindows().length;
+				if (targetNumMasterWindows !== curNumMasterWindows) {
 					return {
 						status: false,
-						reason: `A middle window (${window.app}) was detected.`,
+						reason: `Number of master windows does not equal expected number of master windows (${curNumMasterWindows}/${targetNumMasterWindows})`,
 					};
 				}
-			}
 
-			return { status: true };
+				// Verify that there is no middle window
+				for (const window of this.windowsData) {
+					if (this.isMiddleWindow(window)) {
+						console.log(
+							this.isStackWindow(window),
+							this.isMasterWindow(window)
+						);
+						return {
+							status: false,
+							reason: `A middle window (${window.app}) was detected.`,
+						};
+					}
+				}
+
+				return { status: true };
+			}
 		},
 		async updateWindows({
 			targetNumMasterWindows,
