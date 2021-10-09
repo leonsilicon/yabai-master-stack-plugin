@@ -243,8 +243,6 @@ export function createWindowsManager({
 		 * is horizontal
 		 */
 		async columnizeStackWindows() {
-			console.log('columnizing');
-			await delay(2000);
 			// In this case, we want to columnize all the windows to the left of the dividing line
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 
@@ -259,9 +257,6 @@ export function createWindowsManager({
 					);
 				}
 			}
-
-			console.log('columnized');
-			await delay(2000);
 		},
 		async moveWindowToStack(window: Window) {
 			console.log(`Moving window ${window.app} to stack.`);

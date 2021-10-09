@@ -6,7 +6,6 @@ export function releaseLock(lockPath: string) {
 	if (locks[lockPath]) {
 		try {
 			fs.rmdirSync(lockPath);
-			console.log('\n\n\nLock released\n\n\n');
 		} catch (error: any) {
 			if (error.code !== 'ENOENT') {
 				throw error;
