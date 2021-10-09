@@ -1,16 +1,9 @@
 import { yabaiPath } from '../config';
-import { readState } from '../state';
-import { createWindowsManager } from '../utils';
-import { getFocusedDisplay } from '../utils/display';
+import { createInitializedWindowsManager } from '../utils';
 import { handleMasterError } from '../utils/error';
 
 async function main() {
-	const state = await readState();
-	const display = getFocusedDisplay();
-	const wm = createWindowsManager({
-		display,
-		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
-	});
+	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
 		// If the focused window is the highest window

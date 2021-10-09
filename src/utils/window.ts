@@ -1,7 +1,15 @@
 import execa from 'execa';
 
 import { yabaiPath } from '../config';
-import type { Display, Window } from '../types';
+import { readState, writeState } from '../state';
+import type { Display, State, Window } from '../types';
+import { getFocusedDisplay } from './display';
+import { acquireHandlerLock } from './lock';
+
+type CreateWindowsManagerProps = {
+	display: Display;
+	expectedCurrentNumMasterWindows: number;
+};
 
 /**
  * Creates a windows manager.
@@ -13,10 +21,7 @@ import type { Display, Window } from '../types';
 export function createWindowsManager({
 	display,
 	expectedCurrentNumMasterWindows,
-}: {
-	display: Display;
-	expectedCurrentNumMasterWindows: number;
-}) {
+}: CreateWindowsManagerProps) {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
 	function getWindowsData() {
@@ -31,6 +36,13 @@ export function createWindowsManager({
 	}
 
 	const windowsManager = {
+		async validateState(state: State) {
+			if (this.windowsData.length < this.expectedCurrentNumMasterWindows) {
+				this.expectedCurrentNumMasterWindows = this.windowsData.length;
+				state[display.id].numMasterWindows = this.windowsData.length;
+				await writeState(state);
+			}
+		},
 		expectedCurrentNumMasterWindows,
 		windowsData: getWindowsData(),
 		refreshWindowsData() {
@@ -245,6 +257,7 @@ export function createWindowsManager({
 			}
 		},
 		moveWindowToStack(window: Window) {
+			console.log(`Moving window ${window.app} to stack.`);
 			/*
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
@@ -295,6 +308,7 @@ export function createWindowsManager({
 			}
 		},
 		moveWindowToMaster(window: Window) {
+			console.log(`Moving window ${window.app} to master.`);
 			/*
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
@@ -542,4 +556,16 @@ export function createWindowsManager({
 	};
 
 	return windowsManager;
+}
+
+export async function createInitializedWindowsManager() {
+	await acquireHandlerLock();
+	const state = await readState();
+	const display = getFocusedDisplay();
+	const wm = createWindowsManager({
+		display,
+		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
+	});
+	await wm.validateState(state);
+	return { wm, state, display };
 }
