@@ -245,14 +245,16 @@ export function createWindowsManager({
 			}
 		},
 		moveWindowToStack(window: Window) {
+			/*
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
 				this.executeYabaiCommand(
 					`${yabaiPath} -m window ${window.id} warp west`
 				);
 			} catch {
-				/* empty */
+				// empty
 			}
+			*/
 
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
@@ -293,14 +295,16 @@ export function createWindowsManager({
 			}
 		},
 		moveWindowToMaster(window: Window) {
+			/*
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
 				this.executeYabaiCommand(
 					`${yabaiPath} -m window ${window.id} warp east`
 				);
 			} catch {
-				/* empty */
+				// empty
 			}
+			*/
 
 			// Find a window that's touching the right side of the screen
 			const masterWindow = this.getWidestMasterWindow();
@@ -324,11 +328,14 @@ export function createWindowsManager({
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			return window.frame.x >= dividingLineXCoordinate;
 		},
+		isWindowTouchingLeftEdge(window: Window) {
+			return window.frame.x === display.frame.x;
+		},
 		/**
 		 * If the window's frame has an x equal to the x of the display, it is a stack window
 		 */
 		isStackWindow(window: Window) {
-			return window.frame.x === display.frame.x;
+			return this.isWindowTouchingLeftEdge(window);
 		},
 		isMiddleWindow(window: Window) {
 			return !this.isStackWindow(window) && !this.isMasterWindow(window);
@@ -351,6 +358,21 @@ export function createWindowsManager({
 			const targetNumMasterWindows =
 				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows;
 			console.log('Starting valid layout check...');
+
+			// If targetNumMasterWindows is equal to the number of windows, all windows must be touching the left side
+			if (
+				targetNumMasterWindows === this.windowsData.length &&
+				!this.windowsData.every((window) =>
+					this.isWindowTouchingLeftEdge(window)
+				)
+			) {
+				return {
+					status: false,
+					reason:
+						'The number of main windows is equal to the number of windows and not all windows are touching the left edge.',
+				};
+			}
+
 			const curNumMasterWindows = this.getMasterWindows().length;
 			if (targetNumMasterWindows !== curNumMasterWindows) {
 				return {
