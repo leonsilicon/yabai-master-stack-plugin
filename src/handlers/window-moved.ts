@@ -1,5 +1,5 @@
 import { createInitializedWindowsManager } from '../utils';
-import { releaseLock } from '../utils/lock';
+import { releaseHandlerLock } from '../utils/handler';
 import { handleMasterError } from '../utils/main';
 
 async function main() {
@@ -11,4 +11,4 @@ async function main() {
 	console.log('Finished handling window_moved.');
 }
 
-main().catch(handleMasterError).finally(releaseLock);
+main().catch(handleMasterError).finally(releaseHandlerLock);
