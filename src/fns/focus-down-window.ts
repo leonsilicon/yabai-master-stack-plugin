@@ -1,6 +1,7 @@
 import { yabaiPath } from '../config';
 import { createInitializedWindowsManager } from '../utils';
-import { handleMasterError } from '../utils/error';
+import { releaseLock } from '../utils/lock';
+import { handleMasterError } from '../utils/main';
 
 async function main() {
 	const { wm } = await createInitializedWindowsManager();
@@ -34,10 +35,6 @@ async function main() {
 		}
 		// Otherwise, just focus south
 		else {
-			console.log(
-				wm.isStackWindow(focusedWindow),
-				wm.isBottomWindow(wm.getStackWindows(), focusedWindow)
-			);
 			wm.executeYabaiCommand(`${yabaiPath} -m window --focus south`);
 		}
 	} else {
@@ -45,4 +42,4 @@ async function main() {
 	}
 }
 
-main().catch(handleMasterError);
+main().catch(handleMasterError).finally(releaseLock);

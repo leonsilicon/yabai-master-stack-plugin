@@ -7,7 +7,6 @@ import type { State } from './types';
 import { getDisplays } from './utils/display';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
-const stateLockPath = path.join(pkgDir.sync(__dirname)!, 'state.json.lock');
 
 const displays = getDisplays();
 const defaultState: State = {};
@@ -19,10 +18,10 @@ const defaultStateJson = JSON.stringify(defaultState);
 
 let release: () => Promise<void> | undefined;
 async function acquireStateLock() {
-	if (!fs.existsSync(stateLockPath)) {
-		await fs.promises.writeFile(stateLockPath, '');
+	if (!fs.existsSync(stateFilePath)) {
+		await fs.promises.writeFile(stateFilePath, defaultStateJson);
 	}
-	release = await lockfile.lock(stateLockPath);
+	release = await lockfile.lock(stateFilePath);
 }
 
 async function releaseStateLock() {
@@ -37,19 +36,12 @@ export async function resetState() {
 
 export async function writeState(state: State) {
 	await acquireStateLock();
-	if (!fs.existsSync(stateFilePath)) {
-		await fs.promises.writeFile(stateFilePath, defaultStateJson);
-	}
-
 	await fs.promises.writeFile(stateFilePath, JSON.stringify(state));
 	await releaseStateLock();
 }
 
 export async function readState(): Promise<State> {
 	await acquireStateLock();
-	if (!fs.existsSync(stateFilePath)) {
-		await fs.promises.writeFile(stateFilePath, defaultStateJson);
-	}
 	const data = (await fs.promises.readFile(stateFilePath)).toString();
 	await releaseStateLock();
 

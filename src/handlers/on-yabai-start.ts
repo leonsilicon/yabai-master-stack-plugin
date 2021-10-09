@@ -1,15 +1,12 @@
 import { createInitializedWindowsManager } from '../utils';
-import { handleMasterError } from '../utils/error';
+import { releaseLock } from '../utils/lock';
+import { handleMasterError } from '../utils/main';
 
 async function main() {
-	try {
-		const { wm, state, display } = await createInitializedWindowsManager();
-		await wm.updateWindows({
-			targetNumMasterWindows: state[display.id].numMasterWindows,
-		});
-	} catch {
-		// empty
-	}
+	const { wm, state, display } = await createInitializedWindowsManager();
+	await wm.updateWindows({
+		targetNumMasterWindows: state[display.id].numMasterWindows,
+	});
 }
 
-main().catch(handleMasterError);
+main().catch(handleMasterError).finally(releaseLock);

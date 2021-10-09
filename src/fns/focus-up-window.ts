@@ -1,6 +1,7 @@
 import { yabaiPath } from '../config';
 import { createInitializedWindowsManager } from '../utils';
-import { handleMasterError } from '../utils/error';
+import { releaseLock } from '../utils/lock';
+import { handleMasterError } from '../utils/main';
 
 async function main() {
 	const { wm } = await createInitializedWindowsManager();
@@ -39,4 +40,4 @@ async function main() {
 	}
 }
 
-main().catch(handleMasterError);
+main().catch(handleMasterError).finally(releaseLock);
