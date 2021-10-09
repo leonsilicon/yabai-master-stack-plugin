@@ -1,3 +1,4 @@
+import delay from 'delay';
 import execa from 'execa';
 
 import { yabaiPath } from '../config';
@@ -258,6 +259,8 @@ export function createWindowsManager({
 		 * is horizontal
 		 */
 		async columnizeStackWindows() {
+			console.log('column');
+			await delay(3000);
 			// In this case, we want to columnize all the windows to the left of the dividing line
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 
@@ -272,6 +275,9 @@ export function createWindowsManager({
 					);
 				}
 			}
+
+			console.log('finished columnizing');
+			await delay(3000);
 		},
 		/**
 		 * Turns the master section into a column by making sure the split direction of all the master windows

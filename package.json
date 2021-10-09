@@ -10,6 +10,7 @@
     "tc": "tsc --noEmit"
   },
   "dependencies": {
+    "delay": "^5.0.0",
     "execa": "^5.1.1",
     "pkg-dir": "^5.0.0"
   },

@@ -5,6 +5,7 @@ specifiers:
   '@types/node': ^16.9.3
   '@typescript-eslint/eslint-plugin': ^4.31.2
   '@typescript-eslint/parser': ^4.31.1
+  delay: ^5.0.0
   eslint: ^7.32.0
   eslint-config-airbnb-base: ^14.2.1
   eslint-config-prettier: ^8.3.0
@@ -19,6 +20,7 @@ specifiers:
   typescript: ^4.4.3
 
 dependencies:
+  delay: 5.0.0
   execa: 5.1.1
   pkg-dir: 5.0.0
 
@@ -748,6 +750,11 @@ packages:
     dependencies:
       object-keys: 1.1.1
     dev: true
+
+  /delay/5.0.0:
+    resolution: {integrity: sha512-ReEBKkIfe4ya47wlPYf/gu5ib6yUG0/Aez0JQZQz94kiWtRQvZIQbTiehsnwHvLSWJnQdhVeqYue7Id1dKr0qw==}
+    engines: {node: '>=10'}
+    dev: false
 
   /diff/4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
