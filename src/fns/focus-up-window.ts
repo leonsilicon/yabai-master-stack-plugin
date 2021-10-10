@@ -2,7 +2,6 @@ import { createInitializedWindowsManager } from '../utils';
 import { main } from '../utils/main';
 
 main(async () => {
-	console.log(`${process.pid} start up`);
 	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
@@ -33,5 +32,4 @@ main(async () => {
 			await wm.executeYabaiCommand(`-m window --focus north`);
 		}
 	}
-	console.log(`${process.pid} end up`);
 });

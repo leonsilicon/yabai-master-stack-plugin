@@ -1,11 +1,12 @@
 import execa from 'execa';
-import getStream from 'get-stream';
 import { parse } from 'shell-quote';
 
 import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
 import type { Display, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
+import { getYabaiOutput } from './yabai';
+import onExit from 'signal-exit'
 
 type CreateWindowsManagerProps = {
 	display: Display;
@@ -26,15 +27,12 @@ export function createWindowsManager({
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
 	async function getWindowsData() {
-		console.log(`${process.pid} window 1`);
-		const yabaiStdout = execa(yabaiPath, ['-m', 'query', '--windows']).stdout!;
-		const yabaiOutput = await getStream(yabaiStdout);
-
-		console.log(`${process.pid} window 2`);
+		const yabaiProcess = execa(yabaiPath, ['-m', 'query', '--windows']);
+		const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
+		const yabaiOutput = await yabaiOutputPromise;
 		const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
 			(window) => window.split !== 'none' && window.display === display.index
 		);
-		console.log(`${process.pid} window 3`);
 		return windowsData;
 	}
 
@@ -57,22 +55,16 @@ export function createWindowsManager({
 			this.windowsData = await getWindowsData();
 		},
 		async refreshWindowsData() {
-			console.log(`${process.pid} refresh 1`);
 			const newWindowsData = await getWindowsData();
-			console.log(`${process.pid} refresh 2`);
 			this.windowsData = newWindowsData;
-			console.log(`${process.pid} refresh 3`);
 		},
 		getUpdatedWindowData(window: Window) {
 			return this.windowsData.find((win) => window.id === win.id)!;
 		},
 		async executeYabaiCommand(command: string) {
-			console.log(`${process.pid} yabai 1`);
-			const yabaiStdout = execa(yabaiPath, parse(command) as string[]).stdout!;
-			const yabaiOutput = await getStream(yabaiStdout);
-			console.log(`${process.pid} yabai 2`);
+			const yabaiProcess = execa(yabaiPath, parse(command) as string[]);
+			const yabaiOutput = await getYabaiOutput(yabaiProcess);
 			await this.refreshWindowsData();
-			console.log(`${process.pid} yabai 3`);
 			return yabaiOutput;
 		},
 		getWindowData({ processId, windowId }: GetWindowDataProps): Window {

@@ -1,19 +1,19 @@
 import execa from 'execa';
-import getStream from 'get-stream';
 
 import { yabaiPath } from '../config';
 import type { Display } from '../types';
+import { getYabaiOutput } from './yabai';
 
 export async function getDisplays() {
-	const yabaiStdout = execa.command(`${yabaiPath} -m query --displays`).stdout!;
-	const yabaiOutput = await getStream(yabaiStdout);
+	const yabaiProcess = execa.command(`${yabaiPath} -m query --displays`);
+	const yabaiOutput = await getYabaiOutput(yabaiProcess);
 	return JSON.parse(yabaiOutput) as Display[];
 }
 
 export async function getFocusedDisplay() {
-	const yabaiStdout = execa.command(
+	const yabaiProcess = execa.command(
 		`${yabaiPath} -m query --displays --display`
-	).stdout!;
-	const yabaiOutput = await getStream(yabaiStdout);
+	);
+	const yabaiOutput = await getYabaiOutput(yabaiProcess);
 	return JSON.parse(yabaiOutput) as Display;
 }
