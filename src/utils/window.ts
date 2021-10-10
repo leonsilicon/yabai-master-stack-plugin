@@ -6,7 +6,6 @@ import { readState, writeState } from '../state';
 import type { Display, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
 import { getYabaiOutput } from './yabai';
-import onExit from 'signal-exit'
 
 type CreateWindowsManagerProps = {
 	display: Display;
