@@ -37,3 +37,9 @@ alt + k : node <your_folder>/yabai-master-stack-layout/dist/fns/focus-up-window.
 alt + shift - i : node <your_folder>/yabai-master-stack-layout/dist/fns/increase-main-window-count.js
 alt + shift - d : node <your_folder/yabai-master-stack-layout/dist/fns/decrease-main-window-count.js
 ```
+
+## Troubleshooting
+
+So there's this super obscure error when binding shell commands to Karabiner where the Node processes will abruptly exit without the onExit callback getting called when registered using the `signal-exit` package (which ends up causing a deadlock since the lockfile doesn't get released). To fix this error, you need to add a `> /dev/null` to the end of the node command in the karabiner `shell_command` property [(see this commit)](https://github.com/leonzalion/macos-configs/commit/93d7b1e3a668476ad8880940c9a117beb39d50ca). Again, I have absolutely no idea why this works, but I discovered it on accident when trying to debug the command by redirecting stdout to a file and then failing to reproduce the issue afterwards.
+
+Maybe I'll add some kind of synchronization mechanism in the future where the plugin will check whether the process is still active, and if it's not active, then delete the lock file or something.
