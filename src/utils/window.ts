@@ -299,7 +299,6 @@ export function createWindowsManager({
 				return;
 			}
 
-			await delay(2000);
 			await this.executeYabaiCommand(
 				`-m window ${window.id} --warp ${stackWindow.id}`
 			);
@@ -312,7 +311,6 @@ export function createWindowsManager({
 					);
 				}
 			} else {
-				await delay(2000);
 				if (window.split === 'vertical') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
@@ -476,9 +474,7 @@ export function createWindowsManager({
 						const masterWindow = masterWindows.pop()!;
 
 						console.info(`Moving master window ${masterWindow.app} to stack.`);
-						await delay(2000);
 						await this.moveWindowToStack(masterWindow);
-						await delay(2000);
 						curNumMasterWindows -= 1;
 					}
 				}
