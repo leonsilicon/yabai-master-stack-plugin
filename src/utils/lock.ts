@@ -17,6 +17,7 @@ export function releaseLock(lockPath: string, options?: { force?: boolean }) {
 
 export function acquireLock(lockPath: string) {
 	try {
+		// Using mkdir to create the lock because it is an atomic operation
 		fs.mkdirSync(lockPath);
 		locks[lockPath] = true;
 	} catch (error: any) {
