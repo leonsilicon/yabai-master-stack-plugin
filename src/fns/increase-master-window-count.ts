@@ -7,7 +7,7 @@ main(async () => {
 	if (state[display.id].numMasterWindows < wm.windowsData.length - 1) {
 		state[display.id].numMasterWindows += 1;
 		writeState(state);
-		console.log('Increasing master window count.');
+		console.info('Increasing master window count.');
 		await wm.updateWindows({
 			targetNumMasterWindows: state[display.id].numMasterWindows,
 		});

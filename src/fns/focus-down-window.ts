@@ -13,7 +13,7 @@ main(async () => {
 		) {
 			// Focus on the top stack window
 			const windowToFocus = wm.getTopStackWindow() ?? wm.getTopMasterWindow();
-			console.log(`Focusing on the window ${windowToFocus?.app}`);
+			console.info(`Focusing on the window ${windowToFocus?.app}`);
 			if (windowToFocus !== undefined) {
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
@@ -23,7 +23,7 @@ main(async () => {
 		) {
 			// Focus on the top master window
 			const windowToFocus = wm.getTopMasterWindow();
-			console.log(`Focusing on the window ${windowToFocus?.app}`);
+			console.info(`Focusing on the window ${windowToFocus?.app}`);
 			if (windowToFocus !== undefined) {
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}

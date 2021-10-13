@@ -9,7 +9,7 @@ main(async () => {
 		// Update the state
 		state[display.id].numMasterWindows -= 1;
 		writeState(state);
-		console.log('Decreasing master window count.');
+		console.info('Decreasing master window count.');
 		await wm.updateWindows({
 			targetNumMasterWindows: state[display.id].numMasterWindows,
 		});

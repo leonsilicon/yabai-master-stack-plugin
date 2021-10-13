@@ -3,9 +3,9 @@ import { main } from '../utils/main';
 
 main(async () => {
 	const { wm, display, state } = await createInitializedWindowsManager();
-	console.log('Starting to handle window_moved.');
+	console.info('Starting to handle window_moved.');
 	await wm.updateWindows({
 		targetNumMasterWindows: state[display.id].numMasterWindows,
 	});
-	console.log('Finished handling window_moved.');
+	console.info('Finished handling window_moved.');
 });
