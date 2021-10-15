@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "delay": "^5.0.0",
+    "dotenv": "^10.0.0",
     "execa": "^5.1.1",
     "get-stream": "^6.0.1",
     "pkg-dir": "^5.0.0",

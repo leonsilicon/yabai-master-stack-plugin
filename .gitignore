@@ -7,4 +7,4 @@ handler.lock
 state.json.lock
 
 .pnpm-debug.log
-
+.env
