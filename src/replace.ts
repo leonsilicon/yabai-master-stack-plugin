@@ -18,6 +18,6 @@ replace.sync({
 				`Environment variable ${envVar} not defined in environment/.env file.`
 			);
 		}
-		return envValue;
+		return JSON.stringify(envValue);
 	},
 });
