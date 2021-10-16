@@ -30,9 +30,12 @@ export function createWindowsManager({
 		const yabaiProcess = execa(yabaiPath, ['-m', 'query', '--windows']);
 		const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
 		const yabaiOutput = await yabaiOutputPromise;
-		const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
+		let windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
 			(window) => window.floating === 0 && window.display === display.index
 		);
+		if (windowsData.length > 1) {
+			windowsData = windowsData.filter((w) => w.split !== 'none');
+		}
 		return windowsData;
 	}
 
