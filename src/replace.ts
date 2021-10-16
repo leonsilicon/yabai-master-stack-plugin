@@ -14,9 +14,14 @@ replace.sync({
 		const envVar = match.slice(match.lastIndexOf('.') + 1);
 		const envValue = process.env[envVar];
 		if (envValue === undefined) {
-			throw new Error(
-				`Environment variable ${envVar} not defined in environment/.env file.`
-			);
+			// If the environment variable is marked is mandatory
+			if (match.endsWith('!')) {
+				throw new Error(
+					`Environment variable ${envVar} not defined in environment/.env file.`
+				);
+			} else {
+				return "undefined";
+			}
 		}
 		return JSON.stringify(envValue);
 	},
