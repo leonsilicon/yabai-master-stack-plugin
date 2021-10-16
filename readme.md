@@ -10,8 +10,15 @@ To "install" this plugin, make sure you have [Node](https://nodejs.org/en/) inst
 cd <your_folder> # replace <your_folder> with the folder you're cloning to the repo to
 git clone https://github.com/leonzalion/yabai-master-stack-plugin
 cd yabai-master-stack-plugin
+```
+
+Then, copy the `.env.example` file and name the new file `.env`, placing it in the same folder as the `.env.example` folder. In the new `.env` file, update `YABAI_PATH` to your installation path of yabai (you can get this by running `which yabai`). In addition, if you don't want debugging output, make sure to remove the `DEBUG=1` line.
+
+Once you've added the `.env` file, you can now install the dependencies and build the files.
+
+```bash
 npm install
-npm run build
+npm build
 ```
 
 Then, add the following lines to your `.yabairc` (remember to replace &lt;your_folder&gt;with the path you folder you cloned the repo to):
