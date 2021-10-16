@@ -1,4 +1,5 @@
 import { createInitializedWindowsManager } from '../utils';
+import { logDebug } from '../utils/log';
 import { main } from '../utils/main';
 
 main(async () => {
@@ -13,7 +14,7 @@ main(async () => {
 			// Focus on the bottom stack window
 			const windowToFocus =
 				wm.getBottomStackWindow() ?? wm.getBottomMasterWindow();
-			console.info(`Focusing on the window ${windowToFocus.app}`);
+			logDebug(() => `Focusing on the window ${windowToFocus.app}`);
 			if (windowToFocus !== undefined) {
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
@@ -23,7 +24,7 @@ main(async () => {
 		) {
 			// Focus on the bottom master window
 			const windowToFocus = wm.getBottomMasterWindow();
-			console.info(`Focusing on the window ${windowToFocus.app}`);
+			logDebug(() => `Focusing on the window ${windowToFocus.app}`);
 			if (windowToFocus !== undefined) {
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}

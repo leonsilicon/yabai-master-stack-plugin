@@ -5,6 +5,7 @@ import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
 import type { Display, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
+import { logDebug } from './log';
 import { getYabaiOutput } from './yabai';
 
 type CreateWindowsManagerProps = {
@@ -110,7 +111,7 @@ export function createWindowsManager({
 					'getDivingLineXCoordinate() was called when there are no windows.'
 				);
 			}
-			console.info(`Top-right window: ${topRightWindow.app}`);
+			logDebug(() => `Top-right window: ${topRightWindow.app}`);
 
 			if (this.expectedCurrentNumMasterWindows === 1)
 				return topRightWindow.frame.x;
@@ -218,10 +219,10 @@ export function createWindowsManager({
 		// In the event that the windows get badly rearranged and all the windows span the entire width of
 		// the screen, split the top-right window vertically and then move the windows into the split
 		async createStack() {
-			console.info('Creating stack...');
+			logDebug(() => 'Creating stack...');
 			let topRightWindow = this.getTopRightWindow();
 			if (topRightWindow === undefined) return;
-			console.info(`Top-right window: ${topRightWindow.app}`);
+			logDebug(() => `Top-right window: ${topRightWindow?.app}`);
 
 			if (topRightWindow.split === 'horizontal') {
 				await this.executeYabaiCommand(
@@ -264,9 +265,9 @@ export function createWindowsManager({
 			}
 		},
 		async moveWindowToStack(window: Window) {
-			console.info(`Moving window ${window.app} to stack.`);
+			logDebug(() => `Moving window ${window.app} to stack.`);
 
-			console.info('moving window west');
+			logDebug(() => 'moving window west');
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
 				await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
@@ -318,7 +319,7 @@ export function createWindowsManager({
 			}
 		},
 		async moveWindowToMaster(window: Window) {
-			console.info(`Moving window ${window.app} to master.`);
+			logDebug(() => `Moving window ${window.app} to master.`);
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
 				await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
@@ -376,7 +377,7 @@ export function createWindowsManager({
 		async isValidLayout(props?: {
 			targetNumMasterWindows?: number;
 		}): Promise<{ status: true } | { status: false; reason: string }> {
-			console.info('Starting valid layout check...');
+			logDebug(() => 'Starting valid layout check...');
 
 			// If there are no windows, it is a valid layout
 			if (this.windowsData.length === 0) {
@@ -433,7 +434,7 @@ export function createWindowsManager({
 				targetNumMasterWindows,
 			});
 			if (layoutValidity.status === true) {
-				console.info('Valid layout detected; no changes were made.');
+				logDebug(() => 'Valid layout detected; no changes were made.');
 				return;
 			} else {
 				console.info(
@@ -445,7 +446,7 @@ export function createWindowsManager({
 
 			// If the stack is supposed to exist but doesn't exist
 			if (targetNumMasterWindows !== numWindows && !this.doesStackExist()) {
-				console.info('Stack does not exist, creating it...');
+				logDebug(() => 'Stack does not exist, creating it...');
 				await this.createStack();
 			}
 
@@ -472,7 +473,9 @@ export function createWindowsManager({
 						// Remove the window with the greatest y-coordinate first
 						const masterWindow = masterWindows.pop()!;
 
-						console.info(`Moving master window ${masterWindow.app} to stack.`);
+						logDebug(
+							() => `Moving master window ${masterWindow.app} to stack.`
+						);
 						await this.moveWindowToStack(masterWindow);
 						curNumMasterWindows -= 1;
 					}
@@ -483,13 +486,17 @@ export function createWindowsManager({
 				let middleWindows;
 				while ((middleWindows = this.getMiddleWindows()).length > 0) {
 					const middleWindow = middleWindows[0];
-					console.info(`Middle window ${middleWindow.app} detected.`);
+					logDebug(() => `Middle window ${middleWindow.app} detected.`);
 					if (curNumMasterWindows < targetNumMasterWindows) {
-						console.info(`Moving middle window ${middleWindow.app} to master.`);
+						logDebug(
+							() => `Moving middle window ${middleWindow.app} to master.`
+						);
 						await this.moveWindowToMaster(middleWindow);
 						curNumMasterWindows += 1;
 					} else {
-						console.info(`Moving middle window ${middleWindow.app} to stack.`);
+						logDebug(
+							() => `Moving middle window ${middleWindow.app} to stack.`
+						);
 						await this.moveWindowToStack(middleWindow);
 					}
 				}
@@ -509,7 +516,7 @@ export function createWindowsManager({
 						`Not enough master windows (${curNumMasterWindows}/${targetNumMasterWindows})`
 					);
 					const stackWindow = stackWindows.pop()!;
-					console.info(`Moving stack window ${stackWindow.app} to master.`);
+					logDebug(() => `Moving stack window ${stackWindow.app} to master.`);
 					await this.moveWindowToMaster(stackWindow);
 					curNumMasterWindows += 1;
 				}
@@ -523,7 +530,7 @@ export function createWindowsManager({
 					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
 				);
 			} else {
-				console.info('updateLayout() was successful.');
+				logDebug(() => 'updateLayout() was successful.');
 			}
 
 			this.expectedCurrentNumMasterWindows = targetNumMasterWindows;

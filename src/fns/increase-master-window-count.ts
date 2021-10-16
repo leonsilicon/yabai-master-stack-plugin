@@ -1,5 +1,6 @@
 import { writeState } from '../state';
 import { createInitializedWindowsManager } from '../utils';
+import { logDebug } from '../utils/log';
 import { main } from '../utils/main';
 
 main(async () => {
@@ -7,7 +8,7 @@ main(async () => {
 	if (state[display.id].numMasterWindows < wm.windowsData.length - 1) {
 		state[display.id].numMasterWindows += 1;
 		writeState(state);
-		console.info('Increasing master window count.');
+		logDebug(() => 'Increasing master window count.');
 		await wm.updateWindows({
 			targetNumMasterWindows: state[display.id].numMasterWindows,
 		});

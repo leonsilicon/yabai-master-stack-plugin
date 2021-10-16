@@ -1,12 +1,13 @@
 import { createInitializedWindowsManager } from '../utils';
+import { logDebug } from '../utils/log';
 import { main } from '../utils/main';
 
 main(async () => {
 	const { wm, state, display } = await createInitializedWindowsManager();
-	console.info('Starting to handle window_created.');
+	logDebug(() => 'Starting to handle window_created.');
 
 	if ((await wm.isValidLayout()).status === true) {
-		console.info('Valid layout detected; no changes were made.');
+		logDebug(() => 'Valid layout detected; no changes were made.');
 		return;
 	}
 
@@ -20,12 +21,12 @@ main(async () => {
 		curNumMasterWindows <= state[display.id].numMasterWindows
 	) {
 		// move the window to the master
-		console.info('Moving newly created window to master.');
+		logDebug(() => 'Moving newly created window to master.');
 		await wm.moveWindowToMaster(window);
 	}
 	// if there are too many windows on the master
 	else {
-		console.info('Moving newly created window to stack.');
+		logDebug(() => 'Moving newly created window to stack.');
 		// move the window to the stack
 		await wm.moveWindowToStack(window);
 	}
@@ -33,5 +34,5 @@ main(async () => {
 	await wm.updateWindows({
 		targetNumMasterWindows: state[display.id].numMasterWindows,
 	});
-	console.info('Finished handling window_created.');
+	logDebug(() => 'Finished handling window_created.');
 });
