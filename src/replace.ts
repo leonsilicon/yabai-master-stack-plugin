@@ -9,7 +9,7 @@ dotenv.config({
 
 replace.sync({
 	files: 'dist/config.js',
-	from: /process\.env\.\w+!?/,
+	from: /process\.env\.\w+!?/g,
 	to: (match) => {
 		const envVar = match.slice(match.lastIndexOf('.') + 1);
 		const envValue = process.env[envVar];

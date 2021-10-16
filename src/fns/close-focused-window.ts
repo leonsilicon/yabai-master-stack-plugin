@@ -36,8 +36,10 @@ main(async () => {
 	} else if (wm.isMasterWindow(windowToClose)) {
 		// If the window is the only master window and there is at least one stack window,
 		// focus on the bottom stack window
-		if (masterWindows.length === 1 && stackWindows.length > 0) {
-			windowToFocus = stackWindows[stackWindows.length - 1];
+		if (masterWindows.length === 1) {
+			if (stackWindows.length > 0) {
+				windowToFocus = stackWindows[stackWindows.length - 1];
+			}
 		}
 		// Focus on the window above it, or if there is no window above it, then the window below it
 		else {

@@ -31,7 +31,7 @@ export function createWindowsManager({
 		const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
 		const yabaiOutput = await yabaiOutputPromise;
 		const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
-			(window) => window.split !== 'none' && window.display === display.index
+			(window) => window.floating === 0 && window.display === display.index
 		);
 		return windowsData;
 	}

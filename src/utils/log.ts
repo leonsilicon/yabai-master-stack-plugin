@@ -1,5 +1,7 @@
-export function logDebug(cb: () => string) {
-	if (process.env.DEBUG) {
-		logDebug(() => cb());
+import { debug } from '../config';
+
+export function logDebug(cb: () => unknown) {
+	if (debug) {
+		console.info(cb());
 	}
 }
