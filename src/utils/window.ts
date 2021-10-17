@@ -30,12 +30,26 @@ export function createWindowsManager({
 		const yabaiProcess = execa(yabaiPath, ['-m', 'query', '--windows']);
 		const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
 		const yabaiOutput = await yabaiOutputPromise;
-		let windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
-			(window) => window.floating === 0 && window.display === display.index
+		const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
+			(window) => {
+				// Window should not be floating
+				if (window.floating !== 0 || window.display !== display.index) {
+					return false;
+				}
+
+				// Floating windows usually have split === 'none'
+				if (window.split === 'none') {
+					// If there's only one window on the display, that window should be included
+					if (window.frame.x === 0 && window.frame.y === 0) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+
+				return true;
+			}
 		);
-		if (windowsData.length > 1) {
-			windowsData = windowsData.filter((w) => w.split !== 'none');
-		}
 		return windowsData;
 	}
 
