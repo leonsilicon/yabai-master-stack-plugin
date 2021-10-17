@@ -37,15 +37,7 @@ export function createWindowsManager({
 					return false;
 				}
 
-				// Floating windows usually have split === 'none'
-				if (window.split === 'none') {
-					// If there's only one window on the display, that window should be included
-					if (window.frame.x === 0 && window.frame.y === 0) {
-						return true;
-					} else {
-						return false;
-					}
-				}
+				if (window.minimized) return false;
 
 				return true;
 			}
