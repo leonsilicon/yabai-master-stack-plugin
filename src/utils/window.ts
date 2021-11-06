@@ -56,11 +56,11 @@ export function createWindowsManager({
 		validateState(state: State) {
 			if (this.windowsData.length < this.expectedCurrentNumMasterWindows) {
 				this.expectedCurrentNumMasterWindows = this.windowsData.length;
-				state[display.id].numMasterWindows = this.windowsData.length;
+				state[space.id].numMasterWindows = this.windowsData.length;
 			}
 
-			if (state[display.id].numMasterWindows <= 0) {
-				state[display.id].numMasterWindows = 1;
+			if (state[space.id].numMasterWindows <= 0) {
+				state[space.id].numMasterWindows = 1;
 			}
 
 			writeState(state);
@@ -606,9 +606,9 @@ export async function createInitializedWindowsManager() {
 	const wm = createWindowsManager({
 		display,
 		space,
-		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
+		expectedCurrentNumMasterWindows: state[space.id].numMasterWindows,
 	});
 	await wm.initialize();
 	wm.validateState(state);
-	return { wm, state, display };
+	return { wm, state, display, space };
 }

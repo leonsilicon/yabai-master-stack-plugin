@@ -3,7 +3,7 @@ import path from 'path';
 import pkgDir from 'pkg-dir';
 
 import type { State } from './types';
-import { getDisplays } from './utils/display';
+import { getSpaces } from './utils/space';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
 
@@ -17,10 +17,10 @@ export async function readState(): Promise<State> {
 		return JSON.parse(data);
 	} else {
 		const defaultState: State = {};
-		const displays = await getDisplays();
+		const spaces = await getSpaces();
 
-		for (const display of displays) {
-			defaultState[display.id] = { numMasterWindows: 1 };
+		for (const space of spaces) {
+			defaultState[space.id] = { numMasterWindows: 1 };
 		}
 
 		const defaultStateJson = JSON.stringify(defaultState);

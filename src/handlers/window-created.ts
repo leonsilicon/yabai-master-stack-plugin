@@ -3,7 +3,7 @@ import { logDebug } from '../utils/log';
 import { main } from '../utils/main';
 
 main(async () => {
-	const { wm, state, display } = await createInitializedWindowsManager();
+	const { wm, state, space } = await createInitializedWindowsManager();
 	logDebug(() => 'Starting to handle window_created.');
 
 	if ((await wm.isValidLayout()).status === true) {
@@ -18,7 +18,7 @@ main(async () => {
 
 	if (
 		curNumMasterWindows > 1 &&
-		curNumMasterWindows <= state[display.id].numMasterWindows
+		curNumMasterWindows <= state[space.id].numMasterWindows
 	) {
 		// move the window to the master
 		logDebug(() => 'Moving newly created window to master.');
@@ -32,7 +32,7 @@ main(async () => {
 	}
 
 	await wm.updateWindows({
-		targetNumMasterWindows: state[display.id].numMasterWindows,
+		targetNumMasterWindows: state[space.id].numMasterWindows,
 	});
 	logDebug(() => 'Finished handling window_created.');
 });

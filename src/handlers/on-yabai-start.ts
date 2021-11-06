@@ -4,8 +4,8 @@ import { main } from '../utils/main';
 
 releaseHandlerLock({ force: true });
 main(async () => {
-	const { wm, state, display } = await createInitializedWindowsManager();
+	const { wm, state, space } = await createInitializedWindowsManager();
 	await wm.updateWindows({
-		targetNumMasterWindows: state[display.id].numMasterWindows,
+		targetNumMasterWindows: state[space.id].numMasterWindows,
 	});
 });

@@ -26,14 +26,22 @@ export type Window = {
 	'native-fullscreen': number;
 };
 
+type SpaceId = number & {
+	__type: 'space';
+};
+
+type DisplayId = number & {
+	__type: 'display';
+};
+
 export type State = {
-	[displayId: string]: {
+	[spaceId: SpaceId]: {
 		numMasterWindows: number;
 	};
 };
 
 export type Display = {
-	id: number;
+	id: DisplayId;
 	uuid: string;
 	index: number;
 	spaces: number[];
@@ -46,7 +54,7 @@ export type Display = {
 };
 
 export type Space = {
-	id: number;
+	id: SpaceId;
 	label: string;
 	index: number;
 	display: number;

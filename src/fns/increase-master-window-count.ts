@@ -4,13 +4,13 @@ import { logDebug } from '../utils/log';
 import { main } from '../utils/main';
 
 main(async () => {
-	const { wm, display, state } = await createInitializedWindowsManager();
-	if (state[display.id].numMasterWindows < wm.windowsData.length - 1) {
-		state[display.id].numMasterWindows += 1;
+	const { wm, space, state } = await createInitializedWindowsManager();
+	if (state[space.id].numMasterWindows < wm.windowsData.length - 1) {
+		state[space.id].numMasterWindows += 1;
 		writeState(state);
 		logDebug(() => 'Increasing master window count.');
 		await wm.updateWindows({
-			targetNumMasterWindows: state[display.id].numMasterWindows,
+			targetNumMasterWindows: state[space.id].numMasterWindows,
 		});
 	}
 });
