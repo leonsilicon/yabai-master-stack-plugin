@@ -44,3 +44,17 @@ export type Display = {
 		h: number;
 	};
 };
+
+export type Space = {
+	id: number;
+	label: string;
+	index: number;
+	display: number;
+	windows: number[];
+	type: string;
+	visible: number;
+	focused: number;
+	'native-fullscreen': number;
+	'first-window': number;
+	'last-window': number;
+};

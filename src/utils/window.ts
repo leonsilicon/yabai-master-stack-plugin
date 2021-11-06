@@ -3,13 +3,15 @@ import { parse } from 'shell-quote';
 
 import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
-import type { Display, State, Window } from '../types';
+import type { Display, Space, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
 import { logDebug } from './log';
+import { getFocusedSpace } from './space';
 import { getYabaiOutput } from './yabai';
 
 type CreateWindowsManagerProps = {
 	display: Display;
+	space: Space;
 	expectedCurrentNumMasterWindows: number;
 };
 
@@ -22,6 +24,7 @@ type CreateWindowsManagerProps = {
  */
 export function createWindowsManager({
 	display,
+	space,
 	expectedCurrentNumMasterWindows,
 }: CreateWindowsManagerProps) {
 	type GetWindowDataProps = { processId?: string; windowId?: string };
@@ -33,7 +36,11 @@ export function createWindowsManager({
 		const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
 			(window) => {
 				// Window should not be floating
-				if (window.floating !== 0 || window.display !== display.index) {
+				if (
+					window.floating !== 0 ||
+					window.display !== display.index ||
+					window.space !== space.index
+				) {
 					return false;
 				}
 
@@ -595,8 +602,10 @@ export function createWindowsManager({
 export async function createInitializedWindowsManager() {
 	const state = await readState();
 	const display = await getFocusedDisplay();
+	const space = await getFocusedSpace();
 	const wm = createWindowsManager({
 		display,
+		space,
 		expectedCurrentNumMasterWindows: state[display.id].numMasterWindows,
 	});
 	await wm.initialize();
