@@ -26,13 +26,14 @@ export type Window = {
 	'native-fullscreen': number;
 };
 
-type SpaceId = number & {
-	__type: 'space';
+type Distinct<T, N> = T & {
+	__type: N;
 };
 
-type DisplayId = number & {
-	__type: 'display';
-};
+export type SpaceId = Distinct<number, 'space'>;
+export type DisplayId = Distinct<number, 'display'>;
+export type DisplayUuid = Distinct<number, 'displayUuid'>;
+export type DisplayIndex = Distinct<number, 'displayIndex'>;
 
 export type State = {
 	[spaceId: SpaceId]: {
@@ -42,8 +43,8 @@ export type State = {
 
 export type Display = {
 	id: DisplayId;
-	uuid: string;
-	index: number;
+	uuid: DisplayUuid;
+	index: DisplayIndex;
 	spaces: number[];
 	frame: {
 		x: number;
