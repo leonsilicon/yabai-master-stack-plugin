@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import pkgDir from 'pkg-dir';
 
-import type { SpaceId, State } from './types';
+import type { State } from './types';
 import { getSpaces } from './utils/space';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
