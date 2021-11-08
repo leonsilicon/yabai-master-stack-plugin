@@ -34,11 +34,3 @@ export async function readState(): Promise<State> {
 		return defaultState;
 	}
 }
-
-export async function getSpaceState(spaceId: SpaceId): Promise<State[SpaceId]> {
-	const state = await readState();
-	if (state[spaceId] === undefined) {
-		state[spaceId] = { numMasterWindows: 1 };
-	}
-	return state[spaceId];
-}
