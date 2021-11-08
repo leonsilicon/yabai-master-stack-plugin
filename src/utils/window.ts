@@ -413,7 +413,7 @@ export function createWindowsManager({
 				return {
 					status: false,
 					reason:
-						'The number of main windows is greater or equal to the number of windows and not all windows are touching the left edge.',
+						'The number of master windows is greater or equal to the number of windows and not all windows are touching the left edge.',
 				};
 			} else {
 				// Verify that the number of master windows equals the target number of master windows

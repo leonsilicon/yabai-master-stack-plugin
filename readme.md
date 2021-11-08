@@ -40,9 +40,9 @@ Then, to make the actions of focusing on the next/prev window work smoothly, set
 alt + j : node <your_folder>/yabai-master-stack-plugin/dist/fns/focus-down-window.js
 alt + k : node <your_folder>/yabai-master-stack-plugin/dist/fns/focus-up-window.js
 
-# adjust number of main windows
-alt + shift - i : node <your_folder>/yabai-master-stack-plugin/dist/fns/increase-main-window-count.js
-alt + shift - d : node <your_folder/yabai-master-stack-plugin/dist/fns/decrease-main-window-count.js
+# adjust number of master windows
+alt + shift - i : node <your_folder>/yabai-master-stack-plugin/dist/fns/increase-master-window-count.js
+alt + shift - d : node <your_folder/yabai-master-stack-plugin/dist/fns/decrease-master-window-count.js
 ```
 
 ## Troubleshooting
