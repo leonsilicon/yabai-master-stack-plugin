@@ -4,7 +4,6 @@ import { main } from '../utils/main';
 
 main(async () => {
 	const { wm } = await createInitializedWindowsManager();
-	await wm.initialize();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
 		// If the focused window is the lowest master window

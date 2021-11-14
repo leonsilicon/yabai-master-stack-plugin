@@ -106,9 +106,6 @@ export function createWindowsManager({
 		getFocusedWindow(): Window | undefined {
 			return this.windowsData.find((w) => w.focused === 1);
 		},
-		getFnWindowId() {
-			return process.argv[2] ?? this.getFocusedWindow();
-		},
 		/**
 		 * There is always a line dividing the master windows from the secondary windows. To find this line,
 		 * we use two master observations:
