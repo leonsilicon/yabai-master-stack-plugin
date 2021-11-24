@@ -7,7 +7,8 @@
 		"build": "rimraf dist && tsc --outDir dist && node dist/replace.js",
 		"lint": "eslint --fix src",
 		"prettier": "prettier --write src",
-		"tc": "tsc --noEmit"
+		"tc": "tsc --noEmit",
+		"test:perf": "ts-node tests/perf.ts"
 	},
 	"dependencies": {
 		"delay": "^5.0.0",
