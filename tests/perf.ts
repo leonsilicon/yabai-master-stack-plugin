@@ -1,10 +1,11 @@
 import 'dotenv/config';
 
 import Benchmark from 'benchmark';
-import execa from 'execa';
-import path from 'path';
+process.env.DEBUG = '';
 
-function p(fn: any) {
+import { createInitializedWindowsManager } from '../src/utils/window';
+
+function p(fn: () => any) {
 	return {
 		defer: true,
 		async fn(deferred: any) {
@@ -14,16 +15,53 @@ function p(fn: any) {
 	};
 }
 
-const suite = new Benchmark.Suite();
+async function main() {
+	const suite = new Benchmark.Suite();
 
-const fnsPath = path.join(__dirname, '../dist/fns');
-const focusUpWindowCommand = `node ${path.join(fnsPath, 'focus-up-window.js')}`;
+	const { wm, state, space } = await createInitializedWindowsManager();
+	const window = wm.getFocusedWindow()!;
+	const stackWindows = wm.getStackWindows();
 
-suite
-	.add('focus-up-window', () => {
-		execa.commandSync(focusUpWindowCommand);
-	})
-	.on('cycle', (event: any) => {
-		console.log(String(event.target));
-	})
-	.run({ async: true });
+	// prettier-ignore
+	suite
+		.add('columnizeStackWindows', p(() => wm.columnizeStackWindows))
+		.add('createStack', p(() => wm.createStack()))
+		.add('doesStackExist', p(() => wm.doesStackExist()))
+		.add('executeYabaiCommand', p(() => wm.executeYabaiCommand('-m query --window')))
+		.add('getBottomMasterWindow', p(() => wm.getBottomMasterWindow()))
+		.add('getBottomStackWindow', p(() => wm.getBottomStackWindow()))
+		.add('getBottomWindow', p(() => wm.getBottomWindow(stackWindows)))
+		.add('getDividingLineXCoordinate', p(() => wm.getDividingLineXCoordinate()))
+		.add('getFocusedWindow', p(() => wm.getFocusedWindow()))
+		.add('getMasterWindows', p(() => wm.getMasterWindows()))
+		.add('getMiddleWindows', p(() => wm.getMiddleWindows()))
+		.add('getStackWindows', p(() => wm.getStackWindows()))
+		.add('getTopLeftWindow', p(() => wm.getTopLeftWindow()))
+		.add('getTopMasterWindow', p(() => wm.getTopMasterWindow()))
+		.add('getTopRightWindow', p(() => wm.getTopRightWindow()))
+		.add('getTopStackWindow', p(() => wm.getTopStackWindow()))
+		.add('getTopWindow', p(() => wm.getTopWindow(stackWindows)))
+		.add('getUpdatedWindowData', p(() => wm.getUpdatedWindowData(window)))
+		.add('getWidestMasterWindow', p(() => wm.getWidestMasterWindow()))
+		.add('getWidestStackWindow', p(() => wm.getWidestStackWindow()))
+		.add('getWindowData', p(() => wm.getWindowData({ windowId: window.id.toString() })))
+		.add('initialize', p(() => wm.initialize()))
+		.add('isBottomWindow', p(() => wm.isBottomWindow(stackWindows, window)))
+		.add('isMasterWindow', p(() => wm.isMasterWindow(window)))
+		.add('isMiddleWindow', p(() => wm.isMiddleWindow(window)))
+		.add('isStackWindow', p(() => wm.isStackWindow(window)))
+		.add('isTopWindow', p(() => wm.isTopWindow(stackWindows, window)))
+		.add('isValidLayout', p(() => wm.isValidLayout()))
+		.add('isWindowTouchingLeftEdge', p(() => wm.isWindowTouchingLeftEdge(window)))
+		.add('moveWindowToMaster', p(() => wm.moveWindowToMaster(window)))
+		.add('moveWindowToStack', p(() => wm.moveWindowToStack(window)))
+		.add('refreshWindowsData', p(() => wm.refreshWindowsData()))
+		.add('updateWindows', p(() => wm.updateWindows({ targetNumMasterWindows: state[space.id].numMasterWindows })))
+		.add('validateState', p(() => wm.validateState(window)))
+		.on('cycle', (event: any) => {
+			console.log(String(event.target));
+		})
+		.run({ async: true });
+}
+
+void main();
