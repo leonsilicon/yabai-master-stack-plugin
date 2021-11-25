@@ -1,9 +1,10 @@
 import 'dotenv/config';
 
 import Benchmark from 'benchmark';
-process.env.DEBUG = '';
 
 import { createInitializedWindowsManager } from '../src/utils/window';
+
+process.env.DEBUG = '';
 
 function p(fn: () => any) {
 	return {
@@ -18,7 +19,7 @@ function p(fn: () => any) {
 async function main() {
 	const suite = new Benchmark.Suite();
 
-	const { wm, state, space } = await createInitializedWindowsManager();
+	const { wm } = await createInitializedWindowsManager();
 	const window = wm.getFocusedWindow()!;
 	const stackWindows = wm.getStackWindows();
 

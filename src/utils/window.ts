@@ -5,7 +5,7 @@ import { yabaiPath } from '../config';
 import { readState, writeState } from '../state';
 import type { Display, Space, State, Window } from '../types';
 import { getFocusedDisplay } from './display';
-import { logDebug, logTime, logTimeEnd } from './log';
+import { logDebug } from './log';
 import { getFocusedSpace } from './space';
 import { getYabaiOutput } from './yabai';
 
