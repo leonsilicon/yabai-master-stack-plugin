@@ -4,18 +4,9 @@ import Benchmark from 'benchmark';
 
 import { setDebug } from '../src/config';
 import { createInitializedWindowsManager } from '../src/utils/window';
+import { p } from './utils';
 
 setDebug(false);
-
-function p(fn: () => any) {
-	return {
-		defer: true,
-		async fn(deferred: any) {
-			await fn();
-			deferred.resolve();
-		},
-	};
-}
 
 async function main() {
 	const suite = new Benchmark.Suite();
