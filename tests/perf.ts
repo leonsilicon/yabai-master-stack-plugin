@@ -20,7 +20,7 @@ function p(fn: () => any) {
 async function main() {
 	const suite = new Benchmark.Suite();
 
-	const { wm } = await createInitializedWindowsManager();
+	const { wm, state } = await createInitializedWindowsManager();
 	const window = wm.getFocusedWindow()!;
 	const stackWindows = wm.getStackWindows();
 
@@ -59,7 +59,7 @@ async function main() {
 		.add('moveWindowToStack', p(() => wm.moveWindowToStack(window)))
 		.add('refreshWindowsData', p(() => wm.refreshWindowsData()))
 		.add('updateWindows', p(() => wm.updateWindows({ targetNumMasterWindows: 1 })))
-		.add('validateState', p(() => wm.validateState(window)))
+		.add('validateState', p(() => wm.validateState(state)))
 		.on('cycle', (event: any) => {
 			console.log(String(event.target));
 		})
