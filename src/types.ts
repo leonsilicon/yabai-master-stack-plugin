@@ -67,3 +67,16 @@ export type Space = {
 	'first-window': number;
 	'last-window': number;
 };
+
+export const Task = {
+	closeFocusedWindow: 'close-focused-window',
+	decreaseMasterWindowCount: 'decrease-master-window-count',
+	focusDownWindow: 'focus-down-window',
+	focusUpWindow: 'focus-up-window',
+	increaseMasterWindowCount: 'increase-master-window-count',
+	onYabaiStart: 'on-yabai-start',
+	windowCreated: 'window-created',
+	windowMoved: 'window-moved'
+} as const;
+
+export type Task = typeof Task;

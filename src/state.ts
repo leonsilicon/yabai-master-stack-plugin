@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import pkgDir from 'pkg-dir';
 
-import type { State } from './types';
+import { State, Task } from './types';
 import { getSpaces } from './utils/space';
 
 const stateFilePath = path.join(pkgDir.sync(__dirname)!, 'state.json');
@@ -34,3 +34,7 @@ export async function readState(): Promise<State> {
 		return defaultState;
 	}
 }
+
+export const activeHandlers = {
+	[Task.windowMoved]: false
+};

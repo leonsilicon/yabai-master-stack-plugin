@@ -14,7 +14,8 @@ import { increaseMasterWindowCount } from '../fns/increase-master-window-count';
 import { onYabaiStart } from '../handlers/on-yabai-start';
 import { windowCreated } from '../handlers/window-created';
 import { windowMoved } from '../handlers/window-moved';
-import { readState } from '../state';
+import { activeHandlers, readState } from '../state';
+import { Task } from '../types';
 import type { WindowsManager, WMPayload } from '../utils';
 import { createInitializedWindowsManager } from '../utils';
 import { getFocusedDisplay } from '../utils/display';
@@ -24,6 +25,7 @@ const app = fastify();
 
 async function createWMPayload(wm: WindowsManager): Promise<WMPayload> {
 	const state = await readState();
+	await wm.refreshWindowsData();
 	const wmPayload: WMPayload = {
 		display: await getFocusedDisplay(),
 		space: await getFocusedSpace(),
@@ -43,19 +45,19 @@ async function main() {
 	}>('/run/:command', async (request, reply) => {
 		const wmPayload = await createWMPayload(wm);
 		switch (request.params.command) {
-			case 'close-focused-window':
+			case Task.closeFocusedWindow:
 				await closeFocusedWindow(wmPayload);
 				break;
-			case 'decrease-master-window-count':
+			case Task.decreaseMasterWindowCount:
 				await decreaseMasterWindowCount(wmPayload);
 				break;
-			case 'focus-down-window':
+			case Task.focusDownWindow:
 				await focusDownWindow(wmPayload);
 				break;
-			case 'focus-up-window':
+			case Task.focusUpWindow:
 				await focusUpWindow(wmPayload);
 				break;
-			case 'increase-master-window-count':
+			case Task.increaseMasterWindowCount:
 				await increaseMasterWindowCount(wmPayload);
 				break;
 		}
@@ -67,15 +69,30 @@ async function main() {
 		Params: { event: string };
 	}>('/handle/:event', async (request, reply) => {
 		const wmPayload = await createWMPayload(wm);
+		console.log(request.params.event);
 		switch (request.params.event) {
-			case 'on-yabai-start':
+			case Task.onYabaiStart:
 				await onYabaiStart(wmPayload);
 				break;
-			case 'window-created':
-				await windowCreated(wmPayload);
+			case Task.windowCreated:
+				if (!activeHandlers[Task.windowMoved]) {
+					try {
+						activeHandlers[Task.windowMoved] = true;
+						await windowCreated(wmPayload);
+					} finally {
+						activeHandlers[Task.windowMoved] = false;
+					}
+				}
 				break;
-			case 'window-moved':
-				await windowMoved(wmPayload);
+			case Task.windowMoved:
+				if (!activeHandlers[Task.windowMoved]) {
+					try {
+						activeHandlers[Task.windowMoved] = true;
+						await windowMoved(wmPayload);
+					} finally {
+						activeHandlers[Task.windowMoved] = false;
+					}
+				}
 				break;
 		}
 

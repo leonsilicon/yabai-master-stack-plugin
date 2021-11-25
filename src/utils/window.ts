@@ -435,121 +435,141 @@ export function createWindowsManager({
 				return { status: true };
 			}
 		},
+		_shouldReupdateWindows: false,
+		isUpdatingWindows: false,
 		async updateWindows({
 			targetNumMasterWindows,
 		}: {
 			targetNumMasterWindows: number;
 		}) {
-			logDebug(
-				() =>
-					`updateWindows() called with targetNumMasterWindows = ${targetNumMasterWindows}`
-			);
-			const layoutValidity = await this.isValidLayout({
-				targetNumMasterWindows,
-			});
-			if (layoutValidity.status === true) {
-				logDebug(() => 'Valid layout detected; no changes were made.');
+			if (this.isUpdatingWindows) {
+				logDebug(() => 'Windows are currently updating, update queued.');
+				this._shouldReupdateWindows = true;
 				return;
-			} else {
+			}
+
+			try {
+				this.isUpdatingWindows = true;
 				logDebug(
 					() =>
-						`Invalid layout detected: ${layoutValidity.reason}. Updating windows...`
+						`updateWindows() called with targetNumMasterWindows = ${targetNumMasterWindows}`
 				);
-			}
-
-			const numWindows = this.windowsData.length;
-
-			// If the stack is supposed to exist but doesn't exist
-			if (targetNumMasterWindows !== numWindows && !this.doesStackExist()) {
-				logDebug(() => 'Stack does not exist, creating it...');
-				await this.createStack();
-			}
-
-			if (numWindows > 2) {
-				const masterWindows = this.getMasterWindows();
-				logDebug(
-					() => `Master windows: ${masterWindows.map((window) => window.app)}`
-				);
-				let curNumMasterWindows = masterWindows.length;
-
-				// If there are too many master windows, move them to stack
-				if (curNumMasterWindows > targetNumMasterWindows) {
+				const layoutValidity = await this.isValidLayout({
+					targetNumMasterWindows,
+				});
+				if (layoutValidity.status === true) {
+					logDebug(() => 'Valid layout detected; no changes were made.');
+					return;
+				} else {
 					logDebug(
 						() =>
-							`Too many master windows (${curNumMasterWindows}/${targetNumMasterWindows}).`
+							`Invalid layout detected: ${layoutValidity.reason}. Updating windows...`
 					);
-					// Sort the windows from bottom to top and then right to left
-					masterWindows.sort((window1, window2) =>
-						window1.frame.y !== window2.frame.y
-							? window1.frame.y - window2.frame.y
-							: window1.frame.x - window2.frame.x
-					);
-
-					while (curNumMasterWindows > targetNumMasterWindows) {
-						// Remove the window with the greatest y-coordinate first
-						const masterWindow = masterWindows.pop()!;
-
-						logDebug(
-							() => `Moving master window ${masterWindow.app} to stack.`
-						);
-						await this.moveWindowToStack(masterWindow);
-						curNumMasterWindows -= 1;
-					}
 				}
 
-				// If there are windows that aren't touching either the left side or the right side
-				// after the move, fill up master and then move the rest to stack
-				let middleWindows;
-				while ((middleWindows = this.getMiddleWindows()).length > 0) {
-					const middleWindow = middleWindows[0];
-					logDebug(() => `Middle window ${middleWindow.app} detected.`);
-					if (curNumMasterWindows < targetNumMasterWindows) {
+				const numWindows = this.windowsData.length;
+
+				// If the stack is supposed to exist but doesn't exist
+				if (targetNumMasterWindows !== numWindows && !this.doesStackExist()) {
+					logDebug(() => 'Stack does not exist, creating it...');
+					await this.createStack();
+				}
+
+				if (numWindows > 2) {
+					const masterWindows = this.getMasterWindows();
+					logDebug(
+						() => `Master windows: ${masterWindows.map((window) => window.app)}`
+					);
+					let curNumMasterWindows = masterWindows.length;
+
+					// If there are too many master windows, move them to stack
+					if (curNumMasterWindows > targetNumMasterWindows) {
 						logDebug(
-							() => `Moving middle window ${middleWindow.app} to master.`
+							() =>
+								`Too many master windows (${curNumMasterWindows}/${targetNumMasterWindows}).`
 						);
-						await this.moveWindowToMaster(middleWindow);
+						// Sort the windows from bottom to top and then right to left
+						masterWindows.sort((window1, window2) =>
+							window1.frame.y !== window2.frame.y
+								? window1.frame.y - window2.frame.y
+								: window1.frame.x - window2.frame.x
+						);
+
+						while (curNumMasterWindows > targetNumMasterWindows) {
+							// Remove the window with the greatest y-coordinate first
+							const masterWindow = masterWindows.pop()!;
+
+							logDebug(
+								() => `Moving master window ${masterWindow.app} to stack.`
+							);
+							await this.moveWindowToStack(masterWindow);
+							curNumMasterWindows -= 1;
+						}
+					}
+
+					// If there are windows that aren't touching either the left side or the right side
+					// after the move, fill up master and then move the rest to stack
+					let middleWindows;
+					while ((middleWindows = this.getMiddleWindows()).length > 0) {
+						const middleWindow = middleWindows[0];
+						logDebug(() => `Middle window ${middleWindow.app} detected.`);
+						if (curNumMasterWindows < targetNumMasterWindows) {
+							logDebug(
+								() => `Moving middle window ${middleWindow.app} to master.`
+							);
+							await this.moveWindowToMaster(middleWindow);
+							curNumMasterWindows += 1;
+						} else {
+							logDebug(
+								() => `Moving middle window ${middleWindow.app} to stack.`
+							);
+							await this.moveWindowToStack(middleWindow);
+						}
+					}
+
+					// If there are still not enough master windows, move some of the stack windows to master
+					const stackWindows = this.getStackWindows();
+					// Sort the stack windows by reverse y-coordinate and reverse x-coordinate to move the
+					// bottom-rightmost windows first
+					stackWindows.sort((window1, window2) =>
+						window1.frame.x !== window2.frame.x
+							? window2.frame.x - window1.frame.x
+							: window2.frame.y - window1.frame.y
+					);
+
+					while (curNumMasterWindows < targetNumMasterWindows) {
+						console.info(
+							`Not enough master windows (${curNumMasterWindows}/${targetNumMasterWindows})`
+						);
+						const stackWindow = stackWindows.pop()!;
+						logDebug(() => `Moving stack window ${stackWindow.app} to master.`);
+						await this.moveWindowToMaster(stackWindow);
 						curNumMasterWindows += 1;
-					} else {
-						logDebug(
-							() => `Moving middle window ${middleWindow.app} to stack.`
-						);
-						await this.moveWindowToStack(middleWindow);
 					}
 				}
 
-				// If there are still not enough master windows, move some of the stack windows to master
-				const stackWindows = this.getStackWindows();
-				// Sort the stack windows by reverse y-coordinate and reverse x-coordinate to move the
-				// bottom-rightmost windows first
-				stackWindows.sort((window1, window2) =>
-					window1.frame.x !== window2.frame.x
-						? window2.frame.x - window1.frame.x
-						: window2.frame.y - window1.frame.y
-				);
-
-				while (curNumMasterWindows < targetNumMasterWindows) {
-					console.info(
-						`Not enough master windows (${curNumMasterWindows}/${targetNumMasterWindows})`
+				// Note: the following should never be called
+				if (
+					(await this.isValidLayout({ targetNumMasterWindows })).status ===
+					false
+				) {
+					throw new Error(
+						`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
 					);
-					const stackWindow = stackWindows.pop()!;
-					logDebug(() => `Moving stack window ${stackWindow.app} to master.`);
-					await this.moveWindowToMaster(stackWindow);
-					curNumMasterWindows += 1;
+				} else {
+					logDebug(() => 'updateLayout() was successful.');
+				}
+
+				this.expectedCurrentNumMasterWindows = targetNumMasterWindows;
+			} finally {
+				this.isUpdatingWindows = false;
+				if (this._shouldReupdateWindows) {
+					this._shouldReupdateWindows = false;
+					await this.updateWindows({
+						targetNumMasterWindows,
+					});
 				}
 			}
-
-			// Note: the following should never be called
-			if (
-				(await this.isValidLayout({ targetNumMasterWindows })).status === false
-			) {
-				throw new Error(
-					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
-				);
-			} else {
-				logDebug(() => 'updateLayout() was successful.');
-			}
-
-			this.expectedCurrentNumMasterWindows = targetNumMasterWindows;
 		},
 		getTopWindow(windows: Window[]) {
 			if (windows.length === 0) {
