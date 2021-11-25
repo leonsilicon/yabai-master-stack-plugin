@@ -2,9 +2,10 @@ import 'dotenv/config';
 
 import Benchmark from 'benchmark';
 
+import { setDebug } from '../src/config';
 import { createInitializedWindowsManager } from '../src/utils/window';
 
-process.env.DEBUG = '';
+setDebug(false);
 
 function p(fn: () => any) {
 	return {
