@@ -20,7 +20,7 @@ async function execute(command: string) {
 async function main() {
 	const suite = new Benchmark.Suite();
 
-	const command = '-m query --window';
+	const command = '-m query --windows --window';
 
 	suite
 		.add(
