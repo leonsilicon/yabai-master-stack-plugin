@@ -41,7 +41,6 @@ async function main() {
 	app.post<{
 		Params: { command: string };
 	}>('/run/:command', async (request, reply) => {
-		console.log(request.params);
 		const wmPayload = await createWMPayload(wm);
 		switch (request.params.command) {
 			case 'close-focused-window':
