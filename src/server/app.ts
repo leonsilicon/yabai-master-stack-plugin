@@ -35,9 +35,13 @@ async function createWMPayload(wm: WindowsManager): Promise<WMPayload> {
 
 async function main() {
 	const { wm } = await createInitializedWindowsManager();
+
+	await onYabaiStart(await createWMPayload(wm));
+
 	app.post<{
 		Params: { command: string };
 	}>('/run/:command', async (request, reply) => {
+		console.log(request.params);
 		const wmPayload = await createWMPayload(wm);
 		switch (request.params.command) {
 			case 'close-focused-window':
