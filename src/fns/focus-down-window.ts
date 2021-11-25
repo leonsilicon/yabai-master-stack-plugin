@@ -1,9 +1,8 @@
-import { createInitializedWindowsManager } from '../utils';
+import type { WMPayload } from '../utils';
 import { logDebug } from '../utils/log';
-import { main } from '../utils/main';
 
-main(async () => {
-	const { wm } = await createInitializedWindowsManager();
+export async function focusDownWindow(wmPayload: WMPayload) {
+	const { wm } = wmPayload;
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
 		// If the focused window is the lowest master window
@@ -35,4 +34,4 @@ main(async () => {
 	} else {
 		await wm.executeYabaiCommand(`-m window --focus first`);
 	}
-});
+}

@@ -1,9 +1,8 @@
 import type { Window } from '../types';
-import { createInitializedWindowsManager } from '../utils';
-import { main } from '../utils/main';
+import type {WMPayload } from '../utils';
 
-main(async () => {
-	const { wm } = await createInitializedWindowsManager();
+export async function closeFocusedWindow(wmPayload: WMPayload) {
+	const { wm } = wmPayload;
 	const windowToClose = wm.getFocusedWindow();
 
 	if (windowToClose === undefined) return;
@@ -56,4 +55,4 @@ main(async () => {
 	if (windowToFocus !== undefined) {
 		await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 	}
-});
+}

@@ -1,11 +1,8 @@
-import { createInitializedWindowsManager } from '../utils';
-import { releaseHandlerLock } from '../utils/handler';
-import { main } from '../utils/main';
+import type { WMPayload } from '../utils';
 
-releaseHandlerLock({ force: true });
-main(async () => {
-	const { wm, state, space } = await createInitializedWindowsManager();
+export async function onYabaiStart(wmPayload: WMPayload) {
+	const { wm, state, space } = wmPayload;
 	await wm.updateWindows({
 		targetNumMasterWindows: state[space.id].numMasterWindows,
 	});
-});
+}

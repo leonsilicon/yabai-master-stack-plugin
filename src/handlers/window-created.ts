@@ -1,9 +1,8 @@
-import { createInitializedWindowsManager } from '../utils';
+import type { WMPayload } from '../utils';
 import { logDebug } from '../utils/log';
-import { main } from '../utils/main';
 
-main(async () => {
-	const { wm, state, space } = await createInitializedWindowsManager();
+export async function windowCreated(wmPayload: WMPayload) {
+	const { wm, state, space } = wmPayload;
 	logDebug(() => 'Starting to handle window_created.');
 
 	if ((await wm.isValidLayout()).status === true) {
@@ -35,4 +34,4 @@ main(async () => {
 		targetNumMasterWindows: state[space.id].numMasterWindows,
 	});
 	logDebug(() => 'Finished handling window_created.');
-});
+}

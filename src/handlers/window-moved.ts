@@ -1,12 +1,11 @@
-import { createInitializedWindowsManager } from '../utils';
+import type { WMPayload } from '../utils';
 import { logDebug } from '../utils/log';
-import { main } from '../utils/main';
 
-main(async () => {
-	const { wm, space, state } = await createInitializedWindowsManager();
+export async function windowMoved(wmPayload: WMPayload) {
+	const { wm, space, state } = wmPayload;
 	logDebug(() => 'Starting to handle window_moved.');
 	await wm.updateWindows({
 		targetNumMasterWindows: state[space.id].numMasterWindows,
 	});
 	logDebug(() => 'Finished handling window_moved.');
-});
+}

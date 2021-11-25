@@ -4,6 +4,7 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
+		"start": "ts-node src/server/app.ts",
 		"build": "rimraf dist && tsc --outDir dist && node dist/replace.js",
 		"lint": "eslint --fix src",
 		"prettier": "prettier --write src",
@@ -14,6 +15,7 @@
 		"delay": "^5.0.0",
 		"dotenv": "^10.0.0",
 		"execa": "^5.1.1",
+		"fastify": "^3.24.0",
 		"get-stream": "^6.0.1",
 		"pkg-dir": "^5.0.0",
 		"replace-in-file": "^6.2.0",

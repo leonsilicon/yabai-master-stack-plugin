@@ -1,11 +1,9 @@
 import { writeState } from '../state';
-import { createInitializedWindowsManager } from '../utils';
+import type { WMPayload } from '../utils';
 import { logDebug } from '../utils/log';
-import { main } from '../utils/main';
 
-main(async () => {
-	const { wm, state, space } = await createInitializedWindowsManager();
-
+export async function decreaseMasterWindowCount(wmPayload: WMPayload) {
+	const { state, space, wm } = wmPayload;
 	if (state[space.id].numMasterWindows > 1) {
 		// Update the state
 		state[space.id].numMasterWindows -= 1;
@@ -15,4 +13,4 @@ main(async () => {
 			targetNumMasterWindows: state[space.id].numMasterWindows,
 		});
 	}
-});
+}

@@ -599,7 +599,16 @@ export function createWindowsManager({
 	return windowsManager;
 }
 
-export async function createInitializedWindowsManager() {
+export type WindowsManager = ReturnType<typeof createWindowsManager>;
+
+export type WMPayload = {
+	state: State;
+	display: Display;
+	space: Space;
+	wm: WindowsManager;
+};
+
+export async function createInitializedWindowsManager(): Promise<WMPayload> {
 	const state = await readState();
 	const display = await getFocusedDisplay();
 	const space = await getFocusedSpace();

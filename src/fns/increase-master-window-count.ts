@@ -1,10 +1,9 @@
 import { writeState } from '../state';
-import { createInitializedWindowsManager } from '../utils';
+import type { WMPayload } from '../utils';
 import { logDebug } from '../utils/log';
-import { main } from '../utils/main';
 
-main(async () => {
-	const { wm, space, state } = await createInitializedWindowsManager();
+export async function increaseMasterWindowCount(wmPayload: WMPayload) {
+	const { wm, space, state } = wmPayload;
 	if (state[space.id].numMasterWindows < wm.windowsData.length - 1) {
 		state[space.id].numMasterWindows += 1;
 		writeState(state);
@@ -13,4 +12,4 @@ main(async () => {
 			targetNumMasterWindows: state[space.id].numMasterWindows,
 		});
 	}
-});
+}
