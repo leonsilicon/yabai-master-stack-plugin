@@ -56,7 +56,7 @@ async function main() {
 		.add('moveWindowToMaster', p(() => wm.moveWindowToMaster(window)))
 		.add('moveWindowToStack', p(() => wm.moveWindowToStack(window)))
 		.add('refreshWindowsData', p(() => wm.refreshWindowsData()))
-		.add('updateWindows', p(() => wm.updateWindows({ targetNumMasterWindows: state[space.id].numMasterWindows })))
+		.add('updateWindows', p(() => wm.updateWindows({ targetNumMasterWindows: 1 })))
 		.add('validateState', p(() => wm.validateState(window)))
 		.on('cycle', (event: any) => {
 			console.log(String(event.target));

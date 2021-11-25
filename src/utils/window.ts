@@ -440,8 +440,9 @@ export function createWindowsManager({
 		}: {
 			targetNumMasterWindows: number;
 		}) {
-			console.info(
-				`updateWindows() called with targetNumMasterWindows = ${targetNumMasterWindows}`
+			logDebug(
+				() =>
+					`updateWindows() called with targetNumMasterWindows = ${targetNumMasterWindows}`
 			);
 			const layoutValidity = await this.isValidLayout({
 				targetNumMasterWindows,
@@ -450,8 +451,9 @@ export function createWindowsManager({
 				logDebug(() => 'Valid layout detected; no changes were made.');
 				return;
 			} else {
-				console.info(
-					`Invalid layout detected: ${layoutValidity.reason}. Updating windows...`
+				logDebug(
+					() =>
+						`Invalid layout detected: ${layoutValidity.reason}. Updating windows...`
 				);
 			}
 
@@ -465,15 +467,16 @@ export function createWindowsManager({
 
 			if (numWindows > 2) {
 				const masterWindows = this.getMasterWindows();
-				console.info(
-					`Master windows: ${masterWindows.map((window) => window.app)}`
+				logDebug(
+					() => `Master windows: ${masterWindows.map((window) => window.app)}`
 				);
 				let curNumMasterWindows = masterWindows.length;
 
 				// If there are too many master windows, move them to stack
 				if (curNumMasterWindows > targetNumMasterWindows) {
-					console.info(
-						`Too many master windows (${curNumMasterWindows}/${targetNumMasterWindows}).`
+					logDebug(
+						() =>
+							`Too many master windows (${curNumMasterWindows}/${targetNumMasterWindows}).`
 					);
 					// Sort the windows from bottom to top and then right to left
 					masterWindows.sort((window1, window2) =>
