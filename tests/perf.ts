@@ -1,8 +1,8 @@
 import 'dotenv/config';
 
 import Benchmark from 'benchmark';
-
-import { createInitializedWindowsManager } from '../src/utils/window';
+import execa from 'execa';
+import path from 'path';
 
 function p(fn: any) {
 	return {
@@ -16,13 +16,13 @@ function p(fn: any) {
 
 const suite = new Benchmark.Suite();
 
+const fnsPath = path.join(__dirname, '../dist/fns');
+const focusUpWindowCommand = `node ${path.join(fnsPath, 'focus-up-window.js')}`;
+
 suite
-	.add(
-		'createInitializedWindowsManager',
-		p(async () => {
-			await createInitializedWindowsManager();
-		})
-	)
+	.add('focus-up-window', () => {
+		execa.commandSync(focusUpWindowCommand);
+	})
 	.on('cycle', (event: any) => {
 		console.log(String(event.target));
 	})
