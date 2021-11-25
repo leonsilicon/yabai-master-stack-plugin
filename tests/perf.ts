@@ -1,7 +1,29 @@
-import { commandSync } from 'execa';
+import 'dotenv/config';
 
-console.time('perf-test');
-for (let i = 0; i < 50; i += 1) {
-	commandSync('node dist/fns/focus-up-window.js');
+import Benchmark from 'benchmark';
+
+import { createInitializedWindowsManager } from '../src/utils/window';
+
+function p(fn: any) {
+	return {
+		defer: true,
+		async fn(deferred: any) {
+			await fn();
+			deferred.resolve();
+		},
+	};
 }
-console.timeEnd('perf-test')
+
+const suite = new Benchmark.Suite();
+
+suite
+	.add(
+		'createInitializedWindowsManager',
+		p(async () => {
+			await createInitializedWindowsManager();
+		})
+	)
+	.on('cycle', (event: any) => {
+		console.log(String(event.target));
+	})
+	.run({ async: true });

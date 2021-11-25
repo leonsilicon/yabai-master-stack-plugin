@@ -5,3 +5,15 @@ export function logDebug(cb: () => unknown) {
 		console.info(cb());
 	}
 }
+
+export function logTime(label: string) {
+	if (debug) {
+		console.time(label);
+	}
+}
+
+export function logTimeEnd(label: string) {
+	if (debug) {
+		console.timeEnd(label);
+	}
+}
