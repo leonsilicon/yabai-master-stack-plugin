@@ -27,13 +27,23 @@ async function main() {
 			'execa + getYabaiOutput',
 			p(async () => {
 				const yabaiProcess = execa(yabaiPath, parse(command) as string[]);
-				await getYabaiOutput(yabaiProcess);
+				const _output = await getYabaiOutput(yabaiProcess);
+			})
+		)
+		.add('execa + commandSync', () => {
+			const _output = execa.commandSync(`${yabaiPath} ${command}`).stdout;
+		})
+		.add(
+			'execa + command',
+			p(async () => {
+				const execaResult = await execa.command(`${yabaiPath} ${command}`);
+				const _output = execaResult.stdout;
 			})
 		)
 		.add(
 			'child_process.exec',
 			p(async () => {
-				await execute(`${yabaiPath} ${command}`);
+				const _output = await execute(`${yabaiPath} ${command}`);
 			})
 		)
 		.on('cycle', (event: any) => {
