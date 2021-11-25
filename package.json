@@ -4,7 +4,8 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
-		"start": "ts-node src/server/app.ts",
+		"start": "node dist/server/app.js",
+		"bstart": "pnpm build && pnpm start",
 		"build": "rimraf dist && tsc --outDir dist && node dist/replace.js",
 		"lint": "eslint --fix src",
 		"prettier": "prettier --write src",

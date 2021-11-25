@@ -4,6 +4,7 @@ import { logDebug } from '../utils/log';
 export async function focusDownWindow(wmPayload: WMPayload) {
 	const { wm } = wmPayload;
 	const focusedWindow = wm.getFocusedWindow();
+	logDebug(() => `Focused window: ${focusedWindow?.app}`);
 	if (focusedWindow !== undefined) {
 		// If the focused window is the lowest master window
 		if (

@@ -5,6 +5,7 @@ import 'dotenv/config';
  */
 import fastify from 'fastify';
 
+import { port } from '../config';
 import { closeFocusedWindow } from '../fns/close-focused-window';
 import { decreaseMasterWindowCount } from '../fns/decrease-master-window-count';
 import { focusDownWindow } from '../fns/focus-down-window';
@@ -35,7 +36,7 @@ async function createWMPayload(wm: WindowsManager): Promise<WMPayload> {
 async function main() {
 	const { wm } = await createInitializedWindowsManager();
 	app.post<{
-		Params: { command: string }
+		Params: { command: string };
 	}>('/run/:command', async (request, reply) => {
 		const wmPayload = await createWMPayload(wm);
 		switch (request.params.command) {
@@ -60,7 +61,7 @@ async function main() {
 	});
 
 	app.post<{
-		Params: { event: string }
+		Params: { event: string };
 	}>('/handle/:event', async (request, reply) => {
 		const wmPayload = await createWMPayload(wm);
 		switch (request.params.event) {
@@ -78,8 +79,12 @@ async function main() {
 		return reply.status(200).send('');
 	});
 
-	app.listen(process.env.PORT || 7513, (err, address) => {
-		console.info(`Yabai plugin server is listening at port ${address}`);
+	app.listen(port, (err, address) => {
+		if (err) {
+			console.error(err);
+		} else {
+			console.info(`Yabai plugin server is listening at port ${address}`);
+		}
 	});
 }
 
