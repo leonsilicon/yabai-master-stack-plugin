@@ -2,15 +2,17 @@ import * as path from 'node:path';
 import process from 'node:process';
 import dotenv from 'dotenv';
 import execa from 'execa';
-import { rmDist } from 'lion-system';
+import { rmDist, chProjectDir } from 'lion-system';
 import pkgDir from 'pkg-dir';
 import replace from 'replace-in-file';
+import desm from 'desm';
 
+chProjectDir(import.meta.url);
 rmDist();
 execa.sync('tsc');
 
 dotenv.config({
-	path: path.join(pkgDir.sync(__dirname)!, '.env'),
+	path: path.join(pkgDir.sync(desm(import.meta.url))!, '.env'),
 });
 
 replace.sync({

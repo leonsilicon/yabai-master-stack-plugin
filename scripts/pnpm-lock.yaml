@@ -1,0 +1,13 @@
+lockfileVersion: 5.3
+
+specifiers:
+  desm: ^1.2.0
+
+dependencies:
+  desm: 1.2.0
+
+packages:
+
+  /desm/1.2.0:
+    resolution: {integrity: sha512-/sHgwtz8V4kzHc/cii4OTtpEssvYe/yDDlPnZyMP5wO5KXYGfUoh22n+8OMhepStjhq6o577SRgTrdfcRepDbw==}
+    dev: false
