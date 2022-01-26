@@ -22,7 +22,7 @@
 		"signal-exit": "^3.0.5"
 	},
 	"devDependencies": {
-		"@leonzalion/configs": "^1.0.41",
+		"@leonzalion/configs": "^1.0.42",
 		"@types/benchmark": "^2.1.1",
 		"@types/lockfile": "^1.0.2",
 		"@types/node": "^16.9.3",

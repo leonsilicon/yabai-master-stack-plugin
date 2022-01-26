@@ -1,7 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
-  '@leonzalion/configs': ^1.0.41
+  '@leonzalion/configs': ^1.0.42
   '@types/benchmark': ^2.1.1
   '@types/lockfile': ^1.0.2
   '@types/node': ^16.9.3
@@ -42,7 +42,7 @@ dependencies:
   signal-exit: 3.0.5
 
 devDependencies:
-  '@leonzalion/configs': 1.0.41_d98c3853af5cb6c8d157643cbc093c33
+  '@leonzalion/configs': 1.0.42_d98c3853af5cb6c8d157643cbc093c33
   '@types/benchmark': 2.1.1
   '@types/lockfile': 1.0.2
   '@types/node': 16.10.1
@@ -403,8 +403,8 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
 
-  /@leonzalion/configs/1.0.41_d98c3853af5cb6c8d157643cbc093c33:
-    resolution: {integrity: sha512-UlztMEY8EdQtyquGFUo+aQSL84ebfy6dI7d8lHgxn1Fo2L42dnfcaq3clRw/9XTBLzZxVEWqygXVYYQ3hT0xNQ==}
+  /@leonzalion/configs/1.0.42_d98c3853af5cb6c8d157643cbc093c33:
+    resolution: {integrity: sha512-qeCuMlmqLHpa9C8hLlPbxBqkSirDrN6KyBjpktMj5VfxfjMu7kfNDwLxl1jSgc/lwgdWOVdiME39xmUoZ9PXIg==}
     hasBin: true
     peerDependencies:
       eslint: ^8.4.0
