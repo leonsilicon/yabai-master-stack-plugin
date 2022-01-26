@@ -1,6 +1,6 @@
-import { createInitializedWindowsManager } from '../utils';
-import { logDebug } from '../utils/log';
-import { main } from '../utils/main';
+import { createInitializedWindowsManager } from '~/utils';
+import { logDebug } from '~/utils/log';
+import { main } from '~/utils/main';
 
 main(async () => {
 	const { wm, state, space } = await createInitializedWindowsManager();

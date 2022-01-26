@@ -3,9 +3,10 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"license": "MIT",
+	"prettier": "@leonzalion/configs/prettier",
 	"scripts": {
-		"build": "rimraf dist && tsc --outDir dist && node dist/replace.js",
-		"lint": "eslint --fix src",
+		"build": "node-ts ./scripts/build.ts",
+		"lint": "eslint --fix --cache .",
 		"prettier": "prettier --write src",
 		"tc": "tsc --noEmit",
 		"test:perf": "ts-node tests/perf.ts"
@@ -21,6 +22,7 @@
 		"signal-exit": "^3.0.5"
 	},
 	"devDependencies": {
+		"@leonzalion/configs": "^1.0.41",
 		"@types/benchmark": "^2.1.1",
 		"@types/lockfile": "^1.0.2",
 		"@types/node": "^16.9.3",
@@ -35,8 +37,10 @@
 		"eslint-plugin-import": "^2.24.2",
 		"eslint-plugin-simple-import-sort": "^7.0.0",
 		"eslint-plugin-unicorn": "^36.0.0",
+		"lion-system": "^1.0.5",
 		"prettier": "^2.4.1",
 		"rimraf": "^3.0.2",
+		"sync-index": "^1.0.11",
 		"ts-node": "^10.2.1",
 		"typescript": "^4.4.3"
 	}

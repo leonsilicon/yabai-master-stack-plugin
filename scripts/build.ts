@@ -1,7 +1,13 @@
+import * as path from 'node:path';
+import process from 'node:process';
 import dotenv from 'dotenv';
-import path from 'path';
+import execa from 'execa';
+import { rmDist } from 'lion-system';
 import pkgDir from 'pkg-dir';
 import replace from 'replace-in-file';
+
+rmDist();
+execa.sync('tsc');
 
 dotenv.config({
 	path: path.join(pkgDir.sync(__dirname)!, '.env'),
@@ -20,9 +26,10 @@ replace.sync({
 					`Environment variable ${envVar} not defined in environment/.env file.`
 				);
 			} else {
-				return "undefined";
+				return 'undefined';
 			}
 		}
+
 		return JSON.stringify(envValue);
 	},
 });
