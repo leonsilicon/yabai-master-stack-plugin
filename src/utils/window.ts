@@ -2,12 +2,12 @@ import { execa } from 'execa';
 import { parse } from 'shell-quote';
 
 import type { Display, Space, State, Window } from '../types.js';
-import { yabaiPath } from './config.js';
 import { readState, writeState } from './state.js';
 import { getFocusedDisplay } from './display.js';
 import { logDebug } from './log.js';
 import { getFocusedSpace } from './space.js';
 import { getYabaiOutput } from './yabai.js';
+import { getConfig } from '~/utils/config.js';
 
 type CreateWindowsManagerProps = {
 	display: Display;
@@ -30,6 +30,7 @@ export function createWindowsManager({
 	type GetWindowDataProps = { processId?: string; windowId?: string };
 
 	async function getWindowsData() {
+		const { yabaiPath } = getConfig();
 		const yabaiProcess = execa(yabaiPath, ['-m', 'query', '--windows']);
 		const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
 		const yabaiOutput = await yabaiOutputPromise;
@@ -78,6 +79,7 @@ export function createWindowsManager({
 			return this.windowsData.find((win) => window.id === win.id)!;
 		},
 		async executeYabaiCommand(command: string) {
+			const { yabaiPath } = getConfig();
 			const yabaiProcess = execa(yabaiPath, parse(command) as string[]);
 			const yabaiOutput = await getYabaiOutput(yabaiProcess);
 			await this.refreshWindowsData();

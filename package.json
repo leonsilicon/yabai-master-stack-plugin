@@ -16,6 +16,7 @@
 		"dotenv": "^14.3.2",
 		"execa": "^6.0.0",
 		"get-stream": "^6.0.1",
+		"onetime": "^6.0.0",
 		"pkg-dir": "^6.0.1",
 		"replace-in-file": "^6.3.2",
 		"shell-quote": "^1.7.3",

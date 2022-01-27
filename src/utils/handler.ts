@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { packageDirectorySync } from 'pkg-dir';
 
-import { acquireLock, releaseLock } from './lock';
+import { acquireLock, releaseLock } from './lock.js';
 
 const handlerLockPath = path.join(packageDirectorySync(), 'handler.lock');
 

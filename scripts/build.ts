@@ -1,35 +1,19 @@
-import process from 'node:process';
+import * as fs from 'node:fs';
 import dotenv from 'dotenv';
 import { execaCommandSync as exec } from 'execa';
 import { rmDist, chProjectDir } from 'lion-system';
-import replace from 'replace-in-file';
 import { join } from 'desm';
 
 chProjectDir(import.meta.url);
+
+if (!fs.existsSync('plugin-config.cjs')) {
+	throw new Error('You must have a plugin-config.cjs in the project root.');
+}
+
 rmDist();
 exec('tsc');
+fs.copyFileSync('plugin-config.cjs', 'dist/plugin-config.cjs');
 
 dotenv.config({
 	path: join(import.meta.url, '..'),
-});
-
-replace.sync({
-	files: 'dist/config.js',
-	from: /process\.env\.\w+!?/g,
-	to: (match) => {
-		const envVar = match.slice(match.lastIndexOf('.') + 1);
-		const envValue = process.env[envVar];
-		if (envValue === undefined) {
-			// If the environment variable is marked is mandatory
-			if (match.endsWith('!')) {
-				throw new Error(
-					`Environment variable ${envVar} not defined in environment/.env file.`
-				);
-			} else {
-				return 'undefined';
-			}
-		}
-
-		return JSON.stringify(envValue);
-	},
 });

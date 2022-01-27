@@ -1,10 +1,13 @@
-import process from 'node:process';
+import { createRequire } from 'node:module';
+import onetime from 'onetime';
 
-export const yabaiPath = process.env.YABAI_PATH!;
+const __require = createRequire(import.meta.url);
 
-// eslint-disable-next-line import/no-mutable-exports
-export let debug = process.env.DEBUG === '1';
+type YabaiPluginConfig = {
+	yabaiPath: string;
+	debug: boolean;
+};
 
-export function setDebug(d: boolean) {
-	debug = d;
-}
+export const getConfig = onetime(
+	() => __require('../plugin-config.cjs') as YabaiPluginConfig
+);
