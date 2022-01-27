@@ -6,7 +6,7 @@ import type { YabaiMasterStackPluginConfig } from '~/types.js';
 
 export const getConfig = onetime(() => {
 	try {
-		const configPath = path.join(os.homedir(), '.config/ysmp/ysmp.config.json');
+		const configPath = path.join(os.homedir(), '.config/ymsp/ymsp.config.json');
 
 		return JSON.parse(
 			fs.readFileSync(configPath).toString()
@@ -15,7 +15,7 @@ export const getConfig = onetime(() => {
 		const err = error as Error & { code: string };
 		if (err.code === 'ENOENT') {
 			throw new Error(
-				'The config file at ~/.config/ysmp.config.json file was not found.'
+				'The config file at ~/.config/ymsp.config.json file was not found.'
 			);
 		} else {
 			throw err;
