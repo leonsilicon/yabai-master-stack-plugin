@@ -1,13 +1,13 @@
-import execa from 'execa';
+import { execa } from 'execa';
 import { parse } from 'shell-quote';
 
-import { yabaiPath } from '../config';
-import { readState, writeState } from '../state';
-import type { Display, Space, State, Window } from '../types';
-import { getFocusedDisplay } from './display';
-import { logDebug } from './log';
-import { getFocusedSpace } from './space';
-import { getYabaiOutput } from './yabai';
+import type { Display, Space, State, Window } from '../types.js';
+import { yabaiPath } from './config.js';
+import { readState, writeState } from './state.js';
+import { getFocusedDisplay } from './display.js';
+import { logDebug } from './log.js';
+import { getFocusedSpace } from './space.js';
+import { getYabaiOutput } from './yabai.js';
 
 type CreateWindowsManagerProps = {
 	display: Display;
@@ -94,10 +94,10 @@ export function createWindowsManager({
 			);
 
 			if (windowData === undefined) {
-				if (processId !== undefined) {
-					throw new Error(`Window with pid ${processId} not found.`);
+				if (processId === undefined) {
+					throw new Error(`Window with id ${windowId!} not found.`);
 				} else {
-					throw new Error(`Window with id ${windowId} not found.`);
+					throw new Error(`Window with pid ${processId} not found.`);
 				}
 			}
 
@@ -124,6 +124,7 @@ export function createWindowsManager({
 					'getDivingLineXCoordinate() was called when there are no windows.'
 				);
 			}
+
 			logDebug(() => `Top-right window: ${topRightWindow.app}`);
 
 			if (this.expectedCurrentNumMasterWindows === 1)
@@ -179,6 +180,7 @@ export function createWindowsManager({
 					topLeftWindow = window;
 				}
 			}
+
 			return topLeftWindow;
 		},
 		/*
@@ -203,6 +205,7 @@ export function createWindowsManager({
 					topRightWindow = window;
 				}
 			}
+
 			return topRightWindow;
 		},
 		getWidestStackWindow() {
@@ -215,6 +218,7 @@ export function createWindowsManager({
 					widestStackWindow = window;
 				}
 			}
+
 			return widestStackWindow;
 		},
 		getWidestMasterWindow() {
@@ -227,6 +231,7 @@ export function createWindowsManager({
 					widestMasterWindow = window;
 				}
 			}
+
 			return widestMasterWindow;
 		},
 		// In the event that the windows get badly rearranged and all the windows span the entire width of
@@ -235,7 +240,7 @@ export function createWindowsManager({
 			logDebug(() => 'Creating stack...');
 			let topRightWindow = this.getTopRightWindow();
 			if (topRightWindow === undefined) return;
-			logDebug(() => `Top-right window: ${topRightWindow?.app}`);
+			logDebug(() => `Top-right window: ${topRightWindow?.app ?? ''}`);
 
 			if (topRightWindow.split === 'horizontal') {
 				await this.executeYabaiCommand(
@@ -270,6 +275,7 @@ export function createWindowsManager({
 				for (const stackWindow of stackWindows) {
 					const window = this.getUpdatedWindowData(stackWindow);
 					if (window.split === 'vertical') {
+						// eslint-disable-next-line no-await-in-loop
 						await this.executeYabaiCommand(
 							`-m window ${window.id} --toggle split`
 						);
@@ -285,7 +291,7 @@ export function createWindowsManager({
 			try {
 				await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
 			} catch {
-				// empty
+				// Empty
 			}
 
 			await this.columnizeStackWindows();
@@ -297,6 +303,7 @@ export function createWindowsManager({
 						`-m window ${window.id} --toggle split`
 					);
 				}
+
 				return;
 			}
 
@@ -337,7 +344,7 @@ export function createWindowsManager({
 			try {
 				await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
 			} catch {
-				// empty
+				// Empty
 			}
 
 			// If the window is already a master window, then don't do anything
@@ -447,7 +454,7 @@ export function createWindowsManager({
 			const layoutValidity = await this.isValidLayout({
 				targetNumMasterWindows,
 			});
-			if (layoutValidity.status === true) {
+			if (layoutValidity.status) {
 				logDebug(() => 'Valid layout detected; no changes were made.');
 				return;
 			} else {
@@ -468,7 +475,10 @@ export function createWindowsManager({
 			if (numWindows > 2) {
 				const masterWindows = this.getMasterWindows();
 				logDebug(
-					() => `Master windows: ${masterWindows.map((window) => window.app)}`
+					() =>
+						`Master windows: ${masterWindows
+							.map((window) => window.app)
+							.join(',')}`
 				);
 				let curNumMasterWindows = masterWindows.length;
 
@@ -480,9 +490,9 @@ export function createWindowsManager({
 					);
 					// Sort the windows from bottom to top and then right to left
 					masterWindows.sort((window1, window2) =>
-						window1.frame.y !== window2.frame.y
-							? window1.frame.y - window2.frame.y
-							: window1.frame.x - window2.frame.x
+						window1.frame.y === window2.frame.y
+							? window1.frame.x - window2.frame.x
+							: window1.frame.y - window2.frame.y
 					);
 
 					while (curNumMasterWindows > targetNumMasterWindows) {
@@ -492,6 +502,7 @@ export function createWindowsManager({
 						logDebug(
 							() => `Moving master window ${masterWindow.app} to stack.`
 						);
+						// eslint-disable-next-line no-await-in-loop
 						await this.moveWindowToStack(masterWindow);
 						curNumMasterWindows -= 1;
 					}
@@ -507,12 +518,14 @@ export function createWindowsManager({
 						logDebug(
 							() => `Moving middle window ${middleWindow.app} to master.`
 						);
+						// eslint-disable-next-line no-await-in-loop
 						await this.moveWindowToMaster(middleWindow);
 						curNumMasterWindows += 1;
 					} else {
 						logDebug(
 							() => `Moving middle window ${middleWindow.app} to stack.`
 						);
+						// eslint-disable-next-line no-await-in-loop
 						await this.moveWindowToStack(middleWindow);
 					}
 				}
@@ -522,9 +535,9 @@ export function createWindowsManager({
 				// Sort the stack windows by reverse y-coordinate and reverse x-coordinate to move the
 				// bottom-rightmost windows first
 				stackWindows.sort((window1, window2) =>
-					window1.frame.x !== window2.frame.x
-						? window2.frame.x - window1.frame.x
-						: window2.frame.y - window1.frame.y
+					window1.frame.x === window2.frame.x
+						? window2.frame.y - window1.frame.y
+						: window2.frame.x - window1.frame.x
 				);
 
 				while (curNumMasterWindows < targetNumMasterWindows) {
@@ -533,20 +546,20 @@ export function createWindowsManager({
 					);
 					const stackWindow = stackWindows.pop()!;
 					logDebug(() => `Moving stack window ${stackWindow.app} to master.`);
+					// eslint-disable-next-line no-await-in-loop
 					await this.moveWindowToMaster(stackWindow);
 					curNumMasterWindows += 1;
 				}
 			}
 
+			const result = await this.isValidLayout({ targetNumMasterWindows });
 			// Note: the following should never be called
-			if (
-				(await this.isValidLayout({ targetNumMasterWindows })).status === false
-			) {
+			if (result.status) {
+				logDebug(() => 'updateLayout() was successful.');
+			} else {
 				throw new Error(
 					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
 				);
-			} else {
-				logDebug(() => 'updateLayout() was successful.');
 			}
 
 			this.expectedCurrentNumMasterWindows = targetNumMasterWindows;
@@ -555,12 +568,14 @@ export function createWindowsManager({
 			if (windows.length === 0) {
 				throw new Error('List of windows provided was empty.');
 			}
+
 			let topWindow = windows[0];
 			for (const w of windows) {
 				if (w.frame.y < topWindow.frame.y) {
 					topWindow = w;
 				}
 			}
+
 			return topWindow;
 		},
 		isTopWindow(windows: Window[], window: Window) {
@@ -577,6 +592,7 @@ export function createWindowsManager({
 					bottomWindow = w;
 				}
 			}
+
 			return bottomWindow;
 		},
 		isBottomWindow(windows: Window[], window: Window) {

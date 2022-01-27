@@ -1,4 +1,4 @@
-import { debug } from '../config';
+import { debug } from './config.js';
 
 export function logDebug(cb: () => unknown) {
 	if (debug) {

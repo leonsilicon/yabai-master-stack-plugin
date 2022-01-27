@@ -1,3 +1,5 @@
+import process from 'node:process';
+
 export const yabaiPath = process.env.YABAI_PATH!;
 
 // eslint-disable-next-line import/no-mutable-exports

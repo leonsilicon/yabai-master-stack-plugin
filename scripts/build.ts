@@ -1,18 +1,16 @@
-import * as path from 'node:path';
 import process from 'node:process';
 import dotenv from 'dotenv';
-import execa from 'execa';
+import { execaCommandSync as exec } from 'execa';
 import { rmDist, chProjectDir } from 'lion-system';
-import pkgDir from 'pkg-dir';
 import replace from 'replace-in-file';
-import desm from 'desm';
+import { join } from 'desm';
 
 chProjectDir(import.meta.url);
 rmDist();
-execa.sync('tsc');
+exec('tsc');
 
 dotenv.config({
-	path: path.join(pkgDir.sync(desm(import.meta.url))!, '.env'),
+	path: join(import.meta.url, '..'),
 });
 
 replace.sync({

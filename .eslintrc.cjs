@@ -1,5 +1,5 @@
-const createAliases = require('@leonzalion/configs/eslint/alias');
 const path = require('path');
+const createAliases = require('@leonzalion/configs/eslint/alias');
 
 module.exports = {
 	extends: [require.resolve('@leonzalion/configs/eslint')],
@@ -20,7 +20,4 @@ module.exports = {
 			},
 		},
 	],
-	rules: {
-		'import/extensions': 'off',
-	},
 };

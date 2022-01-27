@@ -1,9 +1,9 @@
-import path from 'path';
-import pkgDir from 'pkg-dir';
+import path from 'node:path';
+import { packageDirectorySync } from 'pkg-dir';
 
 import { acquireLock, releaseLock } from './lock';
 
-const handlerLockPath = path.join(pkgDir.sync(__dirname)!, 'handler.lock');
+const handlerLockPath = path.join(packageDirectorySync(), 'handler.lock');
 
 export function acquireHandlerLock() {
 	acquireLock(handlerLockPath);
