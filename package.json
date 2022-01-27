@@ -1,6 +1,6 @@
 {
 	"name": "yabai-master-stack-plugin",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"main": "run.js",
 	"type": "module",
 	"license": "MIT",
