@@ -4,6 +4,7 @@
 	"main": "run.js",
 	"type": "module",
 	"license": "MIT",
+	"url": "https://github.com/leonzalion/yabai-master-stack-plugin",
 	"prettier": "@leonzalion/configs/prettier",
 	"scripts": {
 		"start": "node-ts ./src/run.ts",
