@@ -1,4 +1,4 @@
-import type { Window } from '../types.js';
+import type { Window } from '../types/index.js';
 import { createInitializedWindowsManager, main } from '../utils/index.js';
 
 main(async () => {

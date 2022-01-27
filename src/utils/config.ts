@@ -2,7 +2,7 @@ import os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import onetime from 'onetime';
-import type { YabaiMasterStackPluginConfig } from '~/types.js';
+import type { YabaiMasterStackPluginConfig } from '~/types/index.js';
 
 export const getConfig = onetime(() => {
 	try {
