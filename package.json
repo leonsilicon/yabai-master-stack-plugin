@@ -37,7 +37,7 @@
 		"benchmark": "^2.1.4",
 		"desm": "^1.2.0",
 		"eslint": "^8.7.0",
-		"lion-system": "^1.0.8",
+		"lion-system": "^1.0.9",
 		"lionp": "^1.0.14",
 		"prettier": "^2.5.1",
 		"sync-index": "^1.0.11",
