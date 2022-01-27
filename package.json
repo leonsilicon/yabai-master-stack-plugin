@@ -40,5 +40,8 @@
 		"sync-index": "^1.0.11",
 		"ts-node": "^10.4.0",
 		"typescript": "^4.5.5"
+	},
+	"publishConfig": {
+		"directory": "dist"
 	}
 }
