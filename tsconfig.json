@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"outDir": "dist",
 		"target": "esnext",
-		"module": "commonjs",
+		"module": "esnext",
 		"moduleResolution": "node",
 		"noUncheckedIndexedAccess": false,
 		"esModuleInterop": true,

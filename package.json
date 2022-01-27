@@ -2,16 +2,22 @@
 	"name": "yabai-master-stack-plugin",
 	"version": "1.0.0",
 	"main": "index.js",
+	"type": "module",
 	"license": "MIT",
 	"prettier": "@leonzalion/configs/prettier",
 	"scripts": {
+		"start": "node-ts ./src/run.ts",
 		"build": "node-ts ./scripts/build.ts",
 		"lint": "eslint --fix --cache .",
 		"prettier": "prettier --write src",
 		"tc": "tsc --noEmit",
 		"test:perf": "ts-node tests/perf.ts"
 	},
+	"bin": {
+		"ymsp": "./run.js"
+	},
 	"dependencies": {
+		"commander": "^8.3.0",
 		"delay": "^5.0.0",
 		"dotenv": "^14.3.2",
 		"execa": "^6.0.0",
