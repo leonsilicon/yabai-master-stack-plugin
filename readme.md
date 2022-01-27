@@ -32,7 +32,19 @@ yabai -m signal --add event=window_moved action='ymsp window-moved'
 ymsp on-yabai-start
 ```
 
-Then, to make the actions of focusing on the next/prev window work smoothly, set the keybinds to execute the node scripts in the `fns` folder. For example, if you're using [skhd](https://github.com/koekeishiya/skhd), add the following into your `skhdrc` file:
+Then, to make the actions of focusing on the next/prev window work smoothly, set the keybinds to execute the `ymsp` command and pass the appropriate task as the second argument. The list of possible tasks are:
+
+`close-focused-window`: Quits the currently focused window by Yabai.
+\
+`decrease-master-window-count`: Decreases the number of master windows.
+\
+`focus-down-window`: Focuses on the window below the currently focused window.
+\
+`focus-up-window`: Focuses on the window above the currently focused window.
+\
+`increase-master-window-count`: Increases the number of master windows.
+
+For example, if you're using [skhd](https://github.com/koekeishiya/skhd), add the following into your `skhdrc` file:
 
 ```text
 # focus windows
@@ -43,6 +55,8 @@ alt + k : ymsp focus-up-window
 alt + shift - i : ymsp increase-master-window-count
 alt + shift - d : ymsp decrease-master-window-count
 ```
+
+[Here](https://github.com/leonzalion/macos-configs/blob/main/.config/goku/karabiner.edn#L69) is a real-world example usage of this plugin (using Karabiner + GokuRakuJoudo).
 
 ## Troubleshooting
 
