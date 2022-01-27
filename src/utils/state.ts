@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { packageDirectorySync } from 'pkg-dir';
 
+import os from 'node:os';
 import type { State } from '../types.js';
 import { getSpaces } from './space.js';
 
-const stateFilePath = path.join(packageDirectorySync(), 'state.json');
+const stateFilePath = path.join(os.homedir(), '.config/ymsp/state.json');
 
 export function writeState(state: State) {
 	fs.writeFileSync(stateFilePath, JSON.stringify(state));

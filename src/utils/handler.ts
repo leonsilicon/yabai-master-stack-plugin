@@ -1,9 +1,8 @@
+import os from 'node:os';
 import path from 'node:path';
-import { packageDirectorySync } from 'pkg-dir';
-
 import { acquireLock, releaseLock } from './lock.js';
 
-const handlerLockPath = path.join(packageDirectorySync(), 'handler.lock');
+const handlerLockPath = path.join(os.homedir(), '.config/ymsp/handler.lock');
 
 export function acquireHandlerLock() {
 	acquireLock(handlerLockPath);

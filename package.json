@@ -24,7 +24,6 @@
 		"execa": "^6.0.0",
 		"get-stream": "^6.0.1",
 		"onetime": "^6.0.0",
-		"pkg-dir": "^6.0.1",
 		"shell-quote": "^1.7.3",
 		"signal-exit": "^3.0.6"
 	},
