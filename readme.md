@@ -1,6 +1,6 @@
 # Yabai Master-Stack Plugin
 
-![A screenshot of the Master-Stack plugin in action](/images/yabai-master-stack-plugin-screenshot.png)
+![A video of the Master-Stack plugin in action](/images/yabai-master-stack-plugin-usage.gif)
 
 [Yabai](https://github.com/koekeishiya/yabai) is an amazing tiling manager for macOS. However, since the algorithm Yabai uses is based on bsp (binary-space partitioning), implementing layouts such as the master-stack layout in [dwm](https://dwm.suckless.org/) is [not within their goals for the project](https://github.com/koekeishiya/yabai/issues/658#issuecomment-693687832). Luckily, Yabai provides an incredibly powerful signal system that can execute commands in response to an event in Yabai (e.g. when a window is created, deleted, etc.). This plugin leverages this powerful system to emulate the dwm-style master-stack layout in Yabai.
 

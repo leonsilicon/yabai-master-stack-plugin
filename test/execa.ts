@@ -1,13 +1,12 @@
 import 'dotenv/config';
 
+import { exec } from 'node:child_process';
 import Benchmark from 'benchmark';
-import { exec } from 'child_process';
-import execa from 'execa';
+import { execa, execaCommandSync, execaCommand } from 'execa';
 import { parse } from 'shell-quote';
 
-import { yabaiPath } from '../src/config';
-import { getYabaiOutput } from '../src/utils/yabai';
-import { p } from './utils';
+import { p } from './utils.js';
+import { getConfig, getYabaiOutput } from '~/utils/index.js';
 
 async function execute(command: string) {
 	return new Promise((resolve) => {
@@ -18,6 +17,7 @@ async function execute(command: string) {
 }
 
 async function main() {
+	const { yabaiPath } = getConfig();
 	const suite = new Benchmark.Suite();
 
 	const command = ' -m query --windows --window';
@@ -32,14 +32,12 @@ async function main() {
 			})
 		)
 		.add('execa + commandSync', () => {
-			// eslint-disable-next-line prefer-template
-			const _output = execa.commandSync(yabaiPath + command).stdout;
+			const _output = execaCommandSync(yabaiPath + command).stdout;
 		})
 		.add(
 			'execa + command',
 			p(async () => {
-			// eslint-disable-next-line prefer-template
-				const execaResult = await execa.command(yabaiPath + command);
+				const execaResult = await execaCommand(yabaiPath + command);
 				const _output = execaResult.stdout;
 			})
 		)
