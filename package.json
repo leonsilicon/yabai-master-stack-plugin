@@ -11,7 +11,8 @@
 		"lint": "eslint --fix --cache .",
 		"prettier": "prettier --write src",
 		"tc": "tsc --noEmit",
-		"test:perf": "ts-node tests/perf.ts"
+		"release": "lionp",
+		"test:perf": "node-ts test/perf.ts"
 	},
 	"bin": {
 		"ymsp": "./run.js"
@@ -27,9 +28,10 @@
 		"signal-exit": "^3.0.6"
 	},
 	"devDependencies": {
-		"@leonzalion/configs": "^1.0.43",
+		"@leonzalion/configs": "^1.0.46",
 		"@types/benchmark": "^2.1.1",
 		"@types/node": "^17.0.12",
+		"@types/shell-quote": "^1.7.1",
 		"@types/signal-exit": "^3.0.1",
 		"benchmark": "^2.1.4",
 		"desm": "^1.2.0",

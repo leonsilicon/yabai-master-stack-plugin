@@ -1,9 +1,10 @@
 lockfileVersion: 5.3
 
 specifiers:
-  '@leonzalion/configs': ^1.0.43
+  '@leonzalion/configs': ^1.0.46
   '@types/benchmark': ^2.1.1
   '@types/node': ^17.0.12
+  '@types/shell-quote': ^1.7.1
   '@types/signal-exit': ^3.0.1
   benchmark: ^2.1.4
   commander: ^8.3.0
@@ -34,9 +35,10 @@ dependencies:
   signal-exit: 3.0.6
 
 devDependencies:
-  '@leonzalion/configs': 1.0.43_1805332b76d7e3d2c999065f05e7274e
+  '@leonzalion/configs': 1.0.46_1805332b76d7e3d2c999065f05e7274e
   '@types/benchmark': 2.1.1
   '@types/node': 17.0.12
+  '@types/shell-quote': 1.7.1
   '@types/signal-exit': 3.0.1
   benchmark: 2.1.4
   desm: 1.2.0
@@ -310,8 +312,8 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
 
-  /@leonzalion/configs/1.0.43_1805332b76d7e3d2c999065f05e7274e:
-    resolution: {integrity: sha512-zJ1FCvihqBITneTpWXgWKD81HwLteHlohC5pm3j5seKIZHuINpdC+YhgZifJbik70QN5316nK9/T50Cm5oPFlA==}
+  /@leonzalion/configs/1.0.46_1805332b76d7e3d2c999065f05e7274e:
+    resolution: {integrity: sha512-jRZdqyObZf2u0EHMonUf0VxqrCpRIHq1Y6WFospoZ+Ls++ndkbaAAN6YPGnZobyy+CCiDsTVce/28V+Z7jr02w==}
     hasBin: true
     peerDependencies:
       eslint: ^8.4.0
@@ -626,6 +628,10 @@ packages:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
       '@types/node': 17.0.12
+    dev: true
+
+  /@types/shell-quote/1.7.1:
+    resolution: {integrity: sha512-SWZ2Nom1pkyXCDohRSrkSKvDh8QOG9RfAsrt5/NsPQC4UQJ55eG0qClA40I+Gkez4KTQ0uDUT8ELRXThf3J5jw==}
     dev: true
 
   /@types/signal-exit/3.0.1:
