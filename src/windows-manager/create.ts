@@ -6,9 +6,6 @@ import type {
 	WindowsManager,
 } from '~/types/windows-manager.js';
 import type { Display, Space } from '~/types/yabai.js';
-import { getFocusedDisplay } from '~/utils/display.js';
-import { getFocusedSpace } from '~/utils/space.js';
-import { readState } from '~/utils/state.js';
 
 const properties = retrieveModuleProperties(
 	windowsManagerModules
