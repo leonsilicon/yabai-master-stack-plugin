@@ -1,7 +1,7 @@
 {
 	"name": "yabai-master-stack-plugin",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "run.js",
 	"type": "module",
 	"license": "MIT",
 	"prettier": "@leonzalion/configs/prettier",
