@@ -15,6 +15,7 @@
 		"test:perf": "node-ts test/perf.ts"
 	},
 	"bin": {
+		"yabai-master-stack-plugin": "./run.js",
 		"ymsp": "./run.js"
 	},
 	"dependencies": {

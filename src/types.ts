@@ -68,3 +68,8 @@ export type Space = {
 	'first-window': number;
 	'last-window': number;
 };
+
+export type YabaiMasterStackPluginConfig = {
+	yabaiPath: string;
+	debug: boolean;
+};
