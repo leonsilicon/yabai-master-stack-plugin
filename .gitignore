@@ -11,3 +11,4 @@ state.json.lock
 
 # config file
 ./plugin-config.cjs
+.eslintcache
