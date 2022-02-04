@@ -15,7 +15,7 @@ specifiers:
   get-stream: ^6.0.1
   lion-architecture: ^1.0.3
   lion-system: ^1.0.9
-  lionp: ^1.0.14
+  lionp: ^1.0.15
   liontypes: ^1.0.2
   onetime: ^6.0.0
   prettier: ^2.5.1
@@ -47,7 +47,7 @@ devDependencies:
   desm: 1.2.0
   eslint: 8.7.0
   lion-system: 1.0.9
-  lionp: 1.0.14
+  lionp: 1.0.15
   liontypes: 1.0.2
   prettier: 2.5.1
   sync-index: 1.0.11
@@ -2963,8 +2963,8 @@ packages:
       pkg-up: 4.0.0
     dev: true
 
-  /lionp/1.0.14:
-    resolution: {integrity: sha512-q/g72J4XLuQ/BpTor1PWWwEVis+sw2/dJA0LycRdT1v/OXuZa5j8sq/EW5+AA7lNEyWuA27xipfRQry2rtpWvw==}
+  /lionp/1.0.15:
+    resolution: {integrity: sha512-a1IK4x3TAw8V2uuRHmKJGy8qtCGZroa2kIyxwKawCVYP3m383V7orwxwPAeHB/piUL4P/cft/M6UGeVXoG1XRg==}
     engines: {git: '>=2.11.0', node: '>=10', npm: '>=6.8.0'}
     hasBin: true
     dependencies:
@@ -2983,6 +2983,7 @@ packages:
       is-interactive: 2.0.0
       is-scoped: 3.0.0
       issue-regex: 4.0.0
+      lion-system: 1.0.9
       listr2: 3.14.0_enquirer@2.3.6
       log-symbols: 4.1.0
       meow: 10.1.2
