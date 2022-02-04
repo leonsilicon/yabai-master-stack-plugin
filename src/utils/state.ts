@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import os from 'node:os';
-import type { State } from '../types.js';
+import type { State } from '../types/index.js';
 import { getSpaces } from './space.js';
 
 const stateFilePath = path.join(os.homedir(), '.config/ymsp/state.json');

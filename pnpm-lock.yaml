@@ -13,8 +13,10 @@ specifiers:
   eslint: ^8.7.0
   execa: ^6.0.0
   get-stream: ^6.0.1
+  lion-architecture: ^1.0.3
   lion-system: ^1.0.9
   lionp: ^1.0.14
+  liontypes: ^1.0.2
   onetime: ^6.0.0
   prettier: ^2.5.1
   shell-quote: ^1.7.3
@@ -22,6 +24,7 @@ specifiers:
   sync-index: ^1.0.11
   ts-node: ^10.4.0
   tsc-alias: ^1.5.0
+  type-fest: ^2.11.0
   typescript: ^4.5.5
 
 dependencies:
@@ -29,6 +32,7 @@ dependencies:
   delay: 5.0.0
   execa: 6.0.0
   get-stream: 6.0.1
+  lion-architecture: 1.0.3
   onetime: 6.0.0
   shell-quote: 1.7.3
   signal-exit: 3.0.6
@@ -44,10 +48,12 @@ devDependencies:
   eslint: 8.7.0
   lion-system: 1.0.9
   lionp: 1.0.14
+  liontypes: 1.0.2
   prettier: 2.5.1
   sync-index: 1.0.11
   ts-node: 10.4.0_a4f631dedb43a025ec8d07f05ba12686
   tsc-alias: 1.5.0
+  type-fest: 2.11.0
   typescript: 4.5.5
 
 packages:
@@ -2938,12 +2944,18 @@ packages:
     resolution: {integrity: sha512-Atocnm7Wr9nuvAn97yEPQa3pcQI5eLQGBz+m6iTb+CVw+IOzYB9MrYK7jI7BfC9ISnT4Fu0eiwhAScV//rp4Hw==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
-      type-fest: 2.10.0
+      type-fest: 2.11.0
     dev: true
 
   /lines-and-columns/1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
     dev: true
+
+  /lion-architecture/1.0.3:
+    resolution: {integrity: sha512-U5JNVCmJpnxu4m9LCYWQsroXvvrMPyY3h3Qmwe70eVnPG/B1KgtyQSWLVXuKTDUvVokuriWDfHKilTbgS/fXiQ==}
+    dependencies:
+      rfdc: 1.3.0
+    dev: false
 
   /lion-system/1.0.9:
     resolution: {integrity: sha512-kOomq2SrAljYpUkzzXHAors4Bibe9+sP51uGSyfi2ilYCx6e0scHiYg3t6oyhWhr4276QjIbjNGwkBEylAB1ww==}
@@ -2986,8 +2998,12 @@ packages:
       semver: 7.3.5
       symbol-observable: 4.0.0
       terminal-link: 3.0.0
-      type-fest: 2.10.0
+      type-fest: 2.11.0
       update-notifier: 5.1.0
+    dev: true
+
+  /liontypes/1.0.2:
+    resolution: {integrity: sha512-zqqWTSDSX8gpB9rCyYDveGaL6WSSaUydw03AYFO/vEAYer4EiEZCUxCKL+f7tVQ0Amcx0yB9mlxQBnEL/5K/LQ==}
     dev: true
 
   /listr2/3.14.0_enquirer@2.3.6:
@@ -3233,7 +3249,7 @@ packages:
     resolution: {integrity: sha512-NHDDGYudnvRutt/VhKFlX26IotXe1w0cmkDm6JGquh5bz/bDTw0LufSmH/GxTjEdpHEO+bVKFTwdrcGa/9XlKQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
-      type-fest: 2.10.0
+      type-fest: 2.11.0
     dev: true
 
   /node-releases/2.0.1:
@@ -3779,7 +3795,7 @@ packages:
     dependencies:
       find-up: 6.2.0
       read-pkg: 7.0.0
-      type-fest: 2.10.0
+      type-fest: 2.11.0
     dev: true
 
   /read-pkg/5.2.0:
@@ -3809,7 +3825,7 @@ packages:
       '@types/normalize-package-data': 2.4.1
       normalize-package-data: 3.0.3
       parse-json: 5.2.0
-      type-fest: 2.10.0
+      type-fest: 2.11.0
     dev: true
 
   /readable-stream/3.6.0:
@@ -3914,7 +3930,6 @@ packages:
 
   /rfdc/1.3.0:
     resolution: {integrity: sha512-V2hovdzFbOi77/WajaSMXk2OLm+xNIeQdMMuB7icj7bk6zi2F8GGAxigcnDFpJHbNyNcgyJDiP+8nOrY5cZGrA==}
-    dev: true
 
   /rimraf/3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
@@ -4395,8 +4410,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /type-fest/2.10.0:
-    resolution: {integrity: sha512-u2yreDMllFI3VCpWt0rKrGs/E2LO0YHBwiiOIj+ilQh9+ALMaa4lNBSdoDvuHN3cbKcYk9L1BXP49x9RT+o/SA==}
+  /type-fest/2.11.0:
+    resolution: {integrity: sha512-GwRKR1jZMAQP/hVR929DWB5Z2lwSIM/nNcHEfDj2E0vOMhcYbqFxGKE5JaSzMdzmEtWJiamEn6VwHs/YVXVhEQ==}
     engines: {node: '>=12.20'}
     dev: true
 

@@ -30,6 +30,7 @@
 		"delay": "^5.0.0",
 		"execa": "^6.0.0",
 		"get-stream": "^6.0.1",
+		"lion-architecture": "^1.0.3",
 		"onetime": "^6.0.0",
 		"shell-quote": "^1.7.3",
 		"signal-exit": "^3.0.6"
@@ -45,10 +46,12 @@
 		"eslint": "^8.7.0",
 		"lion-system": "^1.0.9",
 		"lionp": "^1.0.14",
+		"liontypes": "^1.0.2",
 		"prettier": "^2.5.1",
 		"sync-index": "^1.0.11",
 		"ts-node": "^10.4.0",
 		"tsc-alias": "^1.5.0",
+		"type-fest": "^2.11.0",
 		"typescript": "^4.5.5"
 	},
 	"publishConfig": {

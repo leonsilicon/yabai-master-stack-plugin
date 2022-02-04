@@ -1,6 +1,6 @@
 import { execaCommand } from 'execa';
 
-import type { Space } from '../types.js';
+import type { Space } from '../types/index.js';
 import { getConfig } from './config.js';
 import { getYabaiOutput } from './yabai.js';
 
