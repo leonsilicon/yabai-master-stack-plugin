@@ -7,6 +7,7 @@ import {
 main(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
+	console.log(focusedWindow)
 	if (focusedWindow !== undefined) {
 		// If the focused window is the highest window
 		if (

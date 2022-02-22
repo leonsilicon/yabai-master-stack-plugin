@@ -50,9 +50,10 @@ export function windowDataModule() {
 			const yabaiOutput = await yabaiOutputPromise;
 			const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
 				(window) => {
+					console.log(window)
 					// Window should not be floating
 					if (
-						!window['is-floating'] ||
+						window['is-floating'] ||
 						window.display !== this.display.index ||
 						window.space !== this.space.index
 					) {
