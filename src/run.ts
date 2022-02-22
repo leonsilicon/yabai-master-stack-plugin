@@ -4,6 +4,7 @@ import process from 'node:process';
 import { Argument, program } from 'commander';
 
 program
+	.name('yabai-master-stack-plugin')
 	.showHelpAfterError()
 	.addArgument(
 		new Argument('<task>').choices([
