@@ -60,7 +60,7 @@ export function masterWindowModule() {
 			);
 			window = this.getUpdatedWindowData(window);
 
-			if (window.split === 'vertical') {
+			if (window['split-type'] === 'vertical') {
 				await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
 			}
 		},

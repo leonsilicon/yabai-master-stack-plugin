@@ -21,7 +21,7 @@ export function moveModule() {
 
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
-				if (window.split === 'horizontal') {
+				if (window['split-type'] === 'horizontal') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
 					);
@@ -48,13 +48,13 @@ export function moveModule() {
 			window = this.getUpdatedWindowData(window);
 
 			if (this.windowsData.length === 2) {
-				if (window.split === 'horizontal') {
+				if (window['split-type'] === 'horizontal') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
 					);
 				}
 			} else {
-				if (window.split === 'vertical') {
+				if (window['split-type'] === 'vertical') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
 					);

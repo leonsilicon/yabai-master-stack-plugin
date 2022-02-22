@@ -42,7 +42,7 @@ export function stackWindowsModule() {
 			if (topRightWindow === undefined) return;
 			logDebug(() => `Top-right window: ${topRightWindow?.app ?? ''}`);
 
-			if (topRightWindow.split === 'horizontal') {
+			if (topRightWindow['split-type'] === 'horizontal') {
 				await this.executeYabaiCommand(
 					`-m window ${topRightWindow.id} --toggle split`
 				);
@@ -74,7 +74,7 @@ export function stackWindowsModule() {
 			if (stackWindows.length > 1) {
 				for (const stackWindow of stackWindows) {
 					const window = this.getUpdatedWindowData(stackWindow);
-					if (window.split === 'vertical') {
+					if (window['split-type'] === 'vertical') {
 						// eslint-disable-next-line no-await-in-loop
 						await this.executeYabaiCommand(
 							`-m window ${window.id} --toggle split`

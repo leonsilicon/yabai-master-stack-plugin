@@ -52,14 +52,14 @@ export function windowDataModule() {
 				(window) => {
 					// Window should not be floating
 					if (
-						window.floating !== 0 ||
+						!window['is-floating'] ||
 						window.display !== this.display.index ||
 						window.space !== this.space.index
 					) {
 						return false;
 					}
 
-					if (window.minimized) return false;
+					if (window['is-minimized']) return false;
 
 					return true;
 				}
@@ -67,7 +67,7 @@ export function windowDataModule() {
 			return windowsData;
 		},
 		getFocusedWindow(): Window | undefined {
-			return this.windowsData.find((w) => w.focused === 1);
+			return this.windowsData.find((w) => w['has-focus']);
 		},
 	});
 }
