@@ -3,21 +3,25 @@
 	"version": "2.0.0",
 	"description": "Emulate the dwm-style master-stack window layout in yabai!",
 	"license": "MIT",
-	"repository": "leonzalion/yabai-master-stack-plugin",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/leonzalion/yabai-master-stack-plugin.git"
+	},
+	"homepage": "https://github.com/leonzalion/yabai-master-stack-plugin#readme",
 	"author": {
 		"name": "Leon Si",
 		"email": "contact@leonzalion.com",
 		"url": "https://leonzalion.com"
 	},
 	"type": "module",
-	"main": "run.js",
+	"main": "./bin/run.js",
 	"bin": {
-		"yabai-master-stack-plugin": "./run.js",
-		"ymsp": "./run.js"
+		"yabai-master-stack-plugin": "./bin/run.js",
+		"ymsp": "./bin/run.js"
 	},
-	"prettier": "@leonzalion/configs/prettier",
+	"prettier": "@leonzalion/configs/prettier.cjs",
 	"scripts": {
-		"start": "node-ts ./src/run.ts",
+		"start": "node-ts ./src/bin/run.ts",
 		"build": "node-ts ./scripts/build.ts",
 		"lint": "eslint --fix --cache .",
 		"prettier": "prettier --write src",
@@ -26,32 +30,32 @@
 		"test:perf": "node-ts test/perf.ts"
 	},
 	"dependencies": {
-		"commander": "^8.3.0",
+		"commander": "^9.0.0",
 		"delay": "^5.0.0",
-		"execa": "^6.0.0",
+		"execa": "^6.1.0",
 		"get-stream": "^6.0.1",
-		"lion-architecture": "^1.0.3",
+		"lion-architecture": "^1.0.4",
 		"onetime": "^6.0.0",
 		"shell-quote": "^1.7.3",
-		"signal-exit": "^3.0.6"
+		"signal-exit": "^3.0.7"
 	},
 	"devDependencies": {
-		"@leonzalion/configs": "^1.0.46",
+		"@leonzalion/configs": "^1.1.1",
 		"@types/benchmark": "^2.1.1",
-		"@types/node": "^17.0.12",
+		"@types/node": "^17.0.21",
 		"@types/shell-quote": "^1.7.1",
 		"@types/signal-exit": "^3.0.1",
 		"benchmark": "^2.1.4",
 		"desm": "^1.2.0",
-		"eslint": "^8.7.0",
-		"lion-system": "^1.0.9",
-		"lionp": "^1.0.15",
+		"eslint": "^8.10.0",
+		"lion-system": "^1.0.10",
+		"lionp": "^1.0.19",
 		"liontypes": "^1.0.2",
 		"prettier": "^2.5.1",
-		"sync-index": "^1.0.11",
-		"ts-node": "^10.4.0",
-		"tsc-alias": "^1.5.0",
-		"type-fest": "^2.11.0",
+		"sync-index": "^1.0.12",
+		"ts-node": "^10.5.0",
+		"tsc-alias": "^1.6.3",
+		"type-fest": "^2.12.0",
 		"typescript": "^4.5.5"
 	},
 	"publishConfig": {
