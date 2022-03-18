@@ -1,7 +1,7 @@
 import { logDebug } from '~/utils/log.js';
 import { useDefineMethods } from '~/utils/modules.js';
 
-export function updateModule() {
+export function layoutModule() {
 	const defineMethods = useDefineMethods();
 
 	return defineMethods({
