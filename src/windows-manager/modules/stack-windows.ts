@@ -67,6 +67,13 @@ export function stackWindowsModule() {
 		 * is horizontal
 		 */
 		async columnizeStackWindows() {
+			if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {
+				logDebug(
+					() => 'Skipped columnizing stack windows because there is no stack.'
+				);
+				return;
+			}
+
 			// In this case, we want to columnize all the windows to the left of the dividing line
 			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 
