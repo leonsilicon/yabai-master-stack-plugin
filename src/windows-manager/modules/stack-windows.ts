@@ -33,24 +33,21 @@ export function stackWindowsModule() {
 		},
 
 		/**
-		 * In the event that the windows get badly rearranged and all the windows span the entire width of
-		 * the screen, split the top-right window vertically and then move the windows into the split
+		 * In the event that the windows get badly rearranged, we force all windows to become vertically split to ensure that there exists a stack
 		 */
 		async createStack() {
 			logDebug(() => 'Creating stack...');
-			let topRightWindow = this.getTopRightWindow();
-			if (topRightWindow === undefined) return;
-			logDebug(() => `Top-right window: ${topRightWindow?.app ?? ''}`);
+			for (const window of this.windowsData) {
+				const splitType = isYabai3Window(window)
+					? window.split
+					: window['split-type'];
 
-			const splitType = isYabai3Window(topRightWindow)
-				? topRightWindow.split
-				: topRightWindow['split-type'];
-
-			if (splitType === 'horizontal') {
-				await this.executeYabaiCommand(
-					`-m window ${topRightWindow.id} --toggle split`
-				);
-				topRightWindow = this.getTopRightWindow();
+				if (splitType === 'horizontal') {
+					// eslint-disable-next-line no-await-in-loop
+					await this.executeYabaiCommand(
+						`-m window ${window.id} --toggle split`
+					);
+				}
 			}
 
 			await this.columnizeStackWindows();
