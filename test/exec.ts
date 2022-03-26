@@ -48,7 +48,7 @@ async function main() {
 			})
 		)
 		.on('cycle', (event: any) => {
-			console.log(String(event.target));
+			console.info(String(event.target));
 		})
 		.run({ async: true });
 }

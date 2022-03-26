@@ -46,6 +46,6 @@ suite
 		.add('updateWindows', p(async () => wm.updateWindows({ targetNumMasterWindows: 1 })))
 		.add('validateState', p(() => { wm.validateState(state); }))
 		.on('cycle', (event: any) => {
-			console.log(String(event.target));
+			console.info(String(event.target));
 		})
 		.run({ async: true });
