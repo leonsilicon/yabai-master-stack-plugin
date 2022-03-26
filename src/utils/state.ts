@@ -15,9 +15,19 @@ export async function readState(): Promise<State> {
 	if (fs.existsSync(stateFilePath)) {
 		const data = JSON.parse(fs.readFileSync(stateFilePath).toString()) as State;
 		const spaces = await getSpaces();
+
+		// Set the default numMasterWindows of each unknown space to 1
 		for (const space of spaces) {
-			if (data[space.id] === undefined) {
-				data[space.id] = { numMasterWindows: 1 };
+			if (data[space.id.toString()] === undefined) {
+				data[space.id.toString()] = { numMasterWindows: 1 };
+			}
+		}
+
+		// Delete unknown spaces
+		for (const spaceId of Object.keys(spaces)) {
+			if (!spaces.some((space) => space.id.toString() === spaceId)) {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				data[spaceId] = undefined as any;
 			}
 		}
 

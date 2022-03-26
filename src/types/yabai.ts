@@ -57,7 +57,7 @@ export type Yabai4Window = {
 	'is-grabbed': boolean;
 };
 
-export type Window = Yabai3Window | Yabai4Window
+export type Window = Yabai3Window | Yabai4Window;
 
 type Distinct<T, N> = T & {
 	__type: N;
@@ -69,7 +69,7 @@ export type DisplayUuid = Distinct<number, 'displayUuid'>;
 export type DisplayIndex = Distinct<number, 'displayIndex'>;
 
 export type State = Record<
-	SpaceId,
+	string,
 	{
 		numMasterWindows: number;
 	}
@@ -117,7 +117,7 @@ export type Yabai4Space = {
 	'is-native-fullscreen': number;
 };
 
-export type Space = Yabai3Space | Yabai4Space
+export type Space = Yabai3Space | Yabai4Space;
 
 export type YabaiMasterStackPluginConfig = {
 	yabaiPath: string;
