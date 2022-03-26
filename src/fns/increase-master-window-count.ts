@@ -7,7 +7,7 @@ import {
 
 main(async () => {
 	const { wm, space, state } = await createInitializedWindowsManager();
-	if (state[space.id].numMasterWindows < wm.windowsData.length - 1) {
+	if (state[space.id].numMasterWindows < wm.windowsData.length) {
 		state[space.id].numMasterWindows += 1;
 		writeState(state);
 		logDebug(() => 'Increasing master window count.');

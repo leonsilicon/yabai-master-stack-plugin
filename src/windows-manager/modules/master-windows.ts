@@ -43,10 +43,13 @@ export function masterWindowModule() {
 		async moveWindowToMaster(window: Window) {
 			logDebug(() => `Moving window ${window.app} to master.`);
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
-			try {
-				await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
-			} catch {
-				// Empty
+			// Only execute this heuristic when the layout isn't a pancake
+			if (this.expectedCurrentNumMasterWindows < this.windowsData.length) {
+				try {
+					await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
+				} catch {
+					// Empty
+				}
 			}
 
 			// If the window is already a master window, then don't do anything
@@ -56,6 +59,7 @@ export function masterWindowModule() {
 			const masterWindow = this.getWidestMasterWindow();
 
 			if (masterWindow === undefined || masterWindow.id === window.id) return;
+
 			await this.executeYabaiCommand(
 				`-m window ${window.id} --warp ${masterWindow.id}`
 			);

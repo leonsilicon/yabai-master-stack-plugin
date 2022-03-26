@@ -17,7 +17,7 @@ export function layoutModule() {
 
 			const targetNumMasterWindows = props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows; // If targetNumMasterWindows is greater or equal to the number of windows, all windows must be touching the left side
 			if (
-				targetNumMasterWindows >= this.windowsData.length &&
+				targetNumMasterWindows > this.windowsData.length &&
 				!this.windowsData.every((window) =>
 					this.isWindowTouchingLeftEdge(window)
 				)
@@ -25,7 +25,7 @@ export function layoutModule() {
 				return {
 					status: false,
 					reason:
-						'The number of master windows is greater or equal to the number of windows and not all windows are touching the left edge.',
+						'The number of master windows is greater than the number of windows and not all windows are touching the left edge.',
 				};
 			} else {
 				// Verify that the number of master windows equals the target number of master windows
@@ -80,7 +80,7 @@ export function layoutModule() {
 				await this.createStack();
 			}
 
-			if (numWindows > 2) {
+			if (numWindows > 1) {
 				const masterWindows = this.getMasterWindows();
 				logDebug(
 					() =>
