@@ -20,7 +20,7 @@ program
 		])
 	)
 	.action(async (task: string) => {
-		await import(`./fns/${task}.js`);
+		await import(`../fns/${task}.js`);
 	});
 
 program.parse(process.argv);
