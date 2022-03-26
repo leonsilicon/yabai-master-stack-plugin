@@ -8,9 +8,16 @@ export function moveModule() {
 
 	return defineMethods({
 		async moveWindowToStack(window: Window) {
+			if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {
+				logDebug(
+					() =>
+						`Skipped moving window ${window.app} to stack becuase there is no stack.`
+				);
+				return;
+			}
+
 			logDebug(() => `Moving window ${window.app} to stack.`);
 
-			logDebug(() => 'moving window west');
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
 				await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
