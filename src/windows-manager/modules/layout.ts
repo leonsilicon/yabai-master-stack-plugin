@@ -1,4 +1,3 @@
-import delay from 'delay';
 import { logDebug } from '~/utils/log.js';
 import { useDefineMethods } from '~/utils/modules.js';
 import { isYabai3Window } from '~/utils/yabai.js';
@@ -98,8 +97,6 @@ export function layoutModule() {
 					}
 				}
 			}
-
-			await delay(2000);
 
 			if (numWindows > 1) {
 				const masterWindows = this.getMasterWindows();
