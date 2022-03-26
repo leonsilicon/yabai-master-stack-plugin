@@ -51,6 +51,7 @@ export function stackWindowsModule() {
 			}
 
 			await this.columnizeStackWindows();
+			await this.columnizeMasterWindows();
 		},
 		/**
 		 * If the top-right window has a x-coordinate of 0, or if the stack dividing

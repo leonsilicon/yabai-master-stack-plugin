@@ -73,5 +73,33 @@ export function masterWindowModule() {
 				await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
 			}
 		},
+		/**
+		 * Turns the master into a column by making sure the split direction of all the master windows
+		 * is horizontal
+		 */
+		async columnizeMasterWindows() {
+			// In this case, we want to columnize all the windows to the left of the dividing line
+			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
+
+			const masterWindows = this.windowsData.filter(
+				(window) => window.frame.x >= dividingLineXCoordinate
+			);
+			if (masterWindows.length > 1) {
+				for (const masterWindow of masterWindows) {
+					const window = this.getUpdatedWindowData(masterWindow);
+
+					const splitType = isYabai3Window(window)
+						? window.split
+						: window['split-type'];
+
+					if (splitType === 'vertical') {
+						// eslint-disable-next-line no-await-in-loop
+						await this.executeYabaiCommand(
+							`-m window ${window.id} --toggle split`
+						);
+					}
+				}
+			}
+		},
 	});
 }

@@ -9,8 +9,7 @@ export function dividingLineModule() {
 		 * There is always a line dividing the master windows from the secondary windows. To find this line,
 		 * we use two master observations:
 		 * 1. The top-right window is always on the right side of the dividing line.
-		 * 2. If there is more than one master window, the dividing line must cross the left side of two
-		 * windows
+		 * 2. If there is more than one master window, the dividing line must cross the left side of two windows
 		 * Using these observations, we can loop through the windows in descending x-coordinate starting from the top-right window
 		 * and for each pair of windows that share x-coordinates, we check if the numMasterWindows is less
 		 * than the number of windows we've iterated through, and if so, return the x-coordinate of the currently

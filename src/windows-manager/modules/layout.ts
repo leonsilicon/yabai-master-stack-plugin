@@ -61,6 +61,10 @@ export function layoutModule() {
 				() =>
 					`updateWindows() called with targetNumMasterWindows = ${targetNumMasterWindows}`
 			);
+
+			await this.columnizeMasterWindows();
+			await this.columnizeStackWindows();
+
 			const layoutValidity = await this.isValidLayout({
 				targetNumMasterWindows,
 			});
@@ -181,10 +185,10 @@ export function layoutModule() {
 			const result = await this.isValidLayout({ targetNumMasterWindows });
 			// Note: the following should never be called
 			if (result.status) {
-				logDebug(() => 'updateLayout() was successful.');
+				logDebug(() => 'updateWindows() was successful.');
 			} else {
 				throw new Error(
-					`updateLayout() ended with an invalid layout; reason: ${layoutValidity.reason}`
+					`updateWindows() ended with an invalid layout; reason: ${layoutValidity.reason}`
 				);
 			}
 
