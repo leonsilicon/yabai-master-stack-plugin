@@ -1,5 +1,7 @@
+import delay from 'delay';
 import { logDebug } from '~/utils/log.js';
 import { useDefineMethods } from '~/utils/modules.js';
+import { isYabai3Window } from '~/utils/yabai.js';
 
 export function layoutModule() {
 	const defineMethods = useDefineMethods();
@@ -15,7 +17,8 @@ export function layoutModule() {
 				return { status: true };
 			}
 
-			const targetNumMasterWindows = props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows; // If targetNumMasterWindows is greater or equal to the number of windows, all windows must be touching the left side
+			const targetNumMasterWindows =
+				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows; // If targetNumMasterWindows is greater or equal to the number of windows, all windows must be touching the left side
 			if (
 				targetNumMasterWindows > this.windowsData.length &&
 				!this.windowsData.every((window) =>
@@ -79,6 +82,24 @@ export function layoutModule() {
 				logDebug(() => 'Stack does not exist, creating it...');
 				await this.createStack();
 			}
+
+			// If the user wants a pancake layout, set the split of all windows to horizontal
+			if (targetNumMasterWindows === numWindows) {
+				for (const window of this.windowsData) {
+					const splitType = isYabai3Window(window)
+						? window.split
+						: window['split-type'];
+
+					if (splitType === 'vertical') {
+						// eslint-disable-next-line no-await-in-loop
+						await this.executeYabaiCommand(
+							`-m window ${window.id} --toggle split`
+						);
+					}
+				}
+			}
+
+			await delay(2000);
 
 			if (numWindows > 1) {
 				const masterWindows = this.getMasterWindows();
