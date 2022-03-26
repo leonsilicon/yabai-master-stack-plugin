@@ -1,5 +1,5 @@
 import type { Window } from '~/types/index.js';
-import { logDebug } from '~/utils/index.js';
+import { isYabai3Window, logDebug } from '~/utils/index.js';
 import { useDefineMethods } from '~/utils/modules.js';
 
 export function stackWindowsModule() {
@@ -42,7 +42,11 @@ export function stackWindowsModule() {
 			if (topRightWindow === undefined) return;
 			logDebug(() => `Top-right window: ${topRightWindow?.app ?? ''}`);
 
-			if (topRightWindow['split-type'] === 'horizontal') {
+			const splitType = isYabai3Window(topRightWindow)
+				? topRightWindow.split
+				: topRightWindow['split-type'];
+
+			if (splitType === 'horizontal') {
 				await this.executeYabaiCommand(
 					`-m window ${topRightWindow.id} --toggle split`
 				);
@@ -74,7 +78,12 @@ export function stackWindowsModule() {
 			if (stackWindows.length > 1) {
 				for (const stackWindow of stackWindows) {
 					const window = this.getUpdatedWindowData(stackWindow);
-					if (window['split-type'] === 'vertical') {
+
+					const splitType = isYabai3Window(window)
+						? window.split
+						: window['split-type'];
+
+					if (splitType === 'vertical') {
 						// eslint-disable-next-line no-await-in-loop
 						await this.executeYabaiCommand(
 							`-m window ${window.id} --toggle split`

@@ -1,6 +1,7 @@
 import type { Window } from '~/types/yabai.js';
 import { logDebug } from '~/utils/log.js';
 import { useDefineMethods } from '~/utils/modules.js';
+import { isYabai3Window } from '~/utils/yabai.js';
 
 export function moveModule() {
 	const defineMethods = useDefineMethods();
@@ -21,7 +22,11 @@ export function moveModule() {
 
 			// If there's only two windows, make sure that the window stack exists
 			if (this.windowsData.length === 2) {
-				if (window['split-type'] === 'horizontal') {
+				const splitType = isYabai3Window(window)
+					? window.split
+					: window['split-type'];
+
+				if (splitType === 'horizontal') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
 					);
@@ -47,14 +52,18 @@ export function moveModule() {
 			);
 			window = this.getUpdatedWindowData(window);
 
+			const splitType = isYabai3Window(window)
+				? window.split
+				: window['split-type'];
+
 			if (this.windowsData.length === 2) {
-				if (window['split-type'] === 'horizontal') {
+				if (splitType === 'horizontal') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
 					);
 				}
 			} else {
-				if (window['split-type'] === 'vertical') {
+				if (splitType === 'vertical') {
 					await this.executeYabaiCommand(
 						`-m window ${window.id} --toggle split`
 					);

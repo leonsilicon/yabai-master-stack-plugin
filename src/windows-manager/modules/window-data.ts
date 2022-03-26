@@ -2,7 +2,7 @@ import { execa } from 'execa';
 import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import { useDefineMethods } from '~/utils/modules.js';
-import { getYabaiOutput } from '~/utils/yabai.js';
+import { getYabaiOutput, isYabai3Window } from '~/utils/yabai.js';
 
 export function windowDataModule() {
 	const defineMethods = useDefineMethods();
@@ -50,17 +50,24 @@ export function windowDataModule() {
 			const yabaiOutput = await yabaiOutputPromise;
 			const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter(
 				(window) => {
-					console.log(window)
+					const isFloating = isYabai3Window(window)
+						? window.floating
+						: window['is-floating'];
+
 					// Window should not be floating
 					if (
-						window['is-floating'] ||
+						isFloating ||
 						window.display !== this.display.index ||
 						window.space !== this.space.index
 					) {
 						return false;
 					}
 
-					if (window['is-minimized']) return false;
+					const isMinimized = isYabai3Window(window)
+						? window.minimized
+						: window['is-minimized'];
+
+					if (isMinimized) return false;
 
 					return true;
 				}
@@ -68,7 +75,9 @@ export function windowDataModule() {
 			return windowsData;
 		},
 		getFocusedWindow(): Window | undefined {
-			return this.windowsData.find((w) => w['has-focus']);
+			return this.windowsData.find((w) =>
+				isYabai3Window(w) ? w.focused : w['has-focus']
+			);
 		},
 	});
 }

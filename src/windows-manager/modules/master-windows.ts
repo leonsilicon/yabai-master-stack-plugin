@@ -1,6 +1,7 @@
 import type { Window } from '~/types/yabai.js';
 import { logDebug } from '~/utils/log.js';
 import { useDefineMethods } from '~/utils/modules.js';
+import { isYabai3Window } from '~/utils/yabai.js';
 
 export function masterWindowModule() {
 	const defineMethods = useDefineMethods();
@@ -60,7 +61,11 @@ export function masterWindowModule() {
 			);
 			window = this.getUpdatedWindowData(window);
 
-			if (window['split-type'] === 'vertical') {
+			const splitType = isYabai3Window(window)
+				? window.split
+				: window['split-type'];
+
+			if (splitType === 'vertical') {
 				await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
 			}
 		},

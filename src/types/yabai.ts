@@ -1,4 +1,32 @@
-export type Window = {
+export type Yabai3Window = {
+	id: number;
+	pid: number;
+	app: string;
+	title: string;
+	frame: { x: number; y: number; w: number; h: number };
+	level: number;
+	role: string;
+	subrole: string;
+	movable: number;
+	resizable: number;
+	display: number;
+	space: number;
+	focused: number;
+	split: string;
+	floating: number;
+	sticky: number;
+	minimized: number;
+	topmost: number;
+	opacity: number;
+	shadow: number;
+	border: number;
+	'stack-index': number;
+	'zoom-parent': number;
+	'zoom-fullscreen': number;
+	'native-fullscreen': number;
+};
+
+export type Yabai4Window = {
 	id: number;
 	pid: number;
 	app: string;
@@ -29,6 +57,8 @@ export type Window = {
 	'is-grabbed': boolean;
 };
 
+export type Window = Yabai3Window | Yabai4Window
+
 type Distinct<T, N> = T & {
 	__type: N;
 };
@@ -58,7 +88,21 @@ export type Display = {
 	spaces: number[];
 };
 
-export type Space = {
+export type Yabai3Space = {
+	id: SpaceId;
+	label: string;
+	index: number;
+	display: number;
+	windows: number[];
+	type: string;
+	visible: number;
+	focused: number;
+	'native-fullscreen': number;
+	'first-window': number;
+	'last-window': number;
+};
+
+export type Yabai4Space = {
 	id: SpaceId;
 	uuid: string;
 	index: number;
@@ -72,6 +116,8 @@ export type Space = {
 	'is-visible': number;
 	'is-native-fullscreen': number;
 };
+
+export type Space = Yabai3Space | Yabai4Space
 
 export type YabaiMasterStackPluginConfig = {
 	yabaiPath: string;
