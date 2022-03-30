@@ -60,9 +60,9 @@ alt + shift - d : ymsp decrease-master-window-count
 
 ## Troubleshooting
 
-So there's this super obscure error when binding shell commands to Karabiner where the Node processes will abruptly exit without the onExit callback getting called when registered using the `signal-exit` package (which ends up causing a deadlock since the lockfile doesn't get released). To fix this error, you need to add a `> /dev/null` to the end of the node command in the karabiner `shell_command` property [(see this commit)](https://github.com/leonzalion/macos-configs/commit/6df4fb7e6677e1e9bc1aebc2ccaa37df939c4688#diff-dff9f478ed6c5e11907650c8803d50aaf8d3603be5485c71792f5e34065be4aa). I have absolutely no idea why this works, but I discovered it on accident when trying to debug the command by redirecting stdout to a file and then failing to reproduce the issue afterwards.
+When binding shell commands to Karabiner, Node.js processes will abruptly exit without the exit handlers getting called to release a lockfile. This error can be fixed by adding a `> /dev/null` to the end of the node command in the karabiner `shell_command` property [(see this commit)](https://github.com/leonzalion/macos-configs/commit/6df4fb7e6677e1e9bc1aebc2ccaa37df939c4688#diff-dff9f478ed6c5e11907650c8803d50aaf8d3603be5485c71792f5e34065be4aa).
 
-Maybe I'll add some kind of synchronization mechanism in the future where the plugin will check whether the process which registered the lock is still active, and if it's not active, then it'll delete the lock file or something.
+If you have any other issues with this plugin, please don't hesitate to open an New Issue under the Isuses tab!
 
 ## TODO
 
