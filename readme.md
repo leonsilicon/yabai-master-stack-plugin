@@ -1,6 +1,6 @@
 # Yabai Master-Stack Plugin
 
-[![npm version](https://badge.fury.io/js/yabai-master-stack-plugin.svg)](https://badge.fury.io/js/yabai-master-stack-plugin)
+[![npm version](https://img.shields.io/npm/v/yabai-master-stack-plugin)](https://npmjs.com/package/yabai-master-stack-plugin)
 
 ![A video of the Master-Stack plugin in action](/images/yabai-master-stack-plugin-usage.gif)
 
