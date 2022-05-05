@@ -24,9 +24,9 @@
 		"build": "node-ts ./scripts/build.ts",
 		"lint": "eslint --fix --cache .",
 		"prettier": "prettier --write src",
-		"tc": "tsc --noEmit",
 		"release": "lionp",
-		"test:perf": "node-ts test/perf.ts"
+		"test:perf": "node-ts test/perf.ts",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"commander": "^9.2.0",
