@@ -68,4 +68,4 @@ If you have any other issues with this plugin, please don't hesitate to open an 
 
 ## TODO
 
-[ ] Add an option to temporary disable auto-positioning of a window.
+- [ ] Add an option to temporary disable auto-positioning of a window.
