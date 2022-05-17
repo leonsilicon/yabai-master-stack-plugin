@@ -45,6 +45,7 @@
 		"@types/signal-exit": "^3.0.1",
 		"benchmark": "^2.1.4",
 		"desm": "^1.2.0",
+		"lionconfig": "^1.7.3",
 		"liontypes": "^1.0.4",
 		"sync-index": "^1.0.13",
 		"type-fest": "^2.12.2",
