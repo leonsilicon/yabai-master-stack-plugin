@@ -79,6 +79,11 @@ export function dividingLineModule() {
 					.filter((window) => !this.isWindowTouchingLeftEdge(window))
 					.sort((window1, window2) => window1.frame.x - window2.frame.x);
 
+				// If there are no master windows, then the dividing line is the left side of the screen.
+				if (nonMasterWindows.length === 0) {
+					return this.display.frame.x;
+				}
+
 				const numMasterWindows =
 					this.windowsData.length - nonMasterWindows.length;
 
