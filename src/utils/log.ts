@@ -9,7 +9,10 @@ export function logDebug(cb: () => unknown) {
 	const { debug } = getConfig();
 
 	if (debug) {
-		fs.appendFileSync(path.join(os.homedir(), '.ymsp-log'), util.inspect(cb()));
+		fs.appendFileSync(
+			path.join(os.homedir(), '.ymsp-log'),
+			util.inspect(cb()) + '\n'
+		);
 		console.error(cb());
 	}
 }
