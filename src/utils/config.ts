@@ -14,7 +14,7 @@ export const getConfig = onetime(() => {
 		) as Partial<YabaiMasterStackPluginConfig>;
 
 		const defaultConfig: YabaiMasterStackPluginConfig = {
-			masterPosition: 'left',
+			masterPosition: 'right',
 			debug: false,
 			yabaiPath: '/usr/local/bin/yabai',
 		};
