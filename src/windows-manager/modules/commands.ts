@@ -1,5 +1,6 @@
 import { execa } from 'execa';
 import { parse } from 'shell-quote';
+
 import { getConfig } from '~/utils/config.js';
 import { useDefineMethods } from '~/utils/modules.js';
 import { getYabaiOutput } from '~/utils/yabai.js';

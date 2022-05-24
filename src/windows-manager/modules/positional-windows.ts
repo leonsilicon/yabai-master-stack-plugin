@@ -40,11 +40,11 @@ export function positionalWindowsModule() {
 			return this.getBottomWindow(windows).id === window.id;
 		},
 		/**
-		 * The top-left window is the window with the lowest y-coordinate and the lowest x-coordinate.
-		 */
+			The top-left window is the window with the lowest y-coordinate and the lowest x-coordinate.
+		*/
 		getTopLeftWindow() {
 			const leftWindows = this.windowsData.filter((window) =>
-				this.isStackWindow(window)
+				this.isWindowTouchingLeftEdge(window)
 			);
 			let topLeftWindow = leftWindows[0];
 			for (const window of leftWindows) {
@@ -55,11 +55,14 @@ export function positionalWindowsModule() {
 
 			return topLeftWindow;
 		},
-		/*
-		 * The top-right window is the rightmost window with the lowest y-coordinate.
-		 */
+
+		/**
+			The top-right window is the rightmost window with the lowest y-coordinate.
+		*/
 		getTopRightWindow(): Window | undefined {
-			if (this.windowsData.length === 0) return undefined;
+			if (this.windowsData.length === 0) {
+				return undefined;
+			}
 
 			let lowestYCoordinate = this.windowsData[0].frame.y;
 			for (const window of this.windowsData) {

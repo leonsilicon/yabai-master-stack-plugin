@@ -1,4 +1,5 @@
 import { execa } from 'execa';
+
 import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import { useDefineMethods } from '~/utils/modules.js';

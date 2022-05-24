@@ -1,8 +1,9 @@
-import type { UnionToIntersection } from 'type-fest';
 import type { RemovePrivateProperties } from 'liontypes';
-import * as windowsManagerModules from '~/windows-manager/modules/index.js';
+import type { UnionToIntersection } from 'type-fest';
+
 import type { Window } from '~/types/index.js';
 import type { Display, Space } from '~/types/yabai.js';
+import * as windowsManagerModules from '~/windows-manager/modules/index.js';
 
 class ModulesWrapper {
 	wrapped() {

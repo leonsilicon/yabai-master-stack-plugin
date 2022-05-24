@@ -1,7 +1,7 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
-import os from 'node:os';
 import type { State } from '../types/index.js';
 import { getSpaces } from './space.js';
 

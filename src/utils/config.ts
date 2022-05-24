@@ -1,16 +1,28 @@
+import * as fs from 'node:fs';
 import os from 'node:os';
 import * as path from 'node:path';
-import * as fs from 'node:fs';
 import onetime from 'onetime';
+
 import type { YabaiMasterStackPluginConfig } from '~/types/index.js';
 
 export const getConfig = onetime(() => {
 	try {
 		const configPath = path.join(os.homedir(), '.config/ymsp/ymsp.config.json');
 
-		return JSON.parse(
+		const config = JSON.parse(
 			fs.readFileSync(configPath).toString()
-		) as YabaiMasterStackPluginConfig;
+		) as Partial<YabaiMasterStackPluginConfig>;
+
+		const defaultConfig: YabaiMasterStackPluginConfig = {
+			masterPosition: 'left',
+			debug: false,
+			yabaiPath: '/usr/local/bin/yabai',
+		};
+
+		return {
+			...defaultConfig,
+			...config,
+		};
 	} catch (error: unknown) {
 		const err = error as Error & { code: string };
 		if (err.code === 'ENOENT') {

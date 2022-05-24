@@ -1,4 +1,5 @@
 import type { Window } from '~/types/yabai.js';
+import { getConfig } from '~/utils/config.js';
 import { logDebug } from '~/utils/log.js';
 import { useDefineMethods } from '~/utils/modules.js';
 import { isYabai3Window } from '~/utils/yabai.js';
@@ -20,7 +21,11 @@ export function moveModule() {
 
 			// Use a small heuristic that helps prevent "glitchy" window rearrangements
 			try {
-				await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
+				if (getConfig().masterPosition === 'right') {
+					await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
+				} else {
+					await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
+				}
 			} catch {
 				// Empty
 			}

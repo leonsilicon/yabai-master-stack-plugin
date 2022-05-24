@@ -17,7 +17,9 @@ export function layoutModule() {
 			}
 
 			const targetNumMasterWindows =
-				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows; // If targetNumMasterWindows is greater or equal to the number of windows, all windows must be touching the left side
+				props?.targetNumMasterWindows ?? this.expectedCurrentNumMasterWindows;
+
+			// If `targetNumMasterWindows` is greater or equal to the number of windows, all windows must be touching the left side
 			if (
 				targetNumMasterWindows > this.windowsData.length &&
 				!this.windowsData.every((window) =>

@@ -1,8 +1,9 @@
 import { execaCommand } from 'execa';
 
+import { getConfig } from '~/utils/config.js';
+
 import type { Display, DisplayIndex } from '../types/index.js';
 import { getYabaiOutput } from './yabai.js';
-import { getConfig } from '~/utils/config.js';
 
 export async function getDisplays() {
 	const { yabaiPath } = getConfig();

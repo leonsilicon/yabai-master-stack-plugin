@@ -1,7 +1,8 @@
 import type { ExecaChildProcess } from 'execa';
 import { execaSync } from 'execa';
 import getStream from 'get-stream';
-import type { Window, Yabai3Window, Space, Yabai3Space } from '~/types/yabai.js';
+
+import type { Space, Window, Yabai3Space,Yabai3Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 
 export async function getYabaiOutput(yabaiProcess: ExecaChildProcess) {

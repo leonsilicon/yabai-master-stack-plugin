@@ -1,4 +1,4 @@
-export type Yabai3Window = {
+export interface Yabai3Window {
 	id: number;
 	pid: number;
 	app: string;
@@ -24,9 +24,9 @@ export type Yabai3Window = {
 	'zoom-parent': number;
 	'zoom-fullscreen': number;
 	'native-fullscreen': number;
-};
+}
 
-export type Yabai4Window = {
+export interface Yabai4Window {
 	id: number;
 	pid: number;
 	app: string;
@@ -55,7 +55,7 @@ export type Yabai4Window = {
 	'is-sticky': boolean;
 	'is-topmost': boolean;
 	'is-grabbed': boolean;
-};
+}
 
 export type Window = Yabai3Window | Yabai4Window;
 
@@ -75,7 +75,7 @@ export type State = Record<
 	}
 >;
 
-export type Display = {
+export interface Display {
 	id: DisplayId;
 	uuid: DisplayUuid;
 	index: DisplayIndex;
@@ -86,9 +86,9 @@ export type Display = {
 		h: number;
 	};
 	spaces: number[];
-};
+}
 
-export type Yabai3Space = {
+export interface Yabai3Space {
 	id: SpaceId;
 	label: string;
 	index: number;
@@ -100,9 +100,9 @@ export type Yabai3Space = {
 	'native-fullscreen': number;
 	'first-window': number;
 	'last-window': number;
-};
+}
 
-export type Yabai4Space = {
+export interface Yabai4Space {
 	id: SpaceId;
 	uuid: string;
 	index: number;
@@ -115,11 +115,12 @@ export type Yabai4Space = {
 	'has-focus': boolean;
 	'is-visible': number;
 	'is-native-fullscreen': number;
-};
+}
 
 export type Space = Yabai3Space | Yabai4Space;
 
-export type YabaiMasterStackPluginConfig = {
+export interface YabaiMasterStackPluginConfig {
 	yabaiPath: string;
 	debug: boolean;
-};
+	masterPosition: 'left' | 'right';
+}

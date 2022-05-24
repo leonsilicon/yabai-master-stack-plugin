@@ -1,0 +1,3 @@
+{
+  "prettier.configPath": "./node_modules/lionconfig/prettier.cjs"
+}

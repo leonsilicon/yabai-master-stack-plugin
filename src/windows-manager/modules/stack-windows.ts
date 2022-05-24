@@ -1,5 +1,5 @@
 import type { Window } from '~/types/index.js';
-import { isYabai3Window, logDebug } from '~/utils/index.js';
+import { getConfig, isYabai3Window, logDebug } from '~/utils/index.js';
 import { useDefineMethods } from '~/utils/modules.js';
 
 export function stackWindowsModule() {
@@ -7,11 +7,17 @@ export function stackWindowsModule() {
 
 	return defineMethods({
 		/**
-		 * If the window's frame has an x equal to the x of the display, it is a stack window
-		 */
+			If the window's frame has an x equal to the x of the display, it is a stack window
+		*/
 		isStackWindow(window: Window) {
-			return this.isWindowTouchingLeftEdge(window);
+			if (getConfig().masterPosition === 'right') {
+				return this.isWindowTouchingLeftEdge(window);
+			} else {
+				const dividingLineXCoordinate = this.getDividingLineXCoordinate();
+				return window.frame.x < dividingLineXCoordinate;
+			}
 		},
+
 		getWidestStackWindow() {
 			let widestStackWindow: Window | undefined;
 			for (const window of this.getStackWindows()) {
@@ -25,18 +31,21 @@ export function stackWindowsModule() {
 
 			return widestStackWindow;
 		},
+
 		getTopStackWindow() {
 			return this.getTopWindow(this.getStackWindows());
 		},
+
 		getBottomStackWindow() {
 			return this.getBottomWindow(this.getStackWindows());
 		},
 
 		/**
-		 * In the event that the windows get badly rearranged, we force all windows to become vertically split to ensure that there exists a stack
+			In the event that the windows get badly rearranged, we force all windows to become vertically split to ensure that there exists a stack.
 		 */
 		async createStack() {
 			logDebug(() => 'Creating stack...');
+
 			for (const window of this.windowsData) {
 				const splitType = isYabai3Window(window)
 					? window.split
@@ -53,19 +62,23 @@ export function stackWindowsModule() {
 			await this.columnizeStackWindows();
 			await this.columnizeMasterWindows();
 		},
+
 		/**
-		 * If the top-right window has a x-coordinate of 0, or if the stack dividing
-		 * line is equal to 0, then the stack does not exist
-		 */
+			If the top-right window has a x-coordinate of 0, or if the stack dividing line is equal to 0, then the stack does not exist. This applies to master positions on the left and on the right.
+		*/
 		doesStackExist() {
 			const topRightWindow = this.getTopRightWindow();
-			if (topRightWindow === undefined) return false;
+			if (topRightWindow === undefined) {
+				return false;
+			}
+
 			return topRightWindow.frame.x !== 0;
 		},
+
 		/**
-		 * Turns the stack into a column by making sure the split direction of all the stack windows
-		 * is horizontal
-		 */
+			Turns the stack into a column by making sure the split direction of all the stack windows
+			is horizontal
+		*/
 		async columnizeStackWindows() {
 			if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {
 				logDebug(
@@ -74,12 +87,7 @@ export function stackWindowsModule() {
 				return;
 			}
 
-			// In this case, we want to columnize all the windows to the left of the dividing line
-			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
-
-			const stackWindows = this.windowsData.filter(
-				(window) => window.frame.x < dividingLineXCoordinate
-			);
+			const stackWindows = this.getStackWindows();
 			if (stackWindows.length > 1) {
 				for (const stackWindow of stackWindows) {
 					const window = this.getUpdatedWindowData(stackWindow);
