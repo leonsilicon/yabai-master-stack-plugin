@@ -1,5 +1,3 @@
-import * as fastSort from 'fast-sort';
-
 import { getConfig, logDebug } from '~/utils/index.js';
 import { useDefineMethods } from '~/utils/modules.js';
 
@@ -77,15 +75,9 @@ export function dividingLineModule() {
 
 				logDebug(() => `Top-left window: ${topLeftWindow.app}`);
 
-				const nonMasterWindows = fastSort
-					.sort(
-						this.windowsData.filter(
-							(window) => !this.isWindowTouchingLeftEdge(window)
-						)
-					)
-					.by({
-						asc: (window) => window.frame.x,
-					});
+				const nonMasterWindows = this.windowsData
+					.filter((window) => !this.isWindowTouchingLeftEdge(window))
+					.sort((window1, window2) => window1.frame.x - window2.frame.x);
 
 				const numMasterWindows =
 					this.windowsData.length - nonMasterWindows.length;
