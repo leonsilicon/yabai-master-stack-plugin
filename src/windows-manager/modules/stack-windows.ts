@@ -12,9 +12,11 @@ export function stackWindowsModule() {
 		isStackWindow(window: Window) {
 			if (getConfig().masterPosition === 'right') {
 				return this.isWindowTouchingLeftEdge(window);
-			} else {
+			}
+			// If the master position is on the left, the stack windows are the windows with the left side equal to the dividing line
+			 else {
 				const dividingLineXCoordinate = this.getDividingLineXCoordinate();
-				return window.frame.x < dividingLineXCoordinate;
+				return window.frame.x === dividingLineXCoordinate;
 			}
 		},
 

@@ -19,9 +19,11 @@ export function positionalWindowsModule() {
 
 			return topWindow;
 		},
+
 		isTopWindow(windows: Window[], window: Window) {
 			return this.getTopWindow(windows).id === window.id;
 		},
+
 		getBottomWindow(windows: Window[]) {
 			if (windows.length === 0) {
 				throw new Error('List of windows provided was empty.');
@@ -36,6 +38,7 @@ export function positionalWindowsModule() {
 
 			return bottomWindow;
 		},
+
 		isBottomWindow(windows: Window[], window: Window) {
 			return this.getBottomWindow(windows).id === window.id;
 		},
@@ -47,6 +50,7 @@ export function positionalWindowsModule() {
 				this.isWindowTouchingLeftEdge(window)
 			);
 			let topLeftWindow = leftWindows[0];
+
 			for (const window of leftWindows) {
 				if (window.frame.y <= topLeftWindow.frame.y) {
 					topLeftWindow = window;
@@ -83,12 +87,15 @@ export function positionalWindowsModule() {
 
 			return topRightWindow;
 		},
+
 		isMiddleWindow(window: Window) {
 			return !this.isStackWindow(window) && !this.isMasterWindow(window);
 		},
+
 		getMiddleWindows() {
 			return this.windowsData.filter((window) => this.isMiddleWindow(window));
 		},
+
 		isWindowTouchingLeftEdge(window: Window) {
 			return window.frame.x === this.display.frame.x;
 		},

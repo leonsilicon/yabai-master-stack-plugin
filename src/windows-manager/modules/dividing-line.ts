@@ -1,3 +1,5 @@
+import { sort } from 'fast-sort';
+
 import { getConfig, logDebug } from '~/utils/index.js';
 import { useDefineMethods } from '~/utils/modules.js';
 
@@ -11,7 +13,7 @@ export function dividingLineModule() {
 			2. If there is more than one master window, the dividing line must cross the left side of two windows.
 			Using these observations, we can loop through the windows in descending x-coordinate starting from the top-right window and for each pair of windows that share x-coordinates, we check if the numMasterWindows is less than the number of windows we've iterated through, and if so, return the x-coordinate of the currently processed window.
 
-			If the master position is on the left, then the dividing line is always just the x-coordinate + width of the top-left window.
+			If the master position is on the left, then we start searching starting from the top-left window.
 		 */
 		getDividingLineXCoordinate(): number {
 			if (getConfig().masterPosition === 'right') {
@@ -65,11 +67,45 @@ export function dividingLineModule() {
 				// If a pair of windows could not be found (which means all the windows are side-by-side), just
 				// return the top-right window's x-coordinate
 				return topRightWindow.frame.x;
-			}
-			// The dividing line starting from the left is just the x-coordinate + width of the top-left window
-			else {
+			} else {
 				const topLeftWindow = this.getTopLeftWindow();
-				return topLeftWindow.frame.x + topLeftWindow.frame.w;
+				if (topLeftWindow === undefined) {
+					throw new Error(
+						'getDividingLineXCoordinate() was called when there are no windows.'
+					);
+				}
+
+				logDebug(() => `Top-left window: ${topLeftWindow.app}`);
+
+				const nonMasterWindows = sort(
+					this.windowsData.filter(
+						(window) => !this.isWindowTouchingLeftEdge(window)
+					)
+				).by({
+					asc: (window) => window.frame.x,
+				});
+
+				const numMasterWindows =
+					this.windowsData.length - nonMasterWindows.length;
+
+				if (numMasterWindows >= this.expectedCurrentNumMasterWindows) {
+					return nonMasterWindows[0].frame.x;
+				}
+
+				// Otherwise, if there aren't enough windows to the left of the dividing line, iterate through the windows in order of ascending x-coordinate and find pairs of windows
+				for (let i = 0; i < nonMasterWindows.length - 1; i += 1) {
+					const curWindow = nonMasterWindows[i];
+					const nextWindow = nonMasterWindows[i + 1];
+					if (
+						curWindow.frame.x === nextWindow.frame.x &&
+						numMasterWindows + i + 2 >= this.expectedCurrentNumMasterWindows
+					) {
+						return curWindow.frame.x;
+					}
+				}
+
+				// If a pair of windows could not be found (which means all the windows are side-by-side), just return the coordinate of the leftmost window which is not touching the left edge.
+				return nonMasterWindows[0].frame.x;
 			}
 		},
 	});

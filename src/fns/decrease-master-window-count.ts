@@ -1,8 +1,8 @@
 import {
-	writeState,
 	createInitializedWindowsManager,
 	logDebug,
 	main,
+	writeState,
 } from '../utils/index.js';
 
 main(async () => {

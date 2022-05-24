@@ -21,14 +21,14 @@ export function masterWindowModule() {
 			}
 		},
 		getMasterWindows() {
-			const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 			if (getConfig().masterPosition === 'right') {
+				const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 				return this.windowsData.filter(
 					(window) => window.frame.x >= dividingLineXCoordinate
 				);
 			} else {
-				return this.windowsData.filter(
-					(window) => window.frame.x < dividingLineXCoordinate
+				return this.windowsData.filter((window) =>
+					this.isWindowTouchingLeftEdge(window)
 				);
 			}
 		},
