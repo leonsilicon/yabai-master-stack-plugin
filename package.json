@@ -6,14 +6,14 @@
 	"license": "MIT",
 	"author": {
 		"name": "Leon Si",
-		"email": "contact@leonzalion.com",
-		"url": "https://leonzalion.com"
+		"email": "leon@leondreamed.com",
+		"url": "https://leondreamed.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/leonzalion/yabai-master-stack-plugin.git"
+		"url": "https://github.com/leondreamed/yabai-master-stack-plugin.git"
 	},
-	"homepage": "https://github.com/leonzalion/yabai-master-stack-plugin#readme",
+	"homepage": "https://github.com/leondreamed/yabai-master-stack-plugin#readme",
 	"main": "./bin/run.js",
 	"bin": {
 		"yabai-master-stack-plugin": "./bin/run.js",

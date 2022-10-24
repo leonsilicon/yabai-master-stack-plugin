@@ -58,13 +58,13 @@ alt + shift - i : ymsp increase-master-window-count
 alt + shift - d : ymsp decrease-master-window-count
 ```
 
-[Here](https://github.com/leonzalion/macos-configs/blob/main/.config/goku/karabiner.edn#L69) is a real-world example usage of this plugin (using Karabiner + GokuRakuJoudo).
+[Here](https://github.com/leondreamed/macos-configs/blob/main/.config/goku/karabiner.edn#L69) is a real-world example usage of this plugin (using Karabiner + GokuRakuJoudo).
 
 ## Troubleshooting
 
-When binding shell commands to Karabiner, Node.js processes will abruptly exit without the exit handlers getting called to release a lockfile. This error can be fixed by adding a `> /dev/null` to the end of the node command in the karabiner `shell_command` property [(see this commit)](https://github.com/leonzalion/macos-configs/commit/6df4fb7e6677e1e9bc1aebc2ccaa37df939c4688#diff-dff9f478ed6c5e11907650c8803d50aaf8d3603be5485c71792f5e34065be4aa).
+When binding shell commands to Karabiner, Node.js processes will abruptly exit without the exit handlers getting called to release a lockfile. This error can be fixed by adding a `> /dev/null` to the end of the node command in the karabiner `shell_command` property [(see this commit)](https://github.com/leondreamed/macos-configs/commit/6df4fb7e6677e1e9bc1aebc2ccaa37df939c4688#diff-dff9f478ed6c5e11907650c8803d50aaf8d3603be5485c71792f5e34065be4aa).
 
-If you have any other issues with this plugin, please don't hesitate to open an New Issue under the Isuses tab!
+If you have any other issues with this plugin, please don't hesitate to open an New Issue under the Issues tab!
 
 ## TODO
 
