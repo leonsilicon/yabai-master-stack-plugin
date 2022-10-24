@@ -11,13 +11,10 @@ specifiers:
   desm: ^1.3.0
   execa: ^6.1.0
   get-stream: ^6.0.1
-  lion-architecture: ^1.1.0
   lionconfig: ^1.8.11
-  liontypes: ^1.0.4
   onetime: ^6.0.0
   shell-quote: ^1.7.4
   signal-exit: ^3.0.7
-  sync-index: ^1.0.13
   tiny-invariant: ^1.3.1
   type-fest: ^3.1.0
   typescript: ^4.8.4
@@ -28,7 +25,6 @@ dependencies:
   delay: 5.0.0
   execa: 6.1.0
   get-stream: 6.0.1
-  lion-architecture: 1.1.0
   onetime: 6.0.0
   shell-quote: 1.7.4
   signal-exit: 3.0.7
@@ -42,8 +38,6 @@ devDependencies:
   benchmark: 2.1.4
   desm: 1.3.0
   lionconfig: 1.8.11_typescript@4.8.4
-  liontypes: 1.0.4
-  sync-index: 1.0.13
   type-fest: 3.1.0
   typescript: 4.8.4
   vitest: 0.24.3
@@ -5629,10 +5623,6 @@ packages:
     engines: {'0': node >= 0.2.0}
     dev: true
 
-  /just-debounce/1.1.0:
-    resolution: {integrity: sha512-qpcRocdkUmf+UTNBYx5w6dexX5J31AKK1OmPwH630a83DdVVUIngk55RSAiIGpQyoH0dlr872VHfPjnQnK1qDQ==}
-    dev: true
-
   /keyv/4.5.0:
     resolution: {integrity: sha512-2YvuMsA+jnFGtBareKqgANOEKe1mk3HKiXu2fRmAfyxG0MJAywNhi5ttWA3PMjl4NmpyjZNbFifR2vNjW1znfA==}
     dependencies:
@@ -5709,12 +5699,6 @@ packages:
       - enquirer
       - supports-color
     dev: true
-
-  /lion-architecture/1.1.0:
-    resolution: {integrity: sha512-ost2ax9GfOUD61jgbtgHKQimmTg0L2KMkCcgZGtyJTMBheTxuvwwiL7Y8824x0ySCl3BPj1OV4//NPGfbLBdqw==}
-    dependencies:
-      rfdc: 1.3.0
-    dev: false
 
   /lion-git-hooks/1.0.13:
     resolution: {integrity: sha512-ui2aRjpOzzXULUPlBFvGfbiF6mSDy0FfMI2gCJrHofv33nHQUN7D1rxH55HTBTPL8Tcq15StkSZsB3ohOoGJpg==}
@@ -5870,10 +5854,6 @@ packages:
       update-notifier: 6.0.2
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /liontypes/1.0.4:
-    resolution: {integrity: sha512-ZAfwo6/qrLpMDm/vT+VjH/gzJQvrbwV85UOWqW9iP9UYEzR7OOZQME/j2mdCFJciCkCia5KPwm/fhXGW/0XKlA==}
     dev: true
 
   /listr2/4.0.5:
@@ -6898,11 +6878,6 @@ packages:
       p-reflect: 2.1.0
     dev: true
 
-  /p-throttle/5.0.0:
-    resolution: {integrity: sha512-iXBFjW4kP/5Ivw7uC9EDnj+/xo3pNn4Rws3zgMGPwXnWTv1M3P0LVdZxLrqRUI5JK0Fp3Du0bt6lCaVrI3WF7g==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dev: true
-
   /p-timeout/3.2.0:
     resolution: {integrity: sha512-rhIwUycgwwKcP9yTOOFK/AKsAopjjCakVqLHePO3CC6Mir1Z99xT+R63jZxAT5lFZLa2inS5h+ZS2GvR99/FBg==}
     engines: {node: '>=8'}
@@ -7565,6 +7540,7 @@ packages:
 
   /rfdc/1.3.0:
     resolution: {integrity: sha512-V2hovdzFbOi77/WajaSMXk2OLm+xNIeQdMMuB7icj7bk6zi2F8GGAxigcnDFpJHbNyNcgyJDiP+8nOrY5cZGrA==}
+    dev: true
 
   /right-pad/1.0.1:
     resolution: {integrity: sha512-bYBjgxmkvTAfgIYy328fmkwhp39v8lwVgWhhrzxPV3yHtcSqyYKe9/XOhvW48UFjATg3VuJbpsp5822ACNvkmw==}
@@ -8124,22 +8100,6 @@ packages:
     dependencies:
       better-path-resolve: 1.0.0
       rename-overwrite: 4.0.2
-    dev: true
-
-  /sync-index/1.0.13:
-    resolution: {integrity: sha512-N5umxUUyVMuCRzw/DKeFbSneNu6KQrPez0fDnd6a1Ga/+DUHaLrWm1uuuqCxYjDk9SXGYpdYN3M0bUMSOadXJA==}
-    hasBin: true
-    dependencies:
-      chokidar: 3.5.3
-      commander: 9.4.1
-      cosmiconfig: 7.0.1
-      debug: 4.3.4
-      globby: 13.1.2
-      just-debounce: 1.1.0
-      p-throttle: 5.0.0
-      pkg-dir: 6.0.1
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /tapable/0.1.10:
