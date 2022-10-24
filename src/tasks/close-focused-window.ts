@@ -1,7 +1,8 @@
-import type { Window } from '../types/index.js';
-import { createInitializedWindowsManager, main } from '../utils/index.js';
+import type { Window } from '~/types/yabai.js';
 
-main(async () => {
+import { createInitializedWindowsManager, defineTask } from '../utils/index.js';
+
+const closeFocusedWindow = defineTask(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const windowToClose = wm.getFocusedWindow();
 
@@ -56,3 +57,5 @@ main(async () => {
 		await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 	}
 });
+
+export default closeFocusedWindow;

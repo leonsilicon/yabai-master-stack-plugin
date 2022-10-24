@@ -1,10 +1,10 @@
 import {
 	createInitializedWindowsManager,
-	logDebug,
-	main,
+	debug,
+	defineTask,
 } from '../utils/index.js';
 
-main(async () => {
+const focusUpWindow = defineTask(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
@@ -16,8 +16,10 @@ main(async () => {
 			// Focus on the bottom stack window
 			const windowToFocus =
 				wm.getBottomStackWindow() ?? wm.getBottomMasterWindow();
-			logDebug(() => `Focusing on the window ${windowToFocus.app}`);
-			if (windowToFocus !== undefined) {
+			if (windowToFocus === undefined) {
+				debug(() => `No window to focus on`);
+			} else {
+				debug(() => `Focusing on the window ${windowToFocus.app}`);
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
 		} else if (
@@ -26,8 +28,10 @@ main(async () => {
 		) {
 			// Focus on the bottom master window
 			const windowToFocus = wm.getBottomMasterWindow();
-			logDebug(() => `Focusing on the window ${windowToFocus.app}`);
-			if (windowToFocus !== undefined) {
+			if (windowToFocus === undefined) {
+				debug(() => `No window to focus on`);
+			} else {
+				debug(() => `Focusing on the window ${windowToFocus.app}`);
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
 		} else {
@@ -36,3 +40,5 @@ main(async () => {
 		}
 	}
 });
+
+export default focusUpWindow;

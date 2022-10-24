@@ -1,7 +1,8 @@
 import Benchmark from 'benchmark';
 
-import { p } from './utils.js';
 import { createInitializedWindowsManager } from '~/utils/index.js';
+
+import { p } from './utils.js';
 
 const suite = new Benchmark.Suite();
 

@@ -3,7 +3,8 @@ import fs from 'node:fs';
 const locks = new Map<string, true>();
 
 export function releaseLock(lockPath: string, options?: { force?: boolean }) {
-	if (options?.force || locks.has(lockPath)) {
+	const force = options?.force ?? false;
+	if (force || locks.has(lockPath)) {
 		try {
 			fs.rmdirSync(lockPath);
 			locks.delete(lockPath);

@@ -1,9 +1,10 @@
 import * as fs from 'node:fs';
 import os from 'node:os';
 import * as path from 'node:path';
+
 import onetime from 'onetime';
 
-import type { YabaiMasterStackPluginConfig } from '~/types/index.js';
+import type { YabaiMasterStackPluginConfig } from '~/types/yabai.js';
 
 export const getConfig = onetime(() => {
 	try {

@@ -1,10 +1,10 @@
 import {
 	createInitializedWindowsManager,
-	logDebug,
-	main,
+	debug,
+	defineTask,
 } from '../utils/index.js';
 
-main(async () => {
+const focusDownWindow = defineTask(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	// eslint-disable-next-line no-negated-condition
@@ -16,8 +16,10 @@ main(async () => {
 		) {
 			// Focus on the top stack window
 			const windowToFocus = wm.getTopStackWindow() ?? wm.getTopMasterWindow();
-			logDebug(() => `Focusing on the window ${windowToFocus?.app}`);
-			if (windowToFocus !== undefined) {
+			if (windowToFocus === undefined) {
+				debug(() => `Now window to focus on`);
+			} else {
+				debug(() => `Focusing on the window ${windowToFocus.app}`);
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
 		} else if (
@@ -26,8 +28,10 @@ main(async () => {
 		) {
 			// Focus on the top master window
 			const windowToFocus = wm.getTopMasterWindow();
-			logDebug(() => `Focusing on the window ${windowToFocus?.app}`);
-			if (windowToFocus !== undefined) {
+			if (windowToFocus === undefined) {
+				debug(() => `No window to focus on`);
+			} else {
+				debug(() => `Focusing on the window ${windowToFocus.app}`);
 				await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
 			}
 		}
@@ -39,3 +43,5 @@ main(async () => {
 		await wm.executeYabaiCommand(`-m window --focus first`);
 	}
 });
+
+export default focusDownWindow;

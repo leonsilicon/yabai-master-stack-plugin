@@ -1,11 +1,11 @@
 import onExit from 'signal-exit';
 
+import { debug } from './debug.js';
 import { acquireHandlerLock, releaseHandlerLock } from './handler.js';
-import { logDebug } from './log.js';
 
 export function handleMasterError(error: Error & { code?: string }) {
 	if (error.code === 'ELOCKED') {
-		logDebug(() => 'Lock found...aborting');
+		debug(() => 'Lock found...aborting');
 	} else {
 		console.error(error);
 	}
@@ -15,11 +15,20 @@ onExit(() => {
 	releaseHandlerLock();
 });
 
-export function main(cb: () => Promise<void>) {
-	acquireHandlerLock();
-	cb()
-		.catch(handleMasterError)
-		.finally(() => {
-			releaseHandlerLock();
-		});
+export function defineTask(
+	cb: () => Promise<void>,
+	options?: { forceReleaseLock?: boolean }
+): () => Promise<void> {
+	return async () => {
+		if (options?.forceReleaseLock) {
+			releaseHandlerLock({ force: true });
+		}
+
+		acquireHandlerLock();
+		cb()
+			.catch(handleMasterError)
+			.finally(() => {
+				releaseHandlerLock();
+			});
+	};
 }

@@ -1,17 +1,20 @@
 import process from 'node:process';
+
+import invariant from 'tiny-invariant';
+
 import {
 	createInitializedWindowsManager,
-	logDebug,
-	main,
+	debug,
+	defineTask,
 } from '~/utils/index.js';
 
-main(async () => {
+const windowCreated = defineTask(async () => {
 	const { wm, state, space } = await createInitializedWindowsManager();
-	logDebug(() => 'Starting to handle window_created.');
+	debug(() => 'Starting to handle window_created.');
 
 	const result = await wm.isValidLayout();
 	if (result.status) {
-		logDebug(() => 'Valid layout detected; no changes were made.');
+		debug(() => 'Valid layout detected; no changes were made.');
 		return;
 	}
 
@@ -20,23 +23,27 @@ main(async () => {
 	const curNumMasterWindows = wm.getMasterWindows().length;
 	const window = wm.getWindowData({ windowId, processId });
 
+	const spaceState = state[space.id];
+	invariant(spaceState);
 	if (
 		curNumMasterWindows > 1 &&
-		curNumMasterWindows <= state[space.id].numMasterWindows
+		curNumMasterWindows <= spaceState.numMasterWindows
 	) {
 		// Move the window to the master
-		logDebug(() => 'Moving newly created window to master.');
+		debug(() => 'Moving newly created window to master.');
 		await wm.moveWindowToMaster(window);
 	}
 	// If there are too many windows on the master
 	else {
-		logDebug(() => 'Moving newly created window to stack.');
+		debug(() => 'Moving newly created window to stack.');
 		// Move the window to the stack
 		await wm.moveWindowToStack(window);
 	}
 
 	await wm.updateWindows({
-		targetNumMasterWindows: state[space.id].numMasterWindows,
+		targetNumMasterWindows: spaceState.numMasterWindows,
 	});
-	logDebug(() => 'Finished handling window_created.');
+	debug(() => 'Finished handling window_created.');
 });
+
+export default windowCreated;

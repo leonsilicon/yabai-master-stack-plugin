@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import process from 'node:process';
+
 import { Argument, program } from 'commander';
 
 program
@@ -19,8 +20,11 @@ program
 			'window-moved',
 		])
 	)
-	.action(async (task: string) => {
-		await import(`../fns/${task}.js`);
+	.action(async (taskSlug: string) => {
+		const { default: task } = (await import(`../fns/${taskSlug}.js`)) as {
+			default: () => Promise<void>;
+		};
+		await task();
 	});
 
 program.parse(process.argv);

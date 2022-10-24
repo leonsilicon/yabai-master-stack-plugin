@@ -5,19 +5,13 @@
 		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "node",
-		"noUncheckedIndexedAccess": false,
+		"strict": true,
 		"esModuleInterop": true,
 		"baseUrl": ".",
 		"paths": {
-			"~/*": [
-				"./src/*"
-			]
+			"~/*": ["./src/*"]
 		},
-		"lib": [
-			"esnext"
-		]
+		"lib": ["esnext"]
 	},
-	"include": [
-		"src/**/*.ts"
-	]
+	"include": ["src/**/*.ts"]
 }

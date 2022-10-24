@@ -5,10 +5,10 @@ import * as util from 'node:util';
 
 import { getConfig } from '~/utils/config.js';
 
-export function logDebug(cb: () => unknown) {
-	const { debug } = getConfig();
+export function debug(cb: () => unknown) {
+	const { debug: isDebugOn } = getConfig();
 
-	if (debug) {
+	if (isDebugOn) {
 		fs.appendFileSync(
 			path.join(os.homedir(), '.ymsp-log'),
 			util.inspect(cb()) + '\n'

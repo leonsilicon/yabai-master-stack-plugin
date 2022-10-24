@@ -68,12 +68,7 @@ export type DisplayId = Distinct<number, 'display'>;
 export type DisplayUuid = Distinct<number, 'displayUuid'>;
 export type DisplayIndex = Distinct<number, 'displayIndex'>;
 
-export type State = Record<
-	string,
-	{
-		numMasterWindows: number;
-	}
->;
+export type State = Record<string, { numMasterWindows: number }>;
 
 export interface Display {
 	id: DisplayId;
