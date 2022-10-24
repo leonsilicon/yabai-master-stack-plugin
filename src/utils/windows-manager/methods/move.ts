@@ -8,7 +8,7 @@ export async function moveWindowToStack(this: WindowsManager, window: Window) {
 	if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {
 		debug(
 			() =>
-				`Skipped moving window ${window.app} to stack becuase there is no stack.`
+				`Skipped moving window ${window.app} to stack because there is no stack.`
 		);
 		return;
 	}
