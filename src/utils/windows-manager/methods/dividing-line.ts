@@ -1,7 +1,7 @@
 import invariant from 'tiny-invariant';
 
 import { debug, getConfig } from '~/utils/index.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 
 /**
 	There is always a "line" dividing the master windows from the secondary windows. To find this line, we use two observations (the following apply for a master position on the right):

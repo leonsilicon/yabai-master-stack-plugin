@@ -16,6 +16,7 @@ export const getConfig = onetime(() => {
 
 		const defaultConfig: YabaiMasterStackPluginConfig = {
 			masterPosition: 'right',
+			moveNewWindowsToMaster: false,
 			debug: false,
 			yabaiPath: '/usr/local/bin/yabai',
 		};

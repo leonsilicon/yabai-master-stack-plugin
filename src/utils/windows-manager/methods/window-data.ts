@@ -3,8 +3,8 @@ import invariant from 'tiny-invariant';
 
 import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 import { getYabaiOutput, isYabai3Window } from '~/utils/yabai.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
 
 export async function getWindowsData(this: WindowsManager) {
 	const { yabaiPath } = getConfig();

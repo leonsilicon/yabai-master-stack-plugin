@@ -1,8 +1,8 @@
 import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import { debug } from '~/utils/debug.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 import { isYabai3Window } from '~/utils/yabai.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
 
 export async function moveWindowToStack(this: WindowsManager, window: Window) {
 	if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {

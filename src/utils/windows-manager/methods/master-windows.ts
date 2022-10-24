@@ -1,8 +1,8 @@
 import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import { debug } from '~/utils/debug.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 import { isYabai3Window } from '~/utils/yabai.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
 
 /**
 	If the master position is on the right, a window which is to the right of the dividing line is considered a master window.

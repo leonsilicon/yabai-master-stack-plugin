@@ -1,7 +1,7 @@
 import invariant from 'tiny-invariant';
 
 import type { Window } from '~/types/yabai.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 
 export function getTopWindow(
 	this: WindowsManager,

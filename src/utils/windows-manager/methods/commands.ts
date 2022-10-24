@@ -2,8 +2,8 @@ import { execa } from 'execa';
 import { parse } from 'shell-quote';
 
 import { getConfig } from '~/utils/config.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 import { getYabaiOutput } from '~/utils/yabai.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
 
 export async function executeYabaiCommand(
 	this: WindowsManager,

@@ -117,5 +117,6 @@ export type Space = Yabai3Space | Yabai4Space;
 export interface YabaiMasterStackPluginConfig {
 	yabaiPath: string;
 	debug: boolean;
+	moveNewWindowsToMaster: boolean;
 	masterPosition: 'left' | 'right';
 }

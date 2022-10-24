@@ -1,8 +1,8 @@
 import invariant from 'tiny-invariant';
 
 import { debug } from '~/utils/debug.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 import { isYabai3Window } from '~/utils/yabai.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
 
 export async function isValidLayout(
 	this: WindowsManager,

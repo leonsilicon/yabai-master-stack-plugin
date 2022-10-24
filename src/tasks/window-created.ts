@@ -6,6 +6,7 @@ import {
 	createInitializedWindowsManager,
 	debug,
 	defineTask,
+	getConfig,
 } from '~/utils/index.js';
 
 const windowCreated = defineTask(async () => {
@@ -25,7 +26,17 @@ const windowCreated = defineTask(async () => {
 
 	const spaceState = state[space.id];
 	invariant(spaceState);
-	if (
+	if (getConfig().moveNewWindowsToMaster) {
+		// If the master is full, move a window from master to stack
+		if (curNumMasterWindows >= spaceState.numMasterWindows) {
+			const oldMasterWindow = wm.getMasterWindows()[0];
+			invariant(oldMasterWindow);
+			await wm.moveWindowToMaster(window);
+			await wm.moveWindowToStack(oldMasterWindow);
+		} else {
+			await wm.moveWindowToMaster(window);
+		}
+	} else if (
 		curNumMasterWindows > 1 &&
 		curNumMasterWindows <= spaceState.numMasterWindows
 	) {

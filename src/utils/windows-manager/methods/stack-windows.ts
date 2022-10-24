@@ -1,6 +1,6 @@
 import type { Window } from '~/types/yabai.js';
 import { debug, getConfig, isYabai3Window } from '~/utils/index.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 
 /**
 	If the window's frame has an x equal to the x of the display, it is a stack window

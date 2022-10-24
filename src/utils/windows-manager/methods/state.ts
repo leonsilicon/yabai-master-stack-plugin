@@ -2,7 +2,7 @@ import invariant from 'tiny-invariant';
 
 import type { State } from '~/types/yabai.js';
 import { writeState } from '~/utils/state.js';
-import type { WindowsManager } from '~/windows-manager/class.js';
+import type { WindowsManager } from '~/utils/windows-manager/class.js';
 
 export function validateState(this: WindowsManager, state: State) {
 	const spaceState = state[this.space.id];
