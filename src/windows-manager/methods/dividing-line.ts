@@ -16,20 +16,18 @@ export function getDividingLineXCoordinate(this: WindowsManager): number {
 		const topRightWindow = this.getTopRightWindow();
 		if (topRightWindow === undefined) {
 			throw new Error(
-				'getDividingLineXCoordinate() was called when there are no windows.'
+				'getDivingLineXCoordinate() was called when there are no windows.'
 			);
 		}
 
 		debug(() => `Top-right window: ${topRightWindow.app}`);
 
-		if (this.expectedCurrentNumMasterWindows === 1) {
+		if (this.expectedCurrentNumMasterWindows === 1)
 			return topRightWindow.frame.x;
-		}
 
 		const nonStackWindows = this.windowsData.filter(
 			(window) => !this.isStackWindow(window)
 		);
-
 		// Get all the windows to the left of the top-right window which are not a stack window
 		const eligibleWindows = nonStackWindows
 			.filter((window) => window.frame.x <= topRightWindow.frame.x)

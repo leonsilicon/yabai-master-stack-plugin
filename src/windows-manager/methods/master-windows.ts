@@ -9,11 +9,11 @@ import type { WindowsManager } from '~/windows-manager/class.js';
 	If the master position is on the left, a window that is touching the left edge is considered a master window.
 */
 export function isMasterWindow(this: WindowsManager, window: Window) {
-	if (getConfig().masterPosition === 'left') {
-		return this.isWindowTouchingLeftEdge(window);
-	} else {
+	if (getConfig().masterPosition === 'right') {
 		const dividingLineXCoordinate = this.getDividingLineXCoordinate();
 		return window.frame.x >= dividingLineXCoordinate;
+	} else {
+		return this.isWindowTouchingLeftEdge(window);
 	}
 }
 
