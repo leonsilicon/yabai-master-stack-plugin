@@ -21,7 +21,7 @@ program
 		])
 	)
 	.action(async (taskSlug: string) => {
-		const { default: task } = (await import(`../fns/${taskSlug}.js`)) as {
+		const { default: task } = (await import(`../tasks/${taskSlug}.js`)) as {
 			default: () => Promise<void>;
 		};
 		await task();
