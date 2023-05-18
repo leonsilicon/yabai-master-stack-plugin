@@ -2,7 +2,6 @@ import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import { debug } from '~/utils/debug.js';
 import type { WindowsManager } from '~/utils/windows-manager/class.js';
-import { isYabai3Window } from '~/utils/yabai.js';
 
 /**
 	If the master position is on the right, a window which is to the right of the dividing line is considered a master window.
@@ -86,9 +85,7 @@ export async function moveWindowToMaster(this: WindowsManager, window: Window) {
 	);
 	window = this.getUpdatedWindowData(window);
 
-	const splitType = isYabai3Window(window)
-		? window.split
-		: window['split-type'];
+	const splitType = window['split-type'];
 
 	if (splitType === 'vertical') {
 		await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
@@ -104,10 +101,7 @@ export async function columnizeMasterWindows(this: WindowsManager) {
 	if (masterWindows.length > 1) {
 		for (const masterWindow of masterWindows) {
 			const window = this.getUpdatedWindowData(masterWindow);
-
-			const splitType = isYabai3Window(window)
-				? window.split
-				: window['split-type'];
+			const splitType = window['split-type'];
 
 			if (splitType === 'vertical') {
 				// eslint-disable-next-line no-await-in-loop

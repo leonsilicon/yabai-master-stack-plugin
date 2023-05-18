@@ -4,7 +4,7 @@ import invariant from 'tiny-invariant';
 import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import type { WindowsManager } from '~/utils/windows-manager/class.js';
-import { getYabaiOutput, isYabai3Window } from '~/utils/yabai.js';
+import { getYabaiOutput } from '~/utils/yabai.js';
 
 export async function getWindowsData(this: WindowsManager) {
 	const { yabaiPath } = getConfig();
@@ -12,9 +12,7 @@ export async function getWindowsData(this: WindowsManager) {
 	const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
 	const yabaiOutput = await yabaiOutputPromise;
 	const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter((window) => {
-		const isFloating = isYabai3Window(window)
-			? window.floating
-			: window['is-floating'];
+		const isFloating = window['is-floating'];
 
 		// Window should not be floating
 		if (
@@ -25,10 +23,7 @@ export async function getWindowsData(this: WindowsManager) {
 			return false;
 		}
 
-		const isMinimized = isYabai3Window(window)
-			? window.minimized
-			: window['is-minimized'];
-
+		const isMinimized = window['is-minimized'];
 		if (isMinimized) return false;
 
 		return true;
@@ -81,7 +76,5 @@ export function getWindowData(
 }
 
 export function getFocusedWindow(this: WindowsManager): Window | undefined {
-	return this.windowsData.find((w) =>
-		isYabai3Window(w) ? w.focused : w['has-focus']
-	);
+	return this.windowsData.find((w) => w['has-focus']);
 }

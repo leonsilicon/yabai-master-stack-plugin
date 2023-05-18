@@ -29,7 +29,7 @@ export type WindowsManager = InstanceType<typeof WindowManagerClass> &
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const WindowsManager = WindowManagerClass as unknown as {
-	new (
+	new(
 		...args: ConstructorParameters<typeof WindowManagerClass>
 	): WindowsManager;
 };

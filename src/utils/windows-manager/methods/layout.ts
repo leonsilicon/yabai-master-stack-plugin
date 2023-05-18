@@ -2,7 +2,6 @@ import invariant from 'tiny-invariant';
 
 import { debug } from '~/utils/debug.js';
 import type { WindowsManager } from '~/utils/windows-manager/class.js';
-import { isYabai3Window } from '~/utils/yabai.js';
 
 export async function isValidLayout(
 	this: WindowsManager,
@@ -94,9 +93,7 @@ export async function updateWindows(
 	// If the user wants a pancake layout, set the split of all windows to horizontal
 	if (targetNumMasterWindows === numWindows) {
 		for (const window of this.windowsData) {
-			const splitType = isYabai3Window(window)
-				? window.split
-				: window['split-type'];
+			const splitType = window['split-type'];
 
 			if (splitType === 'vertical') {
 				// eslint-disable-next-line no-await-in-loop

@@ -13,5 +13,5 @@
 		},
 		"lib": ["esnext"]
 	},
-	"include": ["src/**/*.ts"]
+	"include": ["./src"]
 }

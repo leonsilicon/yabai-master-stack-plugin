@@ -2,7 +2,6 @@ import type { Window } from '~/types/yabai.js';
 import { getConfig } from '~/utils/config.js';
 import { debug } from '~/utils/debug.js';
 import type { WindowsManager } from '~/utils/windows-manager/class.js';
-import { isYabai3Window } from '~/utils/yabai.js';
 
 export async function moveWindowToStack(this: WindowsManager, window: Window) {
 	if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {
@@ -30,9 +29,7 @@ export async function moveWindowToStack(this: WindowsManager, window: Window) {
 
 	// If there's only two windows, make sure that the window stack exists
 	if (this.windowsData.length === 2) {
-		const splitType = isYabai3Window(window)
-			? window.split
-			: window['split-type'];
+		const splitType = window['split-type'];
 
 		if (splitType === 'horizontal') {
 			await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
@@ -58,9 +55,7 @@ export async function moveWindowToStack(this: WindowsManager, window: Window) {
 	);
 	window = this.getUpdatedWindowData(window);
 
-	const splitType = isYabai3Window(window)
-		? window.split
-		: window['split-type'];
+	const splitType = window['split-type'];
 
 	if (this.windowsData.length === 2) {
 		if (splitType === 'horizontal') {

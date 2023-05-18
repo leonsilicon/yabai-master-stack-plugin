@@ -1,5 +1,5 @@
 import type { Window } from '~/types/yabai.js';
-import { debug, getConfig, isYabai3Window } from '~/utils/index.js';
+import { debug, getConfig } from '~/utils/index.js';
 import type { WindowsManager } from '~/utils/windows-manager/class.js';
 
 /**
@@ -45,9 +45,7 @@ export async function createStack(this: WindowsManager) {
 	debug(() => 'Creating stack...');
 
 	for (const window of this.windowsData) {
-		const splitType = isYabai3Window(window)
-			? window.split
-			: window['split-type'];
+		const splitType = window['split-type'];
 
 		if (splitType === 'horizontal') {
 			// eslint-disable-next-line no-await-in-loop
@@ -86,9 +84,7 @@ export async function columnizeStackWindows(this: WindowsManager) {
 		for (const stackWindow of stackWindows) {
 			const window = this.getUpdatedWindowData(stackWindow);
 
-			const splitType = isYabai3Window(window)
-				? window.split
-				: window['split-type'];
+			const splitType = window['split-type'];
 
 			if (splitType === 'vertical') {
 				// eslint-disable-next-line no-await-in-loop
