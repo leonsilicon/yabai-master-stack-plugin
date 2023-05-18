@@ -11,6 +11,7 @@ export interface Window {
 	level: number;
 	opacity: number;
 	'split-type': string;
+	'split-child': string;
 	'stack-index': number;
 	'can-move': boolean;
 	'can-resize': boolean;
