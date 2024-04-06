@@ -26,9 +26,7 @@ Then, add the following lines to your `.yabairc`:
 
 ```bash
 yabai -m signal --add event=window_created action='ymsp window-created'
-
 yabai -m signal --add event=application_launched action='ymsp window-created'
-
 yabai -m signal --add event=window_moved action='ymsp window-moved'
 
 ymsp on-yabai-start
@@ -50,12 +48,12 @@ For example, if you're using [skhd](https://github.com/koekeishiya/skhd), add th
 
 ```text
 # focus windows
-alt + j : ymsp focus-down-window
-alt + k : ymsp focus-up-window
+alt - j : ymsp focus-down-window
+alt - k : ymsp focus-up-window
 
 # adjust number of master windows
-alt + shift + i : ymsp increase-master-window-count
-alt + shift + d : ymsp decrease-master-window-count
+alt + shift - i : ymsp increase-master-window-count
+alt + shift - d : ymsp decrease-master-window-count
 ```
 
 [Here](https://github.com/leondreamed/macos-configs/blob/main/.config/goku/karabiner.edn#L69) is a real-world example usage of this plugin (using Karabiner + GokuRakuJoudo).
