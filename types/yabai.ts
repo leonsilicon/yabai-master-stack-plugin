@@ -9,6 +9,9 @@ export interface Window {
 	display: number;
 	space: number;
 	level: number;
+	'sub-level': number;
+	layer: string;
+	'sub-layer': string;
 	opacity: number;
 	'split-type': string;
 	'split-child': string;
@@ -17,16 +20,15 @@ export interface Window {
 	'can-resize': boolean;
 	'has-focus': boolean;
 	'has-shadow': boolean;
-	'has-border': boolean;
 	'has-parent-zoom': boolean;
 	'has-fullscreen-zoom': boolean;
+	'has-ax-reference': boolean;
 	'is-native-fullscreen': boolean;
 	'is-visible': boolean;
 	'is-minimized': boolean;
 	'is-hidden': boolean;
 	'is-floating': boolean;
 	'is-sticky': boolean;
-	'is-topmost': boolean;
 	'is-grabbed': boolean;
 }
 

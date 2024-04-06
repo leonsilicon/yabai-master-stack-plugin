@@ -1,4 +1,4 @@
-import { createInitializedWindowsManager } from '#utils/windows-manager/_.ts';
+import { createInitializedWindowsManager } from '#utils/windows-manager.ts';
 import Benchmark from 'benchmark';
 import { p } from './utils.ts';
 
