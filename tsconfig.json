@@ -1,4 +1,0 @@
-{
-	"extends": "@tunnel/tsconfig",
-	"include": ["./tasks"]
-}

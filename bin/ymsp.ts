@@ -22,7 +22,7 @@ onExit(() => {
 });
 
 program
-	.name('yabai-master-stack-plugin')
+	.name('ymsp')
 	.showHelpAfterError()
 	.addArgument(
 		new Argument('<task>').choices([
