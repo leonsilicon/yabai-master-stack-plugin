@@ -8,10 +8,10 @@
 
 ## Installation
 
-To "install" this plugin, make sure you have [Node.js](https://nodejs.org) installed. Then, run the following command to install the npm package globally:
+This plugin uses [Bun](https://bun.sh) for faster startup times. To install it, you'll need to first [install Bun](https://bun.sh/docs/installation), and then run the following command:
 
 ```bash
-npm install --global yabai-master-stack-plugin
+bun install --global yabai-master-stack-plugin
 ```
 
 Then, create a configuration file at `~/.config/ymsp/ymsp.config.json` with the following contents (make sure to replace `/usr/local/bin/yabai` with the path of your `yabai` executable; if you're not sure what it is, run `which yabai`):
@@ -54,8 +54,8 @@ alt + j : ymsp focus-down-window
 alt + k : ymsp focus-up-window
 
 # adjust number of master windows
-alt + shift - i : ymsp increase-master-window-count
-alt + shift - d : ymsp decrease-master-window-count
+alt + shift + i : ymsp increase-master-window-count
+alt + shift + d : ymsp decrease-master-window-count
 ```
 
 [Here](https://github.com/leondreamed/macos-configs/blob/main/.config/goku/karabiner.edn#L69) is a real-world example usage of this plugin (using Karabiner + GokuRakuJoudo).
