@@ -1,17 +1,4 @@
 {
-	"extends": "lionconfig/tsconfig.json",
-	"compilerOptions": {
-		"outDir": "dist",
-		"target": "esnext",
-		"module": "esnext",
-		"moduleResolution": "node",
-		"strict": true,
-		"esModuleInterop": true,
-		"baseUrl": ".",
-		"paths": {
-			"~/*": ["./src/*"]
-		},
-		"lib": ["esnext"]
-	},
-	"include": ["./src"]
+	"extends": "@tunnel/tsconfig",
+	"include": ["./tasks"]
 }

@@ -4,56 +4,43 @@
 	"version": "3.0.0",
 	"description": "Emulate the dwm-style master-stack window layout in yabai!",
 	"license": "MIT",
+	"imports": {
+		"#tasks/*": "./tasks/*",
+		"#types": "./types/_.ts",
+		"#utils/*": "./utils/*"
+	},
 	"author": {
 		"name": "Leon Si",
-		"email": "leon@leondreamed.com",
-		"url": "https://leondreamed.com"
+		"email": "leon@leonsilicon.com",
+		"url": "https://leonsilicon.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/leondreamed/yabai-master-stack-plugin.git"
+		"url": "https://github.com/leonsilicon/yabai-master-stack-plugin.git"
 	},
-	"homepage": "https://github.com/leondreamed/yabai-master-stack-plugin#readme",
-	"main": "./bin/run.js",
+	"homepage": "https://github.com/leonsilicon/yabai-master-stack-plugin#readme",
 	"bin": {
-		"yabai-master-stack-plugin": "./bin/run.js",
-		"ymsp": "./bin/run.js"
+		"ymsp": "./.build/bin/ymsp.ts"
 	},
 	"scripts": {
-		"start": "ts-node ./src/bin/run.ts",
-		"build": "ts-node ./scripts/build.ts",
-		"lint": "eslint --fix --cache .",
-		"format": "prettier --write src",
-		"release": "lionp",
-		"test:perf": "node-ts test/perf.ts",
-		"typecheck": "tsc --noEmit"
+		"format": "dprint fmt"
 	},
 	"dependencies": {
 		"commander": "^10.0.1",
 		"delay": "^5.0.0",
-		"execa": "^7.1.1",
 		"get-stream": "^6.0.1",
 		"onetime": "^6.0.0",
+		"pathe": "^1.1.2",
 		"shell-quote": "^1.8.1",
 		"signal-exit": "^4.0.2",
 		"tiny-invariant": "^1.3.1"
 	},
 	"devDependencies": {
-		"@types/benchmark": "^2.1.2",
-		"@types/node": "^20.2.1",
-		"@types/shell-quote": "^1.7.1",
-		"@types/signal-exit": "^3.0.1",
+		"@tunnel/tsconfig": "^0.0.0",
+		"@types/bun": "^1.0.12",
 		"benchmark": "^2.1.4",
-		"desm": "^1.3.0",
-		"lionconfig": "^2.3.2",
-		"type-fest": "^3.10.0",
-		"typescript": "^5.0.4",
-		"vitest": "^0.31.1"
-	},
-	"publishConfig": {
-		"directory": "dist"
-	},
-	"lionp": {
-		"tests": false
+		"dprint": "^0.45.1",
+		"type-fest": "^4.15.0",
+		"unbuild": "^2.0.0"
 	}
 }

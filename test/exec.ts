@@ -1,14 +1,12 @@
 import 'dotenv/config';
 
-import { exec } from 'node:child_process';
-
+import { getConfig, getYabaiOutput } from '#utils/index.ts';
 import Benchmark from 'benchmark';
 import { execa, execaCommand, execaCommandSync } from 'execa';
+import { exec } from 'node:child_process';
 import { parse } from 'shell-quote';
 
-import { getConfig, getYabaiOutput } from '~/utils/index.js';
-
-import { p } from './utils.js';
+import { p } from './utils.ts';
 
 async function execute(command: string) {
 	return new Promise((resolve) => {
@@ -30,7 +28,7 @@ suite
 		p(async () => {
 			const yabaiProcess = execa(yabaiPath, parsedCommand);
 			const _output = await getYabaiOutput(yabaiProcess);
-		})
+		}),
 	)
 	.add('execa + commandSync', () => {
 		const _output = execaCommandSync(yabaiPath + command).stdout;
@@ -40,13 +38,13 @@ suite
 		p(async () => {
 			const execaResult = await execaCommand(yabaiPath + command);
 			const _output = execaResult.stdout;
-		})
+		}),
 	)
 	.add(
 		'child_process.exec',
 		p(async () => {
 			const _output = await execute(yabaiPath + command);
-		})
+		}),
 	)
 	.on('cycle', (event: any) => {
 		console.info(String(event.target));
