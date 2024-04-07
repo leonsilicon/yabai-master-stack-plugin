@@ -25,7 +25,8 @@ export async function getWindowsData(this: WindowsManager) {
 
 		const isMinimized = window['is-minimized'];
 		const isHidden = window['is-hidden'];
-		if (isMinimized || isHidden) return false;
+		const isVisible = window['is-visible'];
+		if (isMinimized || isHidden || !isVisible) return false;
 
 		return true;
 	});
