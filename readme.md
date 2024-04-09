@@ -14,6 +14,8 @@ This plugin uses [Bun](https://bun.sh) for faster startup times. To install it, 
 bun install --global yabai-master-stack-plugin
 ```
 
+> To update to a newer version, append `@<version>` at the end of the above install command (e.g. `bun install --global yabai-master-stack-plugin@4.1.0`)
+
 Then, create a configuration file at `~/.config/ymsp/ymsp.config.json` with the following contents (make sure to replace `/usr/local/bin/yabai` with the path of your `yabai` executable; if you're not sure what it is, run `which yabai`):
 
 ```json
