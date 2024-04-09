@@ -4,7 +4,7 @@ import { defineTask } from '#utils/task.ts';
 import { createInitializedWindowsManager } from '#utils/windows-manager.ts';
 import invariant from 'tiny-invariant';
 
-const decreaseMasterWindowCount = defineTask(async () => {
+export const decreaseMasterWindowCount = defineTask(async () => {
 	const { wm, state, space } = await createInitializedWindowsManager();
 
 	const spaceState = state[space.id];
@@ -20,4 +20,3 @@ const decreaseMasterWindowCount = defineTask(async () => {
 	}
 });
 
-export default decreaseMasterWindowCount;

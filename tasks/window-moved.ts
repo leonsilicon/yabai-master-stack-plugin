@@ -5,7 +5,7 @@ import {
 import { createInitializedWindowsManager } from '#utils/windows-manager.ts';
 import invariant from 'tiny-invariant';
 
-const windowMoved = defineTask(async () => {
+export const windowMoved = defineTask(async () => {
 	const { wm, space, state } = await createInitializedWindowsManager();
 	debug(() => 'Starting to handle window_moved.');
 	const spaceState = state[space.id];
@@ -15,5 +15,3 @@ const windowMoved = defineTask(async () => {
 	});
 	debug(() => 'Finished handling window_moved.');
 });
-
-export default windowMoved;

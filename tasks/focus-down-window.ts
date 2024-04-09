@@ -4,7 +4,7 @@ import {
 	createInitializedWindowsManager,
 } from '#utils/windows-manager.ts';
 
-const focusDownWindow = defineTask(async () => {
+export const focusDownWindow = defineTask(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	// eslint-disable-next-line no-negated-condition
@@ -42,5 +42,3 @@ const focusDownWindow = defineTask(async () => {
 		await wm.executeYabaiCommand(`-m window --focus first`);
 	}
 });
-
-export default focusDownWindow;

@@ -15,6 +15,8 @@ const tasksMap = {
 	'on-yabai-start': tasks.onYabaiStart,
 	'window-created': tasks.windowCreated,
 	'window-moved': tasks.windowMoved,
+	'focus-next-display': tasks.focusNextDisplay,
+	'focus-previous-display': tasks.focusPreviousDisplay,
 };
 
 onExit(() => {
@@ -25,17 +27,7 @@ program
 	.name('ymsp')
 	.showHelpAfterError()
 	.addArgument(
-		new Argument('<task>').choices([
-			'close-focused-window',
-			'decrease-master-window-count',
-			'focus-down-window',
-			'focus-up-window',
-			'increase-master-window-count',
-			'on-yabai-start',
-			'open-new-window',
-			'window-created',
-			'window-moved',
-		]),
+		new Argument('<task>').choices(Object.keys(tasksMap)),
 	)
 	.action(async (taskSlug: string) => {
 		const task = tasksMap[taskSlug];

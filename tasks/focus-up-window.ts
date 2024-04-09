@@ -2,7 +2,7 @@ import { debug } from '#utils/debug.ts';
 import { defineTask } from '#utils/task.ts';
 import { createInitializedWindowsManager } from '#utils/windows-manager.ts';
 
-const focusUpWindow = defineTask(async () => {
+export const focusUpWindow = defineTask(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const focusedWindow = wm.getFocusedWindow();
 	if (focusedWindow !== undefined) {
@@ -38,5 +38,3 @@ const focusUpWindow = defineTask(async () => {
 		}
 	}
 });
-
-export default focusUpWindow;

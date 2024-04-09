@@ -1,8 +1,10 @@
-export { default as closeFocusedWindow } from './close-focused-window.ts';
-export { default as decreaseMasterWindowCount } from './decrease-master-window-count.ts';
-export { default as focusDownWindow } from './focus-down-window.ts';
-export { default as focusUpWindow } from './focus-up-window.ts';
-export { default as increaseMasterWindowCount } from './increase-master-window-count.ts';
-export { default as onYabaiStart } from './on-yabai-start.ts';
-export { default as windowCreated } from './window-created.ts';
-export { default as windowMoved } from './window-moved.ts';
+export { closeFocusedWindow } from './close-focused-window.ts';
+export { decreaseMasterWindowCount } from './decrease-master-window-count.ts';
+export { focusDownWindow } from './focus-down-window.ts';
+export { focusNextDisplay } from './focus-next-display.ts';
+export { focusPreviousDisplay } from './focus-previous-display.ts';
+export { focusUpWindow } from './focus-up-window.ts';
+export { increaseMasterWindowCount } from './increase-master-window-count.ts';
+export { onYabaiStart } from './on-yabai-start.ts';
+export { windowCreated } from './window-created.ts';
+export { windowMoved } from './window-moved.ts';

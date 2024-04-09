@@ -2,7 +2,7 @@ import type { Window } from '#types';
 import { defineTask } from '#utils/task.ts';
 import { createInitializedWindowsManager } from '#utils/windows-manager.ts';
 
-export default defineTask(async () => {
+export const closeFocusedWindow = defineTask(async () => {
 	const { wm } = await createInitializedWindowsManager();
 	const windowToClose = wm.getFocusedWindow();
 
