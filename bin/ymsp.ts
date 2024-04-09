@@ -17,6 +17,8 @@ const tasksMap = {
 	'window-moved': tasks.windowMoved,
 	'focus-next-display': tasks.focusNextDisplay,
 	'focus-previous-display': tasks.focusPreviousDisplay,
+	'move-window-to-next-display': tasks.moveWindowToNextDisplay,
+	'move-window-to-previous-display': tasks.moveWindowToPreviousDisplay,
 };
 
 onExit(() => {

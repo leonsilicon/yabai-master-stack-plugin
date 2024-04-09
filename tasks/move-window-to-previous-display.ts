@@ -2,7 +2,7 @@ import { getConfig } from '#utils/config.ts';
 import { getDisplays, getFocusedDisplay } from '#utils/display.ts';
 import { defineTask } from '#utils/task.ts';
 
-export const focusPreviousDisplay = defineTask(async () => {
+export const moveWindowToPreviousDisplay = defineTask(async () => {
 	const displays = await getDisplays();
 	const focusedDisplay = await getFocusedDisplay();
 	const sortedDisplays = displays.sort((d1, d2) => d1.frame.x - d2.frame.x);
@@ -18,8 +18,8 @@ export const focusPreviousDisplay = defineTask(async () => {
 	await Bun.spawn([
 		yabaiPath,
 		'-m',
-		'display',
-		'--focus',
+		'window',
+		'--display',
 		previousFocusedDisplay.index.toString(),
 	]);
 });

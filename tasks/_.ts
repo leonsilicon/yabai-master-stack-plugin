@@ -3,6 +3,8 @@ export { decreaseMasterWindowCount } from './decrease-master-window-count.ts';
 export { focusDownWindow } from './focus-down-window.ts';
 export { focusNextDisplay } from './focus-next-display.ts';
 export { focusPreviousDisplay } from './focus-previous-display.ts';
+export { moveWindowToNextDisplay } from './move-window-to-next-display.ts';
+export { moveWindowToPreviousDisplay } from './move-window-to-previous-display.ts';
 export { focusUpWindow } from './focus-up-window.ts';
 export { increaseMasterWindowCount } from './increase-master-window-count.ts';
 export { onYabaiStart } from './on-yabai-start.ts';
