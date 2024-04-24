@@ -1,23 +1,22 @@
 import { debug } from '#utils/debug.ts';
-import { acquireLock } from './lock.ts';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
-export function defineTask(
-	cb: () => Promise<void>,
-	options?: { ignoreLock?: boolean },
-): () => Promise<void> {
+const ymspConfigDirpath = path.join(
+	os.homedir(),
+	'.config/ymsp',
+);
+const lockFilepath = path.join(
+	ymspConfigDirpath,
+	'ymsp.lock',
+);
+
+export function defineTask(cb: () => Promise<void>): () => Promise<void> {
 	return async () => {
-		if (options?.ignoreLock) {
-			return cb();
-		} else {
-			return acquireLock()
-				.then(async (releaseLock) =>
-					cb()
-						.catch(handleMasterError)
-						.finally(() => {
-							releaseLock();
-						})
-				);
-		}
+		fs.rmSync(lockFilepath, { force: true, recursive: true });
+		fs.writeFileSync(lockFilepath, process.pid.toString());
+		return cb().catch(handleMasterError);
 	};
 }
 

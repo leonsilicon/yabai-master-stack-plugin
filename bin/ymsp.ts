@@ -33,6 +33,7 @@ program
 		}
 
 		await task();
+		process.exit(0);
 	});
 
 program.parse(process.argv);
