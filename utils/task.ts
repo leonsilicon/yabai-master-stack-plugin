@@ -6,12 +6,18 @@ export function defineTask(
 	options?: { ignoreLock?: boolean },
 ): () => Promise<void> {
 	return async () => {
-		const releaseLock = options?.ignoreLock ? () => {} : acquireLock();
-		return cb()
-			.catch(handleMasterError)
-			.finally(() => {
-				releaseLock();
-			});
+		if (options?.ignoreLock) {
+			return cb();
+		} else {
+			return acquireLock()
+				.then(async (releaseLock) =>
+					cb()
+						.catch(handleMasterError)
+						.finally(() => {
+							releaseLock();
+						})
+				);
+		}
 	};
 }
 
