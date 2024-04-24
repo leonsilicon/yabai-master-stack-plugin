@@ -7,7 +7,7 @@ const ymspConfigDirpath = path.join(os.homedir(), '.config/ymsp');
 const lockfilePath = path.join(ymspConfigDirpath, 'ymsp.lock');
 
 export function acquireLock() {
-	fs.mkdirSync(ymspConfigDirpath, { recursive: true });
+	fs.mkdirSync(lockfilePath, { recursive: true });
 	try {
 		return lockSync(ymspConfigDirpath, { lockfilePath });
 	} catch (error: unknown) {

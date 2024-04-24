@@ -1,7 +1,7 @@
 {
 	"name": "yabai-master-stack-plugin",
 	"type": "module",
-	"version": "4.1.3",
+	"version": "4.1.4",
 	"description": "Emulate the dwm-style master-stack window layout in yabai!",
 	"license": "MIT",
 	"packageManager": "bun@1.1.2",
