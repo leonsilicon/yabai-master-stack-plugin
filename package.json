@@ -4,6 +4,7 @@
 	"version": "4.1.1",
 	"description": "Emulate the dwm-style master-stack window layout in yabai!",
 	"license": "MIT",
+	"packageManager": "bun@1.1.2",
 	"imports": {
 		"#tasks/*": "./tasks/*",
 		"#types": "./types/_.ts",
