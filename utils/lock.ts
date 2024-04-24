@@ -1,29 +1,28 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'pathe';
-
-const locks = new Map<string, true>();
+import { lockSync, unlockSync } from 'proper-lockfile';
 
 export function releaseLock(lockPath: string, options?: { force?: boolean }) {
-	const force = options?.force ?? false;
-	if (force || locks.has(lockPath)) {
+	if (options?.force) {
 		try {
 			fs.rmdirSync(lockPath);
-			locks.delete(lockPath);
-		} catch (error: unknown) {
-			const err = error as { code: string };
-			if (err.code !== 'ENOENT') {
-				throw error;
-			}
+		} catch {}
+	}
+
+	try {
+		unlockSync(lockPath);
+	} catch (error: unknown) {
+		const err = error as { code: string };
+		if (err.code !== 'ENOENT') {
+			throw error;
 		}
 	}
 }
 
 export function acquireLock(lockPath: string) {
 	try {
-		// Using mkdir to create the lock because it is an atomic operation
-		fs.mkdirSync(lockPath);
-		locks.set(lockPath, true);
+		lockSync(lockPath);
 	} catch (error: unknown) {
 		const err = error as { code: string };
 		if (err.code === 'EEXIST') {
@@ -33,7 +32,6 @@ export function acquireLock(lockPath: string) {
 		}
 	}
 }
-
 
 const handlerLockPath = path.join(os.homedir(), '.config/ymsp/handler.lock');
 
