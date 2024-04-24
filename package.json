@@ -30,6 +30,7 @@
 	"devDependencies": {
 		"@tunnel/tsconfig": "^0.0.0",
 		"@types/bun": "^1.0.12",
+		"@types/proper-lockfile": "^4.1.4",
 		"benchmark": "^2.1.4",
 		"commander": "^10.0.1",
 		"dprint": "^0.45.1",
@@ -44,8 +45,5 @@
 	},
 	"files": [
 		".build"
-	],
-	"dependencies": {
-		"@types/proper-lockfile": "^4.1.4"
-	}
+	]
 }

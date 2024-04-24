@@ -1,6 +1,6 @@
-import invariant from 'tiny-invariant';
 import { defineTask } from '#utils/task.ts';
 import { createInitializedWindowsManager } from '#utils/windows-manager.ts';
+import invariant from 'tiny-invariant';
 
 export const onYabaiStart = defineTask(
 	async () => {
@@ -11,5 +11,4 @@ export const onYabaiStart = defineTask(
 			targetNumMasterWindows: spaceState.numMasterWindows,
 		});
 	},
-	{ forceReleaseLock: true },
 );

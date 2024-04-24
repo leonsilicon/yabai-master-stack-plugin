@@ -1,10 +1,8 @@
 #!/usr/bin/env bun
 
 import * as tasks from '#tasks/_.ts';
-import { releaseHandlerLock } from '#utils/lock.ts';
 import { Argument, program } from 'commander';
 import process from 'node:process';
-import { onExit } from 'signal-exit';
 
 const tasksMap = {
 	'close-focused-window': tasks.closeFocusedWindow,
@@ -20,10 +18,6 @@ const tasksMap = {
 	'move-window-to-next-display': tasks.moveWindowToNextDisplay,
 	'move-window-to-previous-display': tasks.moveWindowToPreviousDisplay,
 };
-
-onExit(() => {
-	releaseHandlerLock();
-});
 
 program
 	.name('ymsp')

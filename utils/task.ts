@@ -1,20 +1,16 @@
 import { debug } from '#utils/debug.ts';
-import { acquireHandlerLock, releaseHandlerLock } from '#utils/lock.ts';
+import { acquireLock } from './lock.ts';
 
 export function defineTask(
 	cb: () => Promise<void>,
-	options?: { forceReleaseLock?: boolean },
+	options?: { ignoreLock?: boolean },
 ): () => Promise<void> {
 	return async () => {
-		if (options?.forceReleaseLock) {
-			releaseHandlerLock({ force: true });
-		}
-
-		acquireHandlerLock();
-		cb()
+		const releaseLock = options?.ignoreLock ? () => {} : acquireLock();
+		return cb()
 			.catch(handleMasterError)
 			.finally(() => {
-				releaseHandlerLock();
+				releaseLock();
 			});
 	};
 }
