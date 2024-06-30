@@ -29,7 +29,6 @@ Then, add the following lines to your `.yabairc`:
 ```bash
 yabai -m signal --add event=window_created action='ymsp window-created'
 yabai -m signal --add event=application_launched action='ymsp window-created'
-yabai -m signal --add event=window_moved action='ymsp window-moved'
 
 ymsp on-yabai-start
 ```
