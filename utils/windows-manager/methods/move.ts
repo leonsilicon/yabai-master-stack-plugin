@@ -14,16 +14,16 @@ export async function moveWindowToStack(this: WindowsManager, window: Window) {
 
 	debug(() => `Moving window ${window.app} to stack.`);
 
-	// Use a small heuristic that helps prevent "glitchy" window rearrangements
-	try {
-		if (getConfig().masterPosition === 'right') {
-			await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
-		} else {
-			await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
-		}
-	} catch {
-		// Empty
-	}
+	// // Use a small heuristic that helps prevent "glitchy" window rearrangements
+	// try {
+	// 	if (getConfig().masterPosition === 'right') {
+	// 		await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
+	// 	} else {
+	// 		await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
+	// 	}
+	// } catch {
+	// 	// Empty
+	// }
 
 	await this.columnizeStackWindows();
 
