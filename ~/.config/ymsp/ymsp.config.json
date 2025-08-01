@@ -1,0 +1,6 @@
+{
+  "masterPosition": "right",
+  "moveNewWindowsToMaster": false,
+  "debug": true,
+  "yabaiPath": "/opt/homebrew/bin/yabai"
+} 
