@@ -1,6 +1,6 @@
 {
-  "name": "ymsp",
-  "version": "4.1.9",
+  "name": "yabai-master-stack-plugin",
+  "version": "4.2.0",
   "description": "Emulate the dwm-style master-stack window layout in yabai!",
   "homepage": "https://github.com/leonsilicon/ymsp#readme",
   "bugs": {
