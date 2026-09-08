@@ -1,6 +1,5 @@
 import type { Window } from "#types";
 import { getConfig } from "#utils/config.ts";
-import { debug } from "#utils/debug.ts";
 import type { WindowsManager } from "#utils/windows-manager/class.ts";
 
 /**
@@ -45,42 +44,9 @@ export function getWidestMasterWindow(this: WindowsManager) {
 }
 
 export async function moveWindowToMaster(this: WindowsManager, window: Window) {
-  debug(() => `Moving window ${window.app} to master.`);
-
-  // Use a small heuristic that helps prevent "glitchy" window rearrangements
-  // Only execute this heuristic when the layout isn't a pancake
-  if (this.expectedCurrentNumMasterWindows < this.windowsData.length) {
-    try {
-      if (getConfig().masterPosition === "right") {
-        await this.executeYabaiCommand(`-m window ${window.id} --warp east`);
-      } else {
-        await this.executeYabaiCommand(`-m window ${window.id} --warp west`);
-      }
-    } catch {
-      // noop
-    }
-  }
-
-  // If the window is already a master window, then don't do anything
-  if (this.isMasterWindow(window)) {
-    return;
-  }
-
-  // Find a window that's touching the right side of the screen
-  const masterWindow = this.getWidestMasterWindow();
-
-  if (masterWindow === undefined || masterWindow.id === window.id) {
-    return;
-  }
-
-  await this.executeYabaiCommand(`-m window ${window.id} --warp ${masterWindow.id}`);
-  window = this.getUpdatedWindowData(window);
-
-  const splitType = window["split-type"];
-
-  if (splitType === "vertical") {
-    await this.executeYabaiCommand(`-m window ${window.id} --toggle split`);
-  }
+  const current = this.windowsData.find((w) => w.id === window.id);
+  if (!current || this.isMasterWindow(current)) return;
+  await this.relayoutWindows(current);
 }
 
 /**

@@ -1,19 +1,11 @@
-import { debug } from "#utils/debug.ts";
-import { writeState } from "#utils/state.ts";
 import { defineTask } from "#utils/task.ts";
+import { writeState } from "#utils/state.ts";
 import { createInitializedWindowsManager } from "#utils/windows-manager.ts";
-import invariant from "tiny-invariant";
-
 export const increaseMasterWindowCount = defineTask(async () => {
-  const { wm, space, state } = await createInitializedWindowsManager();
-  const spaceState = state[space.id];
-  invariant(spaceState);
-  if (spaceState.numMasterWindows < wm.windowsData.length) {
-    spaceState.numMasterWindows += 1;
-    writeState(state);
-    debug(() => "Increasing master window count.");
-    await wm.updateWindows({
-      targetNumMasterWindows: spaceState.numMasterWindows,
-    });
-  }
+  const { wm, state, space } = await createInitializedWindowsManager();
+  const count = Math.max(1, state[space.id].numMasterWindows + 1);
+  state[space.id].numMasterWindows = count;
+  writeState(state);
+  wm.expectedCurrentNumMasterWindows = count;
+  await wm.relayoutWindows();
 });

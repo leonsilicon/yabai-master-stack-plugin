@@ -1,18 +1,22 @@
 import type { Window } from "#types";
 import { getConfig } from "#utils/config.ts";
 import type { WindowsManager } from "#utils/windows-manager/class.ts";
-import { getYabaiOutput } from "#utils/yabai.ts";
+import { getYabaiOutput, queryFocusedWindow } from "#utils/yabai.ts";
 import invariant from "tiny-invariant";
 
 export async function getWindowsData(this: WindowsManager) {
   const { yabaiPath } = getConfig();
   const yabaiProcess = Bun.spawn([yabaiPath, "-m", "query", "--windows"], {
     stdout: "pipe",
+    stderr: "pipe",
   });
   const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
   const yabaiOutput = await yabaiOutputPromise;
-  const windowsData = (JSON.parse(yabaiOutput) as Window[]).filter((window) => {
+  this.allWindowsData = JSON.parse(yabaiOutput) as Window[];
+  const windowsData = this.allWindowsData.filter((window) => {
     const isFloating = window["is-floating"];
+
+    if (window.subrole === "AXDialog" || window["is-native-fullscreen"]) return false;
 
     // Window should not be floating
     if (isFloating || window.display !== this.display.index || window.space !== this.space.index) {
@@ -22,7 +26,12 @@ export async function getWindowsData(this: WindowsManager) {
     const isMinimized = window["is-minimized"];
     const isHidden = window["is-hidden"];
     const isVisible = window["is-visible"];
-    if (isMinimized || isHidden || !isVisible) return false;
+    if (
+      isMinimized ||
+      isHidden ||
+      (!isVisible && this.space["is-visible"] !== 0 && this.space["is-visible"] !== false)
+    )
+      return false;
 
     return true;
   });
@@ -32,10 +41,12 @@ export async function getWindowsData(this: WindowsManager) {
 export async function refreshWindowsData(this: WindowsManager) {
   const newWindowsData = await this.getWindowsData();
   this.windowsData = newWindowsData;
+  this.focusedWindowData = await queryFocusedWindow();
+  this.focusQueryCompleted = true;
 }
 
 export async function initialize(this: WindowsManager) {
-  this.windowsData = await this.getWindowsData();
+  await this.refreshWindowsData();
 }
 
 export function getUpdatedWindowData(this: WindowsManager, window: Window) {
@@ -56,8 +67,8 @@ export function getWindowData(
     throw new Error("Must provide at least one of processId or windowId");
   }
 
-  const windowData = this.windowsData.find(
-    (window) => window.pid === Number(processId) || window.id === Number(windowId),
+  const windowData = this.windowsData.find((window) =>
+    windowId !== undefined ? window.id === Number(windowId) : window.pid === Number(processId),
   );
 
   if (windowData === undefined) {
@@ -73,5 +84,8 @@ export function getWindowData(
 }
 
 export function getFocusedWindow(this: WindowsManager): Window | undefined {
-  return this.windowsData.find((w) => w["has-focus"]);
+  if (this.focusQueryCompleted) return this.focusedWindowData;
+  return (
+    this.allWindowsData.find((w) => w["has-focus"]) ?? this.windowsData.find((w) => w["has-focus"])
+  );
 }

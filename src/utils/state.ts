@@ -7,7 +7,9 @@ import { getSpaces } from "./space.ts";
 const stateFilePath = path.join(os.homedir(), ".config/ymsp/state.json");
 
 export function writeState(state: State) {
-  fs.writeFileSync(stateFilePath, JSON.stringify(state));
+  fs.mkdirSync(path.dirname(stateFilePath), { recursive: true });
+  fs.writeFileSync(`${stateFilePath}.tmp`, JSON.stringify(state));
+  fs.renameSync(`${stateFilePath}.tmp`, stateFilePath);
 }
 
 export async function readState(): Promise<State> {
@@ -23,10 +25,9 @@ export async function readState(): Promise<State> {
     }
 
     // Delete unknown spaces
-    for (const spaceId of Object.keys(spaces)) {
+    for (const spaceId of Object.keys(data)) {
       if (!spaces.some((space) => space.id.toString() === spaceId)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        data[spaceId] = undefined as any;
+        delete data[spaceId];
       }
     }
 
@@ -39,8 +40,7 @@ export async function readState(): Promise<State> {
       defaultState[space.id] = { numMasterWindows: 1 };
     }
 
-    const defaultStateJson = JSON.stringify(defaultState);
-    fs.writeFileSync(stateFilePath, defaultStateJson);
+    writeState(defaultState);
     return defaultState;
   }
 }

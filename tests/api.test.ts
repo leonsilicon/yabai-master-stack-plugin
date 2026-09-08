@@ -65,7 +65,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 test("the API exposes every task and manager method without invoking them", () => {
-  expect(Object.keys(api.tasksMap)).toHaveLength(14);
+  expect(Object.keys(api.tasksMap)).toHaveLength(26);
   for (const [name, task] of Object.entries(tasks)) {
     expect(api[name as keyof typeof api]).toBe(task);
     expect(Object.values(api.tasksMap)).toContain(task);
@@ -112,6 +112,7 @@ test("filters windows by display, space, visibility, and floating state", async 
   expect(await wm.getWindowsData()).toEqual([valid]);
   expect(mocks.spawn).toHaveBeenCalledWith(["/custom/yabai", "-m", "query", "--windows"], {
     stdout: "pipe",
+    stderr: "pipe",
   });
 });
 
@@ -122,30 +123,6 @@ test("refuses commands after another process takes the lock", async () => {
   });
   expect(mocks.spawn).not.toHaveBeenCalled();
 });
-
-test.each(["left", "right"] as const)(
-  "master tasks honor the configured executable and %s direction",
-  async (position) => {
-    mocks.config.masterPosition = position;
-    await api.focusMasterWindow();
-    await api.moveWindowToMaster();
-    const direction = position === "right" ? "east" : "west";
-    expect(mocks.spawn).toHaveBeenNthCalledWith(1, [
-      "/custom/yabai",
-      "-m",
-      "window",
-      "--focus",
-      direction,
-    ]);
-    expect(mocks.spawn).toHaveBeenNthCalledWith(2, [
-      "/custom/yabai",
-      "-m",
-      "window",
-      "--swap",
-      direction,
-    ]);
-  },
-);
 
 test("focusDisplay waits for subprocess completion", async () => {
   let finish!: (code: number) => void;
@@ -163,4 +140,29 @@ test("focusDisplay waits for subprocess completion", async () => {
   finish(0);
   await pending;
   expect(completed).toBe(true);
+});
+
+test("authoritative focused query works when has-focus is false", () => {
+  const wm = manager();
+  wm.focusQueryCompleted = true;
+  wm.focusedWindowData = { ...windowAt(9, 0, 0), "has-focus": false };
+  expect(wm.getFocusedWindow()?.id).toBe(9);
+  wm.focusedWindowData = undefined;
+  expect(wm.getFocusedWindow()).toBeUndefined();
+});
+
+test("excludes dialogs/fullscreen while retaining ordinary windows on inactive spaces", async () => {
+  const wm = manager();
+  wm.space["is-visible"] = false;
+  const valid = { ...windowAt(1, 0, 0), "is-visible": false };
+  mocks.spawn.mockReturnValue({
+    stdout: new Response(
+      JSON.stringify([
+        valid,
+        { ...valid, id: 2, subrole: "AXDialog" },
+        { ...valid, id: 3, "is-native-fullscreen": true },
+      ]),
+    ).body,
+  });
+  expect(await wm.getWindowsData()).toEqual([valid]);
 });

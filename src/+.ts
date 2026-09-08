@@ -11,9 +11,19 @@ export * from "./utils/task.ts";
 export * from "./utils/windows-manager.ts";
 export * from "./utils/yabai.ts";
 export * from "./utils/windows-manager/class.ts";
-export { executeYabaiCommand } from "./utils/windows-manager/methods/commands.ts";
-export { getDividingLineXCoordinate } from "./utils/windows-manager/methods/dividing-line.ts";
-export { isValidLayout, updateWindows } from "./utils/windows-manager/methods/layout.ts";
+export {
+  executeYabaiCommand,
+  setWindowFloating,
+} from "./utils/windows-manager/methods/commands.ts";
+export {
+  getDividingLineXCoordinate,
+  getLeftLineXCoordinate,
+} from "./utils/windows-manager/methods/dividing-line.ts";
+export {
+  isValidLayout,
+  updateWindows,
+  relayoutWindows,
+} from "./utils/windows-manager/methods/layout.ts";
 export {
   isMasterWindow,
   getMasterWindows,

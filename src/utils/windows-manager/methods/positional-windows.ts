@@ -102,5 +102,5 @@ export function getMiddleWindows(this: WindowsManager) {
 }
 
 export function isWindowTouchingLeftEdge(this: WindowsManager, window: Window) {
-  return window.frame.x === this.display.frame.x;
+  return window.frame.x === this.getLeftLineXCoordinate();
 }

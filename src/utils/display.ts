@@ -1,22 +1,11 @@
 import type { Display, DisplayIndex } from "#types";
-import { getConfig } from "#utils/config.ts";
-import { getYabaiOutput } from "./yabai.ts";
-
-export async function getDisplays() {
-  const { yabaiPath } = getConfig();
-  const yabaiProcess = Bun.spawn([yabaiPath, "-m", "query", "--displays"]);
-  const yabaiOutput = await getYabaiOutput(yabaiProcess);
-  return JSON.parse(yabaiOutput) as Display[];
+import { runYabai } from "./yabai.ts";
+export async function getDisplays(): Promise<Display[]> {
+  return JSON.parse(await runYabai("query", "--displays")) as Display[];
 }
-
-export async function getFocusedDisplay() {
-  const { yabaiPath } = getConfig();
-  const yabaiProcess = Bun.spawn([yabaiPath, "-m", "query", "--displays", "--display"]);
-  const yabaiOutput = await getYabaiOutput(yabaiProcess);
-  return JSON.parse(yabaiOutput) as Display;
+export async function getFocusedDisplay(): Promise<Display> {
+  return JSON.parse(await runYabai("query", "--displays", "--display")) as Display;
 }
-
 export async function focusDisplay(displayIndex: DisplayIndex) {
-  const { yabaiPath } = getConfig();
-  await Bun.spawn([yabaiPath, "-m", "display", "--focus", displayIndex.toString()]).exited;
+  await runYabai("display", "--focus", String(displayIndex));
 }

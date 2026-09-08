@@ -6,6 +6,9 @@ class WindowManagerClass {
   space: Space;
   expectedCurrentNumMasterWindows: number;
   windowsData: Window[] = [];
+  allWindowsData: Window[] = [];
+  focusedWindowData: Window | undefined;
+  focusQueryCompleted = false;
 
   constructor({
     display,

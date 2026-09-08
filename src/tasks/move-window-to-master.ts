@@ -1,19 +1,10 @@
-import { getConfig } from "#utils/config.ts";
 import { defineTask } from "#utils/task.ts";
-
+import { createInitializedWindowsManager } from "#utils/windows-manager.ts";
 export const moveWindowToMaster = defineTask(async () => {
-  const config = getConfig();
-  switch (config.masterPosition) {
-    case "right": {
-      await Bun.spawn([config.yabaiPath, "-m", "window", "--swap", "east"]).exited;
-      break;
-    }
-    case "left": {
-      await Bun.spawn([config.yabaiPath, "-m", "window", "--swap", "west"]).exited;
-      break;
-    }
-    default: {
-      throw new Error(`Unsupported master position: ${String(config.masterPosition)}`);
-    }
+  const { wm } = await createInitializedWindowsManager();
+  const focused = wm.getFocusedWindow();
+  const top = wm.getTopMasterWindow();
+  if (focused && top && focused.id !== top.id && wm.windowsData.some((w) => w.id === focused.id)) {
+    await wm.executeYabaiCommand(`-m window ${focused.id} --swap ${top.id}`);
   }
 });

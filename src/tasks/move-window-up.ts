@@ -1,5 +1,5 @@
 import { defineTask } from "#utils/task.ts";
 import { navigateWindow } from "#utils/navigation.ts";
-export const focusUpWindow = defineTask(async () => {
-  await navigateWindow(-1, false);
+export const moveWindowUp = defineTask(async () => {
+  await navigateWindow(-1, true);
 });

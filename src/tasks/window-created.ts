@@ -1,50 +1,36 @@
 import { getConfig } from "#utils/config.ts";
-import { debug } from "#utils/debug.ts";
 import { defineTask } from "#utils/task.ts";
 import { createInitializedWindowsManager } from "#utils/windows-manager.ts";
-import process from "node:process";
-import invariant from "tiny-invariant";
+import { queryWindows } from "#utils/yabai.ts";
 
-export const windowCreated = defineTask(async () => {
-  const { wm, state, space } = await createInitializedWindowsManager();
-  debug(() => "Starting to handle window_created.");
-
-  const result = await wm.isValidLayout();
-  if (result.status) {
-    debug(() => "Valid layout detected; no changes were made.");
-    return;
-  }
-
-  const processId = process.env.YABAI_PROCESS_ID!;
-  const windowId = process.env.YABAI_WINDOW_ID!;
-  const curNumMasterWindows = wm.getMasterWindows().length;
-  const window = wm.getWindowData({ windowId, processId });
-
-  const spaceState = state[space.id];
-  invariant(spaceState);
-  if (getConfig().moveNewWindowsToMaster) {
-    // If the master is full, move a window from master to stack
-    if (curNumMasterWindows >= spaceState.numMasterWindows) {
-      const oldMasterWindow = wm.getMasterWindows()[0];
-      invariant(oldMasterWindow);
-      await wm.moveWindowToMaster(window);
-      await wm.moveWindowToStack(oldMasterWindow);
-    } else {
-      await wm.moveWindowToMaster(window);
+export const windowCreated = defineTask(async (windowId?: number) => {
+  const id =
+    windowId ?? (process.env.YABAI_WINDOW_ID ? Number(process.env.YABAI_WINDOW_ID) : undefined);
+  const windows = await queryWindows();
+  // The window ID wins over the process ID; apps can own multiple windows.
+  const candidates =
+    id !== undefined
+      ? windows.filter((w) => w.id === id)
+      : windows.filter((w) => w.pid === Number(process.env.YABAI_PROCESS_ID));
+  for (const candidate of candidates) {
+    const { wm } = await createInitializedWindowsManager(candidate.space);
+    const window = wm.windowsData.find((w) => w.id === candidate.id);
+    if (!window) continue; // destroyed, dialog, minimized, hidden or floating
+    const count = wm.windowsData.length;
+    const max = wm.expectedCurrentNumMasterWindows;
+    await wm.executeYabaiCommand(
+      `-m config split_type ${count === max ? "vertical" : "horizontal"}`,
+    );
+    const split = count === max + 1 ? "vertical" : "horizontal";
+    const current = wm.windowsData.find((w) => w.id === window.id);
+    if (!current) continue;
+    if (current["split-type"] !== "none" && current["split-type"] !== split) {
+      await wm.executeYabaiCommand(`-m window ${window.id} --toggle split`);
     }
-  } else if (curNumMasterWindows > 1 && curNumMasterWindows <= spaceState.numMasterWindows) {
-    // Move the window to the master
-    debug(() => "Moving newly created window to master.");
-    await wm.moveWindowToMaster(window);
-  } // If there are too many windows on the master
-  else {
-    debug(() => "Moving newly created window to stack.");
-    // Move the window to the stack
-    await wm.moveWindowToStack(window);
+    if (getConfig().moveNewWindowsToMaster) {
+      await wm.relayoutWindows(wm.windowsData.find((w) => w.id === window.id));
+    } else {
+      await wm.updateWindows({ targetNumMasterWindows: max });
+    }
   }
-
-  await wm.updateWindows({
-    targetNumMasterWindows: spaceState.numMasterWindows,
-  });
-  debug(() => "Finished handling window_created.");
 });

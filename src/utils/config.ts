@@ -14,15 +14,18 @@ export const getConfig = onetime(() => {
 
     const defaultConfig: YabaiMasterStackPluginConfig = {
       masterPosition: "right",
+      resizeIncrement: 50,
       moveNewWindowsToMaster: false,
       debug: false,
       yabaiPath: "/usr/local/bin/yabai",
     };
 
-    return {
-      ...defaultConfig,
-      ...config,
-    };
+    const result = { ...defaultConfig, ...config };
+    if (!["left", "right"].includes(result.masterPosition))
+      throw new Error("masterPosition must be left or right");
+    if (!Number.isFinite(result.resizeIncrement) || result.resizeIncrement! <= 0)
+      throw new Error("resizeIncrement must be positive");
+    return result;
   } catch (error: unknown) {
     const err = error as Error & { code: string };
     if (err.code === "ENOENT") {

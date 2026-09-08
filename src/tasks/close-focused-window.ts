@@ -1,49 +1,35 @@
-import type { Window } from "#types";
 import { defineTask } from "#utils/task.ts";
 import { createInitializedWindowsManager } from "#utils/windows-manager.ts";
-
 export const closeFocusedWindow = defineTask(async () => {
   const { wm } = await createInitializedWindowsManager();
-  const windowToClose = wm.getFocusedWindow();
-
-  if (windowToClose === undefined) return;
-
-  // Sort the windows from top to bottom
-  const masterWindows = wm.getMasterWindows().sort((w1, w2) => w1.frame.y - w2.frame.y);
-  const stackWindows = wm.getStackWindows().sort((w1, w2) => w1.frame.y - w2.frame.y);
-
-  let windowToFocus: Window | undefined;
-  if (wm.isStackWindow(windowToClose)) {
-    // If the window is the only stack window, then focus on the master window
-    if (stackWindows.length === 1) {
-      windowToFocus = masterWindows[0];
-    } // Focus on the window above it, or if there is no window above it, then the window below it
-    else {
-      const windowPosition = stackWindows.findIndex((w) => w.id === windowToClose.id);
-      if (windowPosition === 0) {
-        windowToFocus = stackWindows[1];
-      } else {
-        windowToFocus = stackWindows[windowPosition - 1];
+  const focused = wm.getFocusedWindow();
+  if (!focused) return;
+  const masters = wm.getMasterWindows().sort((a, b) => a.frame.y - b.frame.y);
+  const stacks = wm.getStackWindows().sort((a, b) => a.frame.y - b.frame.y);
+  const tiled = wm.windowsData.some((w) => w.id === focused.id);
+  let target;
+  if (tiled && wm.isMasterWindow(focused)) {
+    if (masters.length === 1) {
+      target = stacks[0];
+      if (target) await wm.executeYabaiCommand(`-m window ${focused.id} --swap ${target.id}`);
+      await wm.executeYabaiCommand(`-m window ${focused.id} --close`);
+    } else {
+      await wm.executeYabaiCommand(`-m window ${focused.id} --close`);
+      const bottom = wm.getBottomMasterWindow();
+      const promote = wm.getBottomStackWindow();
+      if (bottom && promote) {
+        await wm.executeYabaiCommand(`-m window ${bottom.id} --insert south`);
+        await wm.executeYabaiCommand(`-m window ${promote.id} --warp ${bottom.id}`);
       }
     }
-  } else if (wm.isMasterWindow(windowToClose)) {
-    // If the window is the only master window and there is at least one stack window,
-    // focus on the bottom stack window
-    if (masterWindows.length === 1 && stackWindows.length > 0) {
-      windowToFocus = stackWindows[stackWindows.length - 1];
-    } // Focus on the window above it, or if there is no window above it, then the window below it
-    else {
-      const windowPosition = masterWindows.findIndex((w) => w.id === windowToClose.id);
-      if (windowPosition === 0) {
-        windowToFocus = masterWindows[1];
-      } else {
-        windowToFocus = masterWindows[windowPosition - 1];
-      }
+  } else {
+    if (tiled) {
+      const index = stacks.findIndex((w) => w.id === focused.id);
+      target = stacks.length === 1 ? masters.at(-1) : (stacks[index + 1] ?? stacks[index - 1]);
     }
+    await wm.executeYabaiCommand(`-m window ${focused.id} --close`);
   }
-
-  await wm.executeYabaiCommand(`-m window --close`);
-  if (windowToFocus !== undefined) {
-    await wm.executeYabaiCommand(`-m window --focus ${windowToFocus.id}`);
-  }
+  await wm.updateWindows({ targetNumMasterWindows: wm.expectedCurrentNumMasterWindows });
+  if (target) await wm.executeYabaiCommand(`-m window --focus ${target.id}`);
+  if (wm.windowsData.length === 1) await wm.executeYabaiCommand("-m config split_type vertical");
 });

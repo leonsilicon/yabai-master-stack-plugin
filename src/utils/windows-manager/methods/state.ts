@@ -7,14 +7,10 @@ export function validateState(this: WindowsManager, state: State) {
   const spaceState = state[this.space.id];
   invariant(spaceState);
 
-  if (this.windowsData.length < this.expectedCurrentNumMasterWindows) {
-    this.expectedCurrentNumMasterWindows = this.windowsData.length;
-    spaceState.numMasterWindows = this.windowsData.length;
-  }
-
-  if (spaceState.numMasterWindows <= 0) {
+  if (!Number.isInteger(spaceState.numMasterWindows) || spaceState.numMasterWindows <= 0) {
     spaceState.numMasterWindows = 1;
   }
 
+  this.expectedCurrentNumMasterWindows = spaceState.numMasterWindows;
   writeState(state);
 }

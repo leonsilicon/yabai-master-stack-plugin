@@ -7,13 +7,8 @@ import type { WindowsManager } from "#utils/windows-manager/class.ts";
 	If the window's frame has an x equal to the x of the display, it is a stack window
 */
 export function isStackWindow(this: WindowsManager, window: Window) {
-  if (getConfig().masterPosition === "right") {
-    return this.isWindowTouchingLeftEdge(window);
-  } // If the master position is on the left, the stack windows are the windows with the left side equal to the dividing line
-  else {
-    const dividingLineXCoordinate = this.getDividingLineXCoordinate();
-    return window.frame.x === dividingLineXCoordinate;
-  }
+  const line = this.getDividingLineXCoordinate();
+  return getConfig().masterPosition === "right" ? window.frame.x < line : window.frame.x >= line;
 }
 
 export function getWidestStackWindow(this: WindowsManager) {
@@ -63,7 +58,7 @@ export function doesStackExist(this: WindowsManager) {
     return false;
   }
 
-  return topRightWindow.frame.x !== 0;
+  return this.getStackWindows().length > 0;
 }
 
 /**

@@ -67,11 +67,12 @@ export interface Space {
   "first-window": number;
   "last-window": number;
   "has-focus": boolean;
-  "is-visible": number;
+  "is-visible": boolean | number;
   "is-native-fullscreen": number;
 }
 
 export interface YabaiMasterStackPluginConfig {
+  resizeIncrement?: number;
   yabaiPath: string;
   debug: boolean;
   moveNewWindowsToMaster: boolean;

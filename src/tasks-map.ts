@@ -15,6 +15,18 @@ export const tasksMap = {
   "move-window-to-previous-display": tasks.moveWindowToPreviousDisplay,
   "move-window-to-master": tasks.moveWindowToMaster,
   "focus-master-window": tasks.focusMasterWindow,
-} satisfies Record<string, () => Promise<void>>;
+  "move-window-up": tasks.moveWindowUp,
+  "move-window-down": tasks.moveWindowDown,
+  "increase-master-width": tasks.increaseMasterWidth,
+  "decrease-master-width": tasks.decreaseMasterWidth,
+  "increase-window-height": tasks.increaseWindowHeight,
+  "decrease-window-height": tasks.decreaseWindowHeight,
+  relayout: tasks.relayout,
+  "toggle-float-focused-window": tasks.toggleFloatFocusedWindow,
+  "minimize-focused-window": tasks.minimizeFocusedWindow,
+  "window-destroyed": tasks.windowDestroyed,
+  "focus-space": tasks.focusSpace,
+  "move-window-to-space": tasks.moveWindowToSpace,
+} satisfies Record<string, (...args: never[]) => Promise<void>>;
 
 export type TaskName = keyof typeof tasksMap;
