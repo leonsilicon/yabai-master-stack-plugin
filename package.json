@@ -1,49 +1,77 @@
 {
-	"name": "yabai-master-stack-plugin",
-	"type": "module",
-	"version": "4.1.9",
-	"description": "Emulate the dwm-style master-stack window layout in yabai!",
-	"license": "MIT",
-	"packageManager": "bun@1.1.2",
-	"imports": {
-		"#tasks/*": "./tasks/*",
-		"#types": "./types/_.ts",
-		"#utils/*": "./utils/*"
-	},
-	"author": {
-		"name": "Leon Si",
-		"email": "leon@leonsilicon.com",
-		"url": "https://leonsilicon.com"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/leonsilicon/yabai-master-stack-plugin.git"
-	},
-	"homepage": "https://github.com/leonsilicon/yabai-master-stack-plugin#readme",
-	"bin": {
-		"ymsp": "./.build/bin/ymsp.mjs"
-	},
-	"scripts": {
-		"build": "unbuild",
-		"format": "dprint fmt"
-	},
-	"devDependencies": {
-		"@tunnel/tsconfig": "^0.0.0",
-		"@types/bun": "^1.0.12",
-		"@types/proper-lockfile": "^4.1.4",
-		"benchmark": "^2.1.4",
-		"commander": "^10.0.1",
-		"dprint": "^0.45.1",
-		"onetime": "^6.0.0",
-		"pathe": "^1.1.2",
-		"proper-lockfile": "^4.1.2",
-		"shell-quote": "^1.8.1",
-		"signal-exit": "^4.1.0",
-		"tiny-invariant": "^1.3.1",
-		"type-fest": "^4.15.0",
-		"unbuild": "^2.0.0"
-	},
-	"files": [
-		".build"
-	]
+  "name": "ymsp",
+  "version": "4.1.9",
+  "description": "Emulate the dwm-style master-stack window layout in yabai!",
+  "homepage": "https://github.com/leonsilicon/ymsp#readme",
+  "bugs": {
+    "url": "https://github.com/leonsilicon/ymsp/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Leon Si",
+    "email": "leon@leonsilicon.com",
+    "url": "https://leonsilicon.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonsilicon/yabai-master-stack-plugin.git"
+  },
+  "bin": {
+    "ymsp": "./dist/_ymsp.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/+.d.mts",
+  "imports": {
+    "#tasks/*": "./src/tasks/*",
+    "#types": "./src/types/_.ts",
+    "#utils/*": "./src/utils/*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/+.d.mts",
+      "import": "./dist/+.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build",
+    "prepare": "vp config",
+    "bench": "vp test bench --run",
+    "format": "vp fmt"
+  },
+  "dependencies": {
+    "commander": "^10.0.1",
+    "onetime": "^6.0.0",
+    "pathe": "^1.1.2",
+    "shell-quote": "^1.8.1",
+    "tiny-invariant": "^1.3.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "@types/node": "^26.1.1",
+    "@types/shell-quote": "^1.7.5",
+    "typescript": "^7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0",
+    "vite-plus": "^0.2.4"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.3.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.2",
+      "onFail": "download"
+    }
+  }
 }

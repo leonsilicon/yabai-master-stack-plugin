@@ -1,10 +1,12 @@
 node_modules
 dist
-state.json
+*.log
+.DS_Store
+!.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
 
-# Locks
-state.json.lock
-
+# dotenv environment variable files
 .env
-.eslintcache
-.build
+.env.*
+!.env.example
