@@ -1,3 +1,4 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import type { Display, Space, Window } from "#types";
 import { getConfig } from "./config.ts";
 import { getTaskSignal } from "./task-context.ts";
@@ -14,13 +15,13 @@ export class AerospaceError extends Error {
   }
 }
 
-export async function runAerospace(...args: string[]): Promise<string> {
-  const signal = getTaskSignal();
+export async function runAerospace(runtime: YMSPRuntime, ...args: string[]): Promise<string> {
+  const signal = getTaskSignal(runtime);
   // Callback target variables must not override authoritative focused queries.
-  const env = { ...process.env };
+  const env = { ...runtime.environment };
   delete env.AEROSPACE_WINDOW_ID;
   delete env.AEROSPACE_WORKSPACE;
-  const child = Bun.spawn([getConfig().aerospacePath ?? "/opt/homebrew/bin/aerospace", ...args], {
+  const child = runtime.spawn([getConfig(runtime).aerospacePath, ...args], {
     stdout: "pipe",
     stderr: "pipe",
     env,
@@ -32,7 +33,7 @@ export async function runAerospace(...args: string[]): Promise<string> {
     child.exited,
   ]);
   if (code !== 0) throw new AerospaceError(code, stdout, stderr);
-  getTaskSignal();
+  getTaskSignal(runtime);
   return stdout;
 }
 
@@ -52,9 +53,10 @@ interface WindowRow extends WorkspaceRow {
   "window-layout": string;
   "window-is-fullscreen": boolean;
 }
-export async function getAerospaceSpaces(): Promise<Space[]> {
+export async function getAerospaceSpaces(runtime: YMSPRuntime): Promise<Space[]> {
   const rows = JSON.parse(
     await runAerospace(
+      runtime,
       "list-workspaces",
       "--all",
       "--json",
@@ -83,9 +85,13 @@ export async function getAerospaceSpaces(): Promise<Space[]> {
     "is-native-fullscreen": 0,
   }));
 }
-export async function getAerospaceDisplays(focused = false): Promise<Display[]> {
+export async function getAerospaceDisplays(
+  runtime: YMSPRuntime,
+  focused = false,
+): Promise<Display[]> {
   const rows = JSON.parse(
     await runAerospace(
+      runtime,
       "list-monitors",
       ...(focused ? ["--focused"] : []),
       "--json",
@@ -93,7 +99,7 @@ export async function getAerospaceDisplays(focused = false): Promise<Display[]> 
       format(["monitor-id", "monitor-appkit-nsscreen-screens-id"]),
     ),
   ) as { "monitor-id": number; "monitor-appkit-nsscreen-screens-id": number }[];
-  const geometry = await getDesktopGeometry();
+  const geometry = await getDesktopGeometry(runtime);
   return rows.map((row) => {
     const frame = geometry.displays.find((d) => d.id === row["monitor-appkit-nsscreen-screens-id"]);
     if (!frame) throw new Error(`No macOS geometry for AeroSpace monitor ${row["monitor-id"]}`);
@@ -106,15 +112,23 @@ export async function getAerospaceDisplays(focused = false): Promise<Display[]> 
     } as Display;
   });
 }
-export async function queryAerospaceWindows(focused = false): Promise<Window[]> {
-  return readAerospaceWindows(focused, true);
+export async function queryAerospaceWindows(
+  runtime: YMSPRuntime,
+  focused = false,
+): Promise<Window[]> {
+  return readAerospaceWindows(runtime, focused, true);
 }
 
-async function readAerospaceWindows(focused: boolean, retry: boolean): Promise<Window[]> {
+async function readAerospaceWindows(
+  runtime: YMSPRuntime,
+  focused: boolean,
+  retry: boolean,
+): Promise<Window[]> {
   let rows: WindowRow[];
   try {
     rows = JSON.parse(
       await runAerospace(
+        runtime,
         "list-windows",
         focused ? "--focused" : "--all",
         "--json",
@@ -138,7 +152,7 @@ async function readAerospaceWindows(focused: boolean, retry: boolean): Promise<W
     throw error;
   }
   if (!rows.length) return [];
-  const geometry = await getDesktopGeometry();
+  const geometry = await getDesktopGeometry(runtime);
   // A window can close between the CLI snapshot and the WindowServer snapshot.
   // Retry once so the watcher survives that normal lifecycle race.
   if (
@@ -150,7 +164,7 @@ async function readAerospaceWindows(focused: boolean, retry: boolean): Promise<W
         ) && !geometry.windows.some((w) => w.id === row["window-id"]),
     )
   )
-    return readAerospaceWindows(focused, false);
+    return readAerospaceWindows(runtime, focused, false);
   return rows.map((row) => {
     const frame = geometry.windows.find((w) => w.id === row["window-id"])?.frame;
     const layout = row["window-layout"];
@@ -183,25 +197,26 @@ async function readAerospaceWindows(focused: boolean, retry: boolean): Promise<W
 /** Offscreen AeroSpace windows have parked frames. Visit a workspace for geometry
  * dependent repairs, then restore the user's workspace and focus even on failure. */
 export async function withAerospaceWorkspace<T>(
+  runtime: YMSPRuntime,
   workspace: string | number,
   task: () => Promise<T>,
 ): Promise<T> {
-  const spaces = await getAerospaceSpaces();
+  const spaces = await getAerospaceSpaces(runtime);
   const original = spaces.find((s) => s["has-focus"]);
   const target = spaces.find((s) => s.index === String(workspace));
   if (target?.["is-visible"]) return task();
-  const focused = (await queryAerospaceWindows(true))[0];
-  await runAerospace("workspace", "--", String(workspace));
+  const focused = (await queryAerospaceWindows(runtime, true))[0];
+  await runAerospace(runtime, "workspace", "--", String(workspace));
   try {
     return await task();
   } finally {
-    if (original) await runAerospace("workspace", "--", String(original.index));
+    if (original) await runAerospace(runtime, "workspace", "--", String(original.index));
     if (
       focused &&
-      (await queryAerospaceWindows()).some(
+      (await queryAerospaceWindows(runtime)).some(
         (w) => w.id === focused.id && w.space === original?.index,
       )
     )
-      await runAerospace("focus", "--window-id", String(focused.id));
+      await runAerospace(runtime, "focus", "--window-id", String(focused.id));
   }
 }

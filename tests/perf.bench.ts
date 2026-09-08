@@ -1,7 +1,17 @@
 import { afterAll, bench, vi } from "vite-plus/test";
 import { spawn } from "node:child_process";
 import { Readable } from "node:stream";
-import { createInitializedWindowsManager, defineTask, withTaskLock } from "../src/+.ts";
+import { YMSP, readConfig } from "../src/+.ts";
+import os from "node:os";
+import path from "node:path";
+const directory = process.env.YMSP_CONFIG_DIR ?? path.join(os.homedir(), ".config/ymsp");
+const runtime = new YMSP({
+  ...readConfig(path.join(directory, "ymsp.config.json")),
+  stateFilePath: path.join(directory, "state.json"),
+  lockfilePath: path.join(directory, "task.lock"),
+  environment: process.env,
+});
+const defineTask = (callback: () => Promise<void>) => () => runtime.withTaskLock(callback);
 
 // Opt-in: these benchmarks control windows in the active yabai session.
 // Vite+ runs benchmarks in Node, so bridge the Bun subprocess API used by the app.
@@ -21,7 +31,7 @@ vi.stubGlobal("Bun", {
   },
 });
 afterAll(() => vi.unstubAllGlobals());
-const { wm, state } = await withTaskLock(() => createInitializedWindowsManager());
+const { wm, state } = await runtime.withTaskLock(() => runtime.createInitializedWindowsManager());
 const window = wm.getFocusedWindow()!;
 const stackWindows = wm.getStackWindows();
 

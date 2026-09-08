@@ -1,3 +1,5 @@
+import { YMSPRuntime } from "../src/utils/runtime.ts";
+const runtime = new YMSPRuntime();
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import type { DesktopGeometry } from "../src/utils/macos-geometry.ts";
 const mocks = vi.hoisted(() => ({
@@ -9,7 +11,10 @@ const mocks = vi.hoisted(() => ({
   spawn: vi.fn(),
   geometry: vi.fn(),
 }));
-vi.mock("../src/utils/config.ts", () => ({ getConfig: () => mocks.config }));
+vi.mock("../src/utils/config.ts", async (original) => ({
+  ...(await original<typeof import("../src/utils/config.ts")>()),
+  getConfig: () => mocks.config,
+}));
 vi.mock("../src/utils/macos-geometry.ts", () => ({ getDesktopGeometry: mocks.geometry }));
 import {
   AerospaceError,
@@ -68,7 +73,7 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
     vi.stubEnv("AEROSPACE_WINDOW_ID", "999");
     vi.stubEnv("AEROSPACE_WORKSPACE", "Elsewhere");
     mocks.spawn.mockImplementation(() => output("ok"));
-    expect(await runAerospace("focus", "--window-id", "42")).toBe("ok");
+    expect(await runAerospace(runtime, "focus", "--window-id", "42")).toBe("ok");
     const [argv, options] = mocks.spawn.mock.calls[0];
     expect(argv).toEqual(["/custom/aerospace", "focus", "--window-id", "42"]);
     expect(options.env.AEROSPACE_WINDOW_ID).toBeUndefined();
@@ -77,7 +82,7 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
   });
   test("drains stderr and preserves failure status", async () => {
     mocks.spawn.mockImplementation(() => output("", 7, "server unavailable"));
-    await expect(runAerospace("list-windows", "--all")).rejects.toMatchObject({
+    await expect(runAerospace(runtime, "list-windows", "--all")).rejects.toMatchObject({
       name: "AerospaceError",
       exitCode: 7,
       stderr: "server unavailable",
@@ -85,14 +90,14 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
   });
   test("only the documented no-focus error becomes an empty result", async () => {
     mocks.spawn.mockImplementation(() => output("", 1, "No window is focused"));
-    expect(await queryAerospaceWindows(true)).toEqual([]);
-    await expect(queryAerospaceWindows()).rejects.toBeInstanceOf(AerospaceError);
+    expect(await queryAerospaceWindows(runtime, true)).toEqual([]);
+    await expect(queryAerospaceWindows(runtime)).rejects.toBeInstanceOf(AerospaceError);
     mocks.spawn.mockImplementation(() => output("", 1, "Connection refused"));
-    await expect(queryAerospaceWindows(true)).rejects.toThrow("Connection refused");
+    await expect(queryAerospaceWindows(runtime, true)).rejects.toThrow("Connection refused");
   });
   test("maps native geometry and workspace names without losing Unicode titles", async () => {
     mocks.spawn.mockImplementation(() => output([row()]));
-    expect((await queryWindows())[0]).toMatchObject({
+    expect((await queryWindows(runtime))[0]).toMatchObject({
       id: 42,
       pid: 100,
       title: 'Quotes " and 日本語',
@@ -112,13 +117,13 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
     ["macos_native_window_of_hidden_app", "is-hidden"],
   ])("excludes %s from ordinary tiling", async (layout, flag) => {
     mocks.spawn.mockImplementation(() => output([row(layout)]));
-    expect((await queryAerospaceWindows())[0][flag as "is-floating"]).toBe(true);
+    expect((await queryAerospaceWindows(runtime))[0][flag as "is-floating"]).toBe(true);
   });
   test("excludes AeroSpace fullscreen and reports missing geometry instead of inventing it", async () => {
     mocks.spawn.mockImplementation(() => output([{ ...row(), "window-is-fullscreen": true }]));
-    expect((await queryAerospaceWindows())[0]["is-native-fullscreen"]).toBe(true);
+    expect((await queryAerospaceWindows(runtime))[0]["is-native-fullscreen"]).toBe(true);
     mocks.geometry.mockResolvedValue({ displays: [], windows: [] });
-    await expect(queryAerospaceWindows()).rejects.toThrow("No macOS geometry");
+    await expect(queryAerospaceWindows(runtime)).rejects.toThrow("No macOS geometry");
   });
   test("workspace identity is the exact name, and accordion workspaces are protected", async () => {
     mocks.spawn.mockImplementation(() =>
@@ -128,7 +133,7 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
         { ...workspace("Work"), "workspace-root-container-layout": "v_accordion" },
       ]),
     );
-    expect((await getAerospaceSpaces()).map((s) => [s.id, s.index, s.type])).toEqual([
+    expect((await getAerospaceSpaces(runtime)).map((s) => [s.id, s.index, s.type])).toEqual([
       ["1", "1", "bsp"],
       ["01", "01", "bsp"],
       ["Work", "Work", "stack"],
@@ -139,14 +144,14 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
       .mockImplementationOnce(() => output([row()]))
       .mockImplementationOnce(() => output([]));
     mocks.geometry.mockResolvedValue({ displays: [], windows: [] });
-    expect(await queryAerospaceWindows()).toEqual([]);
+    expect(await queryAerospaceWindows(runtime)).toEqual([]);
     expect(mocks.spawn).toHaveBeenCalledTimes(2);
   });
   test("maps monitors through NSScreen identity, including negative coordinates", async () => {
     mocks.spawn.mockImplementation(() =>
       output([{ "monitor-id": 1, "monitor-appkit-nsscreen-screens-id": 2 }]),
     );
-    expect((await getAerospaceDisplays())[0]).toMatchObject({
+    expect((await getAerospaceDisplays(runtime))[0]).toMatchObject({
       id: 1,
       index: 1,
       frame: { x: -1200, y: -100, w: 1200, h: 900 },
@@ -170,18 +175,18 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
       ["move-node-to-monitor", "--window-id", "42", "2"],
     ],
   ])("routes %j to supported commands", async (input, expected) => {
-    await runWindowManager(...input);
+    await runWindowManager(runtime, ...input);
     expect(mocks.spawn.mock.calls[0][0]).toEqual(["/custom/aerospace", ...expected]);
   });
   test("rejects unsupported operations explicitly", async () => {
-    await expect(runWindowManager("window", "42", "--grid", "1:1")).rejects.toThrow(
+    await expect(runWindowManager(runtime, "window", "42", "--grid", "1:1")).rejects.toThrow(
       "Unsupported AeroSpace",
     );
     expect(mocks.spawn).not.toHaveBeenCalled();
   });
   test("leaves the legacy backend unchanged", async () => {
     mocks.config.windowManager = "yabai";
-    await runWindowManager("space", "--focus", "2");
+    await runWindowManager(runtime, "space", "--focus", "2");
     expect(mocks.spawn.mock.calls[0][0]).toEqual(["/custom/yabai", "-m", "space", "--focus", "2"]);
   });
   test("restores the workspace after failure without refocusing a window moved away", async () => {
@@ -195,7 +200,7 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
       return output("");
     });
     await expect(
-      withAerospaceWorkspace("Destination", async () => {
+      withAerospaceWorkspace(runtime, "Destination", async () => {
         throw new Error("repair failure");
       }),
     ).rejects.toThrow("repair failure");
@@ -204,13 +209,13 @@ describe("AeroSpace 0.21.3 CLI contract", () => {
     expect(commands.some((c) => c[1] === "focus")).toBe(false);
   });
   test("accepts named/numeric workspaces while keeping yabai indices strict", () => {
-    expect(workspaceTarget(1)).toBe("1");
-    expect(workspaceTarget("Work")).toBe("Work");
-    expect(() => workspaceTarget("")).toThrow();
-    expect(() => workspaceTarget("a\nb")).toThrow();
+    expect(workspaceTarget(runtime, 1)).toBe("1");
+    expect(workspaceTarget(runtime, "Work")).toBe("Work");
+    expect(() => workspaceTarget(runtime, "")).toThrow();
+    expect(() => workspaceTarget(runtime, "a\nb")).toThrow();
     mocks.config.windowManager = "yabai";
-    expect(workspaceTarget(1)).toBe(1);
-    expect(() => workspaceTarget("Work")).toThrow();
-    expect(() => workspaceTarget(0)).toThrow();
+    expect(workspaceTarget(runtime, 1)).toBe(1);
+    expect(() => workspaceTarget(runtime, "Work")).toThrow();
+    expect(() => workspaceTarget(runtime, 0)).toThrow();
   });
 });

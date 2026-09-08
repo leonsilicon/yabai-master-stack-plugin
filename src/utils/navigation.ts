@@ -1,7 +1,8 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { createInitializedWindowsManager } from "./windows-manager.ts";
 
-export async function navigateWindow(direction: 1 | -1, swap: boolean) {
-  const { wm } = await createInitializedWindowsManager();
+export async function navigateWindow(runtime: YMSPRuntime, direction: 1 | -1, swap: boolean) {
+  const { wm } = await createInitializedWindowsManager(runtime);
   const focused = wm.getFocusedWindow();
   const masters = wm.getMasterWindows().sort((a, b) => a.frame.y - b.frame.y);
   const stacks = wm.getStackWindows().sort((a, b) => a.frame.y - b.frame.y);

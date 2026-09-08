@@ -6,21 +6,23 @@ import { assertTaskLock } from "./task-context.ts";
 
 /** Use native containers, leaving user-floating windows out of the rebuild. */
 export async function rebuildAerospace(wm: WindowsManager, masters: Window[], stacks: Window[]) {
-  assertTaskLock();
+  assertTaskLock(wm.runtime);
   if (wm.space.type && wm.space.type !== "bsp") return;
-  const columns = getConfig().masterPosition === "left" ? [masters, stacks] : [stacks, masters];
+  const columns =
+    getConfig(wm.runtime).masterPosition === "left" ? [masters, stacks] : [stacks, masters];
   const ordered = columns.flat();
   if (!ordered.length) return;
   const workspace = String(wm.space.index);
-  const focused = (await queryAerospaceWindows(true))[0];
+  const focused = (await queryAerospaceWindows(wm.runtime, true))[0];
   try {
-    await runAerospace("flatten-workspace-tree", "--workspace", workspace);
-    await runAerospace("layout", "--workspace", workspace, "--root", "h_tiles");
+    await runAerospace(wm.runtime, "flatten-workspace-tree", "--workspace", workspace);
+    await runAerospace(wm.runtime, "layout", "--workspace", workspace, "--root", "h_tiles");
     // Moving each window to the left edge in reverse order is deterministic even
     // when the previous tree was malformed. Never cross workspace boundaries.
     for (const window of [...ordered].reverse()) {
       for (let i = 1; i < ordered.length; i++) {
         await runAerospace(
+          wm.runtime,
           "move",
           "--window-id",
           String(window.id),
@@ -33,38 +35,28 @@ export async function rebuildAerospace(wm: WindowsManager, masters: Window[], st
       }
     }
     if (columns.some((c) => c.length === ordered.length)) {
-      await runAerospace("layout", "--workspace", workspace, "--root", "v_tiles");
+      await runAerospace(wm.runtime, "layout", "--workspace", workspace, "--root", "v_tiles");
     } else {
       for (const column of columns) {
         if (column.length < 2) continue;
-        await runAerospace("join-with", "--window-id", String(column[1].id), "left");
+        await runAerospace(wm.runtime, "join-with", "--window-id", String(column[1].id), "left");
         for (let i = 2; i < column.length; i++) {
           const id = String(column[i].id);
-          await runAerospace("focus", "--window-id", String(column[i - 1].id));
-          await runAerospace("move", "--window-id", id, "left");
+          await runAerospace(wm.runtime, "focus", "--window-id", String(column[i - 1].id));
+          await runAerospace(wm.runtime, "move", "--window-id", id, "left");
         }
       }
     }
-    await runAerospace("balance-sizes", "--workspace", workspace);
+    await runAerospace(wm.runtime, "balance-sizes", "--workspace", workspace);
   } finally {
-    if (focused) await runAerospace("focus", "--window-id", String(focused.id));
+    if (focused) await runAerospace(wm.runtime, "focus", "--window-id", String(focused.id));
   }
   await wm.refreshWindowsData();
 }
 
-const insertions = new WeakMap<
-  WindowsManager,
-  {
-    id: number;
-    direction: string;
-    masters: number[];
-    stacks: number[];
-  }
->();
-
 async function insertWindow(wm: WindowsManager, id: number) {
-  const insertion = insertions.get(wm);
-  insertions.delete(wm);
+  const insertion = wm.insertion;
+  delete wm.insertion;
   if (!insertion || insertion.id === id) return;
   await wm.refreshWindowsData();
   const moving = wm.windowsData.find((w) => w.id === id);
@@ -89,16 +81,16 @@ async function insertWindow(wm: WindowsManager, id: number) {
 }
 
 export async function executeAerospaceCommand(wm: WindowsManager, args: string[]): Promise<string> {
-  assertTaskLock();
+  assertTaskLock(wm.runtime);
   if (args[0] === "-m") args = args.slice(1);
   // split_type is a yabai insertion hint; AeroSpace rebuilds explicit containers.
   if (args[0] === "config" && args[1] === "split_type") return "";
   if (args[0] !== "window") throw new Error(`Unsupported AeroSpace command: ${args.join(" ")}`);
-  if (args[1] === "--focus") return runAerospace("focus", "--window-id", args[2]);
+  if (args[1] === "--focus") return runAerospace(wm.runtime, "focus", "--window-id", args[2]);
   const id = args[1];
   const [action, value] = args.slice(2);
   if (action === "--insert") {
-    insertions.set(wm, {
+    wm.insertion = {
       id: Number(id),
       direction: value,
       masters: wm
@@ -109,20 +101,21 @@ export async function executeAerospaceCommand(wm: WindowsManager, args: string[]
         .getStackWindows()
         .sort((a, b) => a.frame.y - b.frame.y)
         .map((w) => w.id),
-    });
+    };
     return "";
   }
-  if (action === "--close") return runAerospace("close", "--window-id", id);
-  if (action === "--minimize") return runAerospace("macos-native-minimize", "--window-id", id);
+  if (action === "--close") return runAerospace(wm.runtime, "close", "--window-id", id);
+  if (action === "--minimize")
+    return runAerospace(wm.runtime, "macos-native-minimize", "--window-id", id);
   if (action === "--toggle" && value === "float") {
     const window = wm.allWindowsData.find((w) => w.id === Number(id));
     const tiling = window?.["is-floating"];
-    await runAerospace("layout", "--window-id", id, tiling ? "tiling" : "floating");
+    await runAerospace(wm.runtime, "layout", "--window-id", id, tiling ? "tiling" : "floating");
     if (tiling) await insertWindow(wm, Number(id));
     return "";
   }
   if (action === "--toggle" && value === "split")
-    return runAerospace("layout", "--window-id", id, "horizontal", "vertical");
+    return runAerospace(wm.runtime, "layout", "--window-id", id, "horizontal", "vertical");
   if (action === "--warp") {
     await insertWindow(wm, Number(id));
     return "";
@@ -138,11 +131,11 @@ export async function executeAerospaceCommand(wm: WindowsManager, args: string[]
     if (a < 0 || b < 0) throw new Error("Cannot swap non-tiled AeroSpace windows");
     if (a > b) [a, b] = [b, a];
     for (let i = a; i < b; i++) {
-      await runAerospace("swap", "--window-id", String(order[i]), "dfs-next");
+      await runAerospace(wm.runtime, "swap", "--window-id", String(order[i]), "dfs-next");
       [order[i], order[i + 1]] = [order[i + 1], order[i]];
     }
     for (let i = b - 1; i > a; i--) {
-      await runAerospace("swap", "--window-id", String(order[i]), "dfs-prev");
+      await runAerospace(wm.runtime, "swap", "--window-id", String(order[i]), "dfs-prev");
       [order[i], order[i - 1]] = [order[i - 1], order[i]];
     }
     return "";
@@ -164,10 +157,18 @@ export async function executeAerospaceCommand(wm: WindowsManager, args: string[]
       // resizes keep the other siblings unchanged (within integer rounding).
       const amount = Math.round((delta * (column.length - 1)) / column.length);
       const signed = (n: number) => `${n >= 0 ? "+" : ""}${n}`;
-      await runAerospace("resize", "--window-id", id, "height", signed(amount));
-      return runAerospace("resize", "--window-id", String(neighbor.id), "height", signed(-amount));
+      await runAerospace(wm.runtime, "resize", "--window-id", id, "height", signed(amount));
+      return runAerospace(
+        wm.runtime,
+        "resize",
+        "--window-id",
+        String(neighbor.id),
+        "height",
+        signed(-amount),
+      );
     }
     return runAerospace(
+      wm.runtime,
       "resize",
       "--window-id",
       id,

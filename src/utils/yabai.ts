@@ -1,3 +1,4 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { getConfig } from "./config.ts";
 import type { Window } from "#types";
 import { getTaskSignal } from "./task-context.ts";
@@ -28,31 +29,32 @@ export async function getYabaiOutput(child: {
   return stdout;
 }
 
-export async function runYabaiCommand(...args: string[]): Promise<string> {
-  const signal = getTaskSignal();
+export async function runYabaiCommand(runtime: YMSPRuntime, ...args: string[]): Promise<string> {
+  const signal = getTaskSignal(runtime);
   const result = await getYabaiOutput(
-    Bun.spawn([getConfig().yabaiPath ?? "/usr/local/bin/yabai", ...args], {
+    runtime.spawn([getConfig(runtime).yabaiPath, ...args], {
+      env: runtime.environment,
       stdout: "pipe",
       stderr: "pipe",
       ...(signal ? { signal } : {}),
     }),
   );
-  getTaskSignal();
+  getTaskSignal(runtime);
   return result;
 }
 
-export async function runYabai(...args: string[]): Promise<string> {
-  return runYabaiCommand("-m", ...args);
+export async function runYabai(runtime: YMSPRuntime, ...args: string[]): Promise<string> {
+  return runYabaiCommand(runtime, "-m", ...args);
 }
 
-export async function queryWindows(): Promise<Window[]> {
-  return JSON.parse(await runYabai("query", "--windows")) as Window[];
+export async function queryWindows(runtime: YMSPRuntime): Promise<Window[]> {
+  return JSON.parse(await runYabai(runtime, "query", "--windows")) as Window[];
 }
 
 /** The focused query is authoritative even when has-focus is false. */
-export async function queryFocusedWindow(): Promise<Window | undefined> {
+export async function queryFocusedWindow(runtime: YMSPRuntime): Promise<Window | undefined> {
   try {
-    const window = JSON.parse(await runYabai("query", "--windows", "--window")) as Window;
+    const window = JSON.parse(await runYabai(runtime, "query", "--windows", "--window")) as Window;
     return Number.isInteger(window.id) ? window : undefined;
   } catch (error) {
     if (

@@ -1,3 +1,4 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { getTaskSignal } from "./task-context.ts";
 
 export interface DesktopGeometry {
@@ -21,9 +22,10 @@ for (let i = 0; i < screens.count; i++) {
 JSON.stringify({displays, windows:windows.map(w => ({id:w.kCGWindowNumber, frame:w.kCGWindowBounds}))});
 `;
 
-export async function getDesktopGeometry(): Promise<DesktopGeometry> {
-  const signal = getTaskSignal();
-  const child = Bun.spawn(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], {
+export async function getDesktopGeometry(runtime: YMSPRuntime): Promise<DesktopGeometry> {
+  const signal = getTaskSignal(runtime);
+  const child = runtime.spawn(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], {
+    env: runtime.environment,
     stdout: "pipe",
     stderr: "pipe",
     ...(signal ? { signal } : {}),
@@ -33,7 +35,7 @@ export async function getDesktopGeometry(): Promise<DesktopGeometry> {
     new Response(child.stderr).text(),
     child.exited,
   ]);
-  getTaskSignal();
+  getTaskSignal(runtime);
   if (code !== 0) throw new Error(`Cannot read macOS window geometry: ${stderr || stdout}`);
   return JSON.parse(stdout) as DesktopGeometry;
 }

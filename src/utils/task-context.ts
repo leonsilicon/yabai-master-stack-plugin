@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from "node:async_hooks";
+import type { YMSPRuntime } from "./runtime.ts";
 
 export type TaskContext = {
   active: boolean;
@@ -6,10 +6,8 @@ export type TaskContext = {
   error?: Error;
 };
 
-export const taskContext = new AsyncLocalStorage<TaskContext>();
-
-export function assertTaskLock(): void {
-  const context = taskContext.getStore();
+export function assertTaskLock(runtime: YMSPRuntime): void {
+  const context = runtime.taskContext.getStore();
   if (context?.error) throw context.error;
   if (!context?.active) {
     throw Object.assign(new Error("No active ymsp task lock; use withTaskLock or defineTask"), {
@@ -19,8 +17,8 @@ export function assertTaskLock(): void {
 }
 
 /** Queries outside a task remain usable; work from an expired task must stop. */
-export function getTaskSignal(): AbortSignal | undefined {
-  if (!taskContext.getStore()) return undefined;
-  assertTaskLock();
-  return taskContext.getStore()!.controller.signal;
+export function getTaskSignal(runtime: YMSPRuntime): AbortSignal | undefined {
+  if (!runtime.taskContext.getStore()) return undefined;
+  assertTaskLock(runtime);
+  return runtime.taskContext.getStore()!.controller.signal;
 }

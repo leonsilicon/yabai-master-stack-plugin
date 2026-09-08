@@ -1,26 +1,49 @@
 #!/usr/bin/env bun
 import { usesAerospace } from "./utils/window-manager-backend.ts";
-import { tasksMap, type TaskName } from "./tasks-map.ts";
+import type { TaskName } from "./tasks-map.ts";
+import { tasksMap as registry } from "./tasks-map.ts";
+import { YMSP } from "./ymsp.ts";
+import { readConfig } from "./utils/config.ts";
+import os from "node:os";
+import path from "node:path";
+
+// Only the CLI opts into the user's conventional config, state, and lock paths.
+function createCLI() {
+  const directory = process.env.YMSP_CONFIG_DIR ?? path.join(os.homedir(), ".config/ymsp");
+  const config = readConfig(path.join(directory, "ymsp.config.json"));
+  return new YMSP({
+    ...config,
+    stateFilePath: path.join(
+      directory,
+      config.windowManager === "aerospace" ? "state.aerospace.json" : "state.json",
+    ),
+    lockfilePath: path.join(directory, "task.lock"),
+    watcherLockfilePath: path.join(directory, "aerospace-watcher.lock"),
+    environment: process.env,
+  });
+}
 import { Argument, program } from "commander";
 
 program
   .name("ymsp")
   .showHelpAfterError()
-  .addArgument(new Argument("<task>", "Task to run").choices(Object.keys(tasksMap)))
+  .addArgument(new Argument("<task>", "Task to run").choices(Object.keys(registry)))
   .argument("[target]", "Space index/workspace name, or optional window ID for window-created")
   .action(async (slug: TaskName, value?: string) => {
+    const ymsp = createCLI();
+    const { tasksMap } = ymsp;
     const needsIndex = slug === "focus-space" || slug === "move-window-to-space";
     if (needsIndex && value === undefined) throw new Error(`${slug} requires a space index`);
     if (value !== undefined && !needsIndex && slug !== "window-created")
       throw new Error(`${slug} takes no argument`);
     const index = value === undefined ? undefined : Number(value);
     if (
-      !(needsIndex && usesAerospace()) &&
+      !(needsIndex && usesAerospace(ymsp)) &&
       index !== undefined &&
       (!Number.isInteger(index) || index < 1)
     )
       throw new Error("Index must be a positive integer");
-    if (needsIndex) await tasksMap[slug](usesAerospace() ? value! : index!);
+    if (needsIndex) await tasksMap[slug](usesAerospace(ymsp) ? value! : index!);
     else if (slug === "window-created") await tasksMap[slug](index);
     else if (slug === "watch-aerospace") {
       const controller = new AbortController();

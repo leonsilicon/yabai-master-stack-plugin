@@ -1,3 +1,5 @@
+import { YMSPRuntime } from "../src/utils/runtime.ts";
+const runtime = new YMSPRuntime();
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import type { Display, Space, Window } from "../src/types/_.ts";
 const mocks = vi.hoisted(() => ({
@@ -6,7 +8,10 @@ const mocks = vi.hoisted(() => ({
   lock: vi.fn(),
   config: { masterPosition: "right" as "left" | "right" },
 }));
-vi.mock("../src/utils/config.ts", () => ({ getConfig: () => mocks.config }));
+vi.mock("../src/utils/config.ts", async (original) => ({
+  ...(await original<typeof import("../src/utils/config.ts")>()),
+  getConfig: () => mocks.config,
+}));
 vi.mock("../src/utils/aerospace.ts", () => ({
   runAerospace: mocks.run,
   queryAerospaceWindows: mocks.query,
@@ -20,6 +25,7 @@ beforeEach(() => {
   mocks.config.masterPosition = "right";
   mocks.run.mockResolvedValue("");
   wm = new WindowsManager({
+    runtime,
     display: { index: 1 } as Display,
     space: { index: "Work" } as Space,
     expectedCurrentNumMasterWindows: 2,
@@ -42,15 +48,17 @@ describe("native layout operations", () => {
     "swap %i with %i preserves every other slot",
     async (a, b) => {
       const order = wm.windowsData.map((w) => w.id);
-      mocks.run.mockImplementation((cmd: string, _flag: string, id: string, direction: string) => {
-        expect(cmd).toBe("swap");
-        const index = order.indexOf(Number(id));
-        const target = index + (direction === "dfs-next" ? 1 : -1);
-        expect(target).toBeGreaterThanOrEqual(0);
-        expect(target).toBeLessThan(order.length);
-        [order[index], order[target]] = [order[target], order[index]];
-        return Promise.resolve("");
-      });
+      mocks.run.mockImplementation(
+        (_runtime: YMSPRuntime, cmd: string, _flag: string, id: string, direction: string) => {
+          expect(cmd).toBe("swap");
+          const index = order.indexOf(Number(id));
+          const target = index + (direction === "dfs-next" ? 1 : -1);
+          expect(target).toBeGreaterThanOrEqual(0);
+          expect(target).toBeLessThan(order.length);
+          [order[index], order[target]] = [order[target], order[index]];
+          return Promise.resolve("");
+        },
+      );
       await executeAerospaceCommand(wm, ["-m", "window", String(a), "--swap", String(b)]);
       const expected = [1, 2, 3, 4, 5, 6];
       [expected[a - 1], expected[b - 1]] = [expected[b - 1], expected[a - 1]];
@@ -67,27 +75,27 @@ describe("native layout operations", () => {
     expect(mocks.run).not.toHaveBeenCalled();
   });
   test("restores original focus on rebuild failure without floating any windows", async () => {
-    mocks.run.mockImplementation((command: string) =>
+    mocks.run.mockImplementation((_runtime: YMSPRuntime, command: string) =>
       command === "join-with" ? Promise.reject(new Error("join failed")) : Promise.resolve(""),
     );
     await expect(
       rebuildAerospace(wm, wm.windowsData.slice(3), wm.windowsData.slice(0, 3)),
     ).rejects.toThrow("join failed");
-    expect(mocks.run).toHaveBeenLastCalledWith("focus", "--window-id", "5");
+    expect(mocks.run).toHaveBeenLastCalledWith(runtime, "focus", "--window-id", "5");
     expect(mocks.run.mock.calls.some((args) => args.includes("floating"))).toBe(false);
   });
   test.each(["left:-50:0", "right:50:0"])(
     "%s grows the selected column by 50 pixels",
     async (edge) => {
       await executeAerospaceCommand(wm, ["-m", "window", "4", "--resize", edge]);
-      expect(mocks.run).toHaveBeenCalledWith("resize", "--window-id", "4", "width", "+50");
+      expect(mocks.run).toHaveBeenCalledWith(runtime, "resize", "--window-id", "4", "width", "+50");
     },
   );
   test("non-top height resize borrows from the previous window only", async () => {
     await executeAerospaceCommand(wm, ["-m", "window", "3", "--resize", "top:0:-60"]);
     expect(mocks.run.mock.calls).toEqual([
-      ["resize", "--window-id", "3", "height", "+40"],
-      ["resize", "--window-id", "2", "height", "-40"],
+      [runtime, "resize", "--window-id", "3", "height", "+40"],
+      [runtime, "resize", "--window-id", "2", "height", "-40"],
     ]);
   });
   test("rejects unknown commands and non-tiled swaps", async () => {

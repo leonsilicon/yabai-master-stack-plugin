@@ -1,7 +1,8 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { defineTask } from "#utils/task.ts";
 import { createInitializedWindowsManager } from "#utils/windows-manager.ts";
-export const closeFocusedWindow = defineTask(async () => {
-  const { wm } = await createInitializedWindowsManager();
+export const closeFocusedWindow = defineTask(async (runtime: YMSPRuntime) => {
+  const { wm } = await createInitializedWindowsManager(runtime);
   const focused = wm.getFocusedWindow();
   if (!focused) return;
   const masters = wm.getMasterWindows().sort((a, b) => a.frame.y - b.frame.y);

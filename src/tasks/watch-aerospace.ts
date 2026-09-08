@@ -1,8 +1,8 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { setTimeout } from "node:timers/promises";
 import fs from "node:fs";
 import path from "pathe";
 import lockfile from "proper-lockfile";
-import { configDirectory } from "#utils/config-directory.ts";
 import { queryAerospaceWindows, getAerospaceSpaces } from "#utils/aerospace.ts";
 import { usesAerospace } from "#utils/window-manager-backend.ts";
 import { withTaskLock } from "#utils/task.ts";
@@ -12,18 +12,23 @@ import { windowDestroyed } from "./window-destroyed.ts";
 /** AeroSpace 0.21 has no destruction/minimize/hide subscription events.
  * Reconcile membership and column structure once a second. Ignore absolute
  * dimensions and focus so manual resizing cannot create a repair loop. */
-export async function watchAerospace(signal?: AbortSignal): Promise<void> {
-  if (!usesAerospace()) throw new Error("watch-aerospace requires windowManager: aerospace");
-  fs.mkdirSync(configDirectory, { recursive: true });
-  const lockPath = path.join(configDirectory, "aerospace-watcher.lock");
-  let release: () => Promise<void>;
+export async function watchAerospace(runtime: YMSPRuntime, signal?: AbortSignal): Promise<void> {
+  if (!usesAerospace(runtime)) throw new Error("watch-aerospace requires windowManager: aerospace");
+  if (runtime.watching) return;
+  runtime.watching = true;
+  const lockPath = runtime.watcherLockfilePath;
+  let release = async () => {};
   try {
-    release = await lockfile.lock(lockPath, {
-      realpath: false,
-      lockfilePath: lockPath,
-      retries: 0,
-    });
+    if (lockPath) {
+      fs.mkdirSync(path.dirname(lockPath), { recursive: true });
+      release = await lockfile.lock(lockPath, {
+        realpath: false,
+        lockfilePath: lockPath,
+        retries: 0,
+      });
+    }
   } catch (error) {
+    runtime.watching = false;
     if ((error as NodeJS.ErrnoException).code === "ELOCKED") return;
     throw error;
   }
@@ -31,9 +36,9 @@ export async function watchAerospace(signal?: AbortSignal): Promise<void> {
   let known = new Set<number>();
   try {
     while (!signal?.aborted) {
-      await withTaskLock(async () => {
-        const windows = await queryAerospaceWindows();
-        const spaces = await getAerospaceSpaces();
+      await withTaskLock(runtime, async () => {
+        const windows = await queryAerospaceWindows(runtime);
+        const spaces = await getAerospaceSpaces(runtime);
         const columnBySpace = new Map(
           spaces.map((space) => [
             space.index,
@@ -73,10 +78,11 @@ export async function watchAerospace(signal?: AbortSignal): Promise<void> {
         if (signature === previous) return;
         if (previous) {
           for (const window of windows) {
-            if (!known.has(window.id) && window["is-visible"]) await windowCreated(window.id);
+            if (!known.has(window.id) && window["is-visible"])
+              await windowCreated(runtime, window.id);
           }
         }
-        await windowDestroyed();
+        await windowDestroyed(runtime);
         known = new Set(windows.map((w) => w.id));
         previous = signature;
       });
@@ -87,6 +93,7 @@ export async function watchAerospace(signal?: AbortSignal): Promise<void> {
       }
     }
   } finally {
+    runtime.watching = false;
     await release();
   }
 }

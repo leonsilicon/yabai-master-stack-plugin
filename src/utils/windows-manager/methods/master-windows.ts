@@ -7,7 +7,7 @@ import type { WindowsManager } from "#utils/windows-manager/class.ts";
 	If the master position is on the left, a window that is touching the left edge is considered a master window.
 */
 export function isMasterWindow(this: WindowsManager, window: Window) {
-  if (getConfig().masterPosition === "right") {
+  if (getConfig(this.runtime).masterPosition === "right") {
     const dividingLineXCoordinate = this.getDividingLineXCoordinate();
     return window.frame.x >= dividingLineXCoordinate;
   } else {
@@ -16,7 +16,7 @@ export function isMasterWindow(this: WindowsManager, window: Window) {
 }
 
 export function getMasterWindows(this: WindowsManager) {
-  if (getConfig().masterPosition === "right") {
+  if (getConfig(this.runtime).masterPosition === "right") {
     const dividingLineXCoordinate = this.getDividingLineXCoordinate();
     return this.windowsData.filter((window) => window.frame.x >= dividingLineXCoordinate);
   } else {

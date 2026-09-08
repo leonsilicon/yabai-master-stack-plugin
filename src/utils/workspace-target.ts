@@ -1,6 +1,7 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { usesAerospace } from "./window-manager-backend.ts";
-export function workspaceTarget(value: number | string): number | string {
-  if (usesAerospace()) {
+export function workspaceTarget(runtime: YMSPRuntime, value: number | string): number | string {
+  if (usesAerospace(runtime)) {
     const name = String(value);
     if (!name.trim() || /[\0\r\n]/.test(name))
       throw new Error("Workspace name must be nonempty and contain no control characters");

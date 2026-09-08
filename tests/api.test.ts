@@ -1,3 +1,5 @@
+import { YMSPRuntime } from "../src/utils/runtime.ts";
+const runtime = new YMSPRuntime();
 import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
 import type { Display, Space, Window } from "../src/+.ts";
 
@@ -18,7 +20,10 @@ vi.mock("../src/utils/task-context.ts", async (original) => ({
   ...(await original<typeof import("../src/utils/task-context.ts")>()),
   assertTaskLock: mocks.assertTaskLock,
 }));
-vi.mock("../src/utils/config.ts", () => ({ getConfig: () => mocks.config }));
+vi.mock("../src/utils/config.ts", async (original) => ({
+  ...(await original<typeof import("../src/utils/config.ts")>()),
+  getConfig: () => mocks.config,
+}));
 vi.mock("node:fs", () => ({
   default: {
     readFileSync: mocks.readFileSync,
@@ -45,6 +50,7 @@ function windowAt(id: number, x: number, y: number): Window {
 }
 function manager() {
   const wm = new api.WindowsManager({
+    runtime,
     display: { index: 1, frame: { x: 0, y: 0, w: 1000, h: 800 } } as Display,
     space: { id: 1, index: 1 } as Space,
     expectedCurrentNumMasterWindows: 2,
@@ -119,6 +125,7 @@ test("filters windows by display, space, visibility, and floating state", async 
   expect(mocks.spawn).toHaveBeenCalledWith(["/custom/yabai", "-m", "query", "--windows"], {
     stdout: "pipe",
     stderr: "pipe",
+    env: {},
   });
 });
 
@@ -140,7 +147,7 @@ test("focusDisplay waits for subprocess completion", async () => {
     }),
   });
   let completed = false;
-  const pending = api.focusDisplay(1 as api.DisplayIndex).then(() => {
+  const pending = api.focusDisplay(runtime, 1 as api.DisplayIndex).then(() => {
     completed = true;
   });
   await Promise.resolve();

@@ -1,6 +1,6 @@
 import * as tasks from "./tasks/_.ts";
 
-export const tasksMap = {
+export const tasksMap = Object.freeze({
   "close-focused-window": tasks.closeFocusedWindow,
   "decrease-master-window-count": tasks.decreaseMasterWindowCount,
   "focus-down-window": tasks.focusDownWindow,
@@ -29,6 +29,6 @@ export const tasksMap = {
   "window-destroyed": tasks.windowDestroyed,
   "focus-space": tasks.focusSpace,
   "move-window-to-space": tasks.moveWindowToSpace,
-} satisfies Record<string, (...args: never[]) => Promise<void>>;
+} satisfies Record<string, (...args: never[]) => Promise<void>>);
 
 export type TaskName = keyof typeof tasksMap;

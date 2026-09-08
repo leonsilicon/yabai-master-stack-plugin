@@ -1,16 +1,17 @@
+import type { YMSPRuntime } from "#utils/runtime.ts";
 import { getConfig } from "./config.ts";
 import { createInitializedWindowsManager } from "./windows-manager.ts";
 
-export async function resize(axis: "width" | "height", direction: 1 | -1) {
-  const { wm } = await createInitializedWindowsManager();
+export async function resize(runtime: YMSPRuntime, axis: "width" | "height", direction: 1 | -1) {
+  const { wm } = await createInitializedWindowsManager(runtime);
   const focused = wm.getFocusedWindow();
   if (!focused || !wm.windowsData.some((w) => w.id === focused.id)) return;
-  const increment = (getConfig().resizeIncrement ?? 50) * direction;
+  const increment = getConfig(runtime).resizeIncrement * direction;
   let edge: string;
   let delta: number;
   if (axis === "width") {
     if (!wm.doesStackExist()) return;
-    const rightMaster = getConfig().masterPosition === "right";
+    const rightMaster = getConfig(runtime).masterPosition === "right";
     edge = wm.isMasterWindow(focused) === rightMaster ? "left" : "right";
     delta = rightMaster ? -increment : increment;
     await wm.executeYabaiCommand(`-m window ${focused.id} --resize ${edge}:${delta}:0`);

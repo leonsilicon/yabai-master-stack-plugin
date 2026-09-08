@@ -1,32 +1,34 @@
 import fs from "node:fs";
 import path from "node:path";
 import lockfile from "proper-lockfile";
-import { lockfilePath, taskLockOptions } from "./lock.ts";
-import { assertTaskLock, taskContext, type TaskContext } from "./task-context.ts";
+import { taskLockOptions } from "./lock.ts";
+import { assertTaskLock, type TaskContext } from "./task-context.ts";
 
-let queue: Promise<unknown> = Promise.resolve();
+import type { YMSPRuntime } from "./runtime.ts";
 
 /** Shared coordination for the CLI and embedded callers. Await nested operations sequentially. */
-export function withTaskLock<T>(cb: () => Promise<T>): Promise<T> {
-  if (taskContext.getStore()) {
+export function withTaskLock<T>(runtime: YMSPRuntime, cb: () => Promise<T>): Promise<T> {
+  if (runtime.taskContext.getStore()) {
     return Promise.resolve().then(() => {
-      assertTaskLock();
+      assertTaskLock(runtime);
       return cb();
     });
   }
-  const task = queue.then(async () => {
-    fs.mkdirSync(path.dirname(lockfilePath), { recursive: true });
+  const task = runtime.queue.then(async () => {
+    const { lockfilePath } = runtime;
+    if (lockfilePath) fs.mkdirSync(path.dirname(lockfilePath), { recursive: true });
     const context: TaskContext = { active: true, controller: new AbortController() };
-    let release: () => Promise<void>;
+    let release = async () => {};
     try {
-      release = await lockfile.lock(lockfilePath, {
-        ...taskLockOptions,
-        lockfilePath,
-        onCompromised(error) {
-          context.error = error;
-          context.controller.abort(error);
-        },
-      });
+      if (lockfilePath)
+        release = await lockfile.lock(lockfilePath, {
+          ...taskLockOptions,
+          lockfilePath,
+          onCompromised(error) {
+            context.error = error;
+            context.controller.abort(error);
+          },
+        });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ELOCKED") {
         throw Object.assign(
@@ -37,9 +39,9 @@ export function withTaskLock<T>(cb: () => Promise<T>): Promise<T> {
       throw error;
     }
     try {
-      return await taskContext.run(context, async () => {
+      return await runtime.taskContext.run(context, async () => {
         const result = await cb();
-        assertTaskLock();
+        assertTaskLock(runtime);
         return result;
       });
     } catch (error) {
@@ -51,13 +53,13 @@ export function withTaskLock<T>(cb: () => Promise<T>): Promise<T> {
       if (!context.error) await release();
     }
   });
-  queue = task.catch(() => {});
+  runtime.queue = task.catch(() => {});
   return task;
 }
 
 /** Serialize complete tasks, including BSP rebuilds, across API calls and processes. */
 export function defineTask<Args extends unknown[]>(
-  cb: (...args: Args) => Promise<void>,
-): (...args: Args) => Promise<void> {
-  return (...args) => withTaskLock(() => cb(...args));
+  cb: (runtime: YMSPRuntime, ...args: Args) => Promise<void>,
+): (runtime: YMSPRuntime, ...args: Args) => Promise<void> {
+  return (runtime, ...args) => withTaskLock(runtime, () => cb(runtime, ...args));
 }

@@ -142,7 +142,7 @@ alt + shift - d : ymsp decrease-master-window-count
 
 Use `ymsp relayout` to recover a malformed BSP tree. If a command fails, its exit status is nonzero and stderr includes the yabai error. Check that the configured executable exists, yabai is running, and its required permissions are enabled.
 
-Tasks serialize through `proper-lockfile` using the directory `~/.config/ymsp/task.lock`. Both the CLI and embedded callers use the same settings: a heartbeat every 2 seconds, stale recovery after 10 seconds without a heartbeat, and approximately 30 seconds of acquisition retries. Ownership is released on success or failure. If ownership is compromised, the task rejects and its in-flight yabai subprocess is aborted. This is JavaScript-only and can be bundled into Chord without native addons or runtime dependency installation. Do not run the Spoon's layout handlers and this plugin's signals simultaneously.
+CLI tasks serialize through `proper-lockfile` using the directory `~/.config/ymsp/task.lock`. Embedded callers opt into sharing that path with `lockfilePath`. Filesystem locks use the same settings: a heartbeat every 2 seconds, stale recovery after 10 seconds without a heartbeat, and approximately 30 seconds of acquisition retries. Ownership is released on success or failure. If ownership is compromised, the task rejects and its in-flight yabai subprocess is aborted. This is JavaScript-only and can be bundled into Chord without native addons or runtime dependency installation. Do not run the Spoon's layout handlers and this plugin's signals simultaneously.
 
 When upgrading from the PID-file implementation, update the CLI and rebuild/reload every embedded copy (including `chords-ymsp`) together. Older versions use `ymsp.lock` and do not coordinate with the new protocol. The old PID file is no longer used; do not delete an active `task.lock` directory to bypass contention.
 
@@ -154,26 +154,62 @@ Run `vp install`, then `vp check`, `vp test`, and `vp pack`. Vite+ configures pa
 
 ## Public API
 
-`src/+.ts` builds to `dist/+.mjs` with TypeScript declarations. Import tasks, config/state/display/space helpers, yabai types, `WindowsManager`, and all manager methods from `yabai-master-stack-plugin`:
+`src/+.ts` builds to `dist/+.mjs` with TypeScript declarations. Construct an instance with explicit settings:
 
 ```ts
-import { focusDownWindow, createInitializedWindowsManager } from "yabai-master-stack-plugin";
+import { YMSP } from "yabai-master-stack-plugin";
 
-await focusDownWindow();
-const { wm } = await createInitializedWindowsManager();
-console.log(wm.getMasterWindows());
+const ymsp = new YMSP({
+  windowManager: "aerospace",
+  aerospacePath: "/opt/homebrew/bin/aerospace",
+  masterPosition: "right",
+  resizeIncrement: 50,
+});
+
+await ymsp.tasks.focusDownWindow();
+await ymsp.tasksMap["focus-space"]("Work");
 ```
 
-Importing the API does not run the CLI or execute a task. Tasks acquire the shared lock automatically. Callers using mutating manager methods directly should wrap them in `withTaskLock` or `defineTask`. A `withTaskLock` callback can await multiple tasks sequentially under one acquisition; unrelated calls queue, and nested tasks reuse their caller's ownership. Always await work before returning from the callback. Standalone manager methods require a manager as their `this` value (for example `getMasterWindows.call(wm)`). `moveWindowToMaster` is the task; `moveManagedWindowToMaster` is the manager method. All manager methods are also exported as `windowsManagerMethods`. `tasksMap` and `TaskName` expose the CLI task registry.
+`new YMSP()` uses built-in yabai defaults. Instances never read `ymsp.config.json`, `YMSP_CONFIG_DIR`, or process environment variables. Each instance owns its settings, in-memory master counts, task queue, and lock context. Debugging writes through the optional `logger` callback (stderr by default), without creating a hidden log file. The `environment` option explicitly supplies subprocess environment and `windowCreated` signal metadata; it defaults to an empty object. The optional `spawn` callback supplies a subprocess runner (Bun by default). Prefer passing a window ID directly to `ymsp.tasks.windowCreated(id)`.
+
+Filesystem state and cross-process coordination require explicit paths. For example, a caller choosing to share the CLI's files can supply:
 
 ```ts
-import { withTaskLock, relayout, focusMasterWindow } from "yabai-master-stack-plugin";
-
-await withTaskLock(async () => {
-  await relayout();
-  await focusMasterWindow();
+const ymsp = new YMSP({
+  windowManager: "aerospace",
+  stateFilePath: "/Users/example/.config/ymsp/state.aerospace.json",
+  lockfilePath: "/Users/example/.config/ymsp/task.lock",
+  watcherLockfilePath: "/Users/example/.config/ymsp/aerospace-watcher.lock",
 });
 ```
+
+Use the same `lockfilePath` for every instance or process managing the same desktop. Without that option, serialization is local to the instance. `stateFilePath` is used exactly as provided; choose separate files for different backends. `watcherLockfilePath` enables cross-process watcher deduplication; without it, duplicate watchers are suppressed within the instance only. To opt into file configuration, spread `readConfig(explicitConfigPath)` into the constructor options; it has no implicit path or cache. The CLI itself explicitly selects the conventional paths and environment, preserving its existing behavior.
+
+Importing the API does not run the CLI or execute a task. Instance tasks acquire their configured lock automatically. Callers using mutating manager methods should await them inside the instance's `withTaskLock` callback:
+
+```ts
+await ymsp.withTaskLock(async () => {
+  const { wm } = await ymsp.createInitializedWindowsManager();
+  await wm.relayoutWindows();
+  await ymsp.tasks.focusMasterWindow();
+});
+```
+
+Nested tasks reuse the same instance's ownership. Always await work before returning from the callback. Settings stay attached to returned window managers. Standalone manager methods require a manager as their `this` value (for example `getMasterWindows.call(wm)`). `moveWindowToMaster` is the task; `moveManagedWindowToMaster` is the manager method. All manager methods remain exported as `windowsManagerMethods`.
+
+**API migration:** unbound task, configuration, state, display, space, and backend helpers now require a `YMSPRuntime` as their first argument. `YMSP` extends that runtime, so existing imports can be migrated as follows:
+
+```ts
+import { focusDownWindow, queryWindows, withTaskLock } from "yabai-master-stack-plugin";
+
+await focusDownWindow(ymsp);
+console.log(await queryWindows(ymsp));
+await withTaskLock(ymsp, async () => {
+  await focusDownWindow(ymsp);
+});
+```
+
+`defineTask` callbacks also receive the runtime first, and the returned task requires it. Constructing a `WindowsManager` directly requires a `runtime` option. The unbound `tasksMap` registry follows the same explicit-runtime signature; `ymsp.tasksMap` and `ymsp.tasks` are already bound to their instance. No API helper falls back to a global instance.
 
 `vp run bench` runs the ported performance suite through Vite+. It requires a configured, running yabai session and moves real windows; it is separate from the mocked unit tests. The benchmark runner bridges Bun subprocess calls to Node child processes, so results measure end-to-end yabai operations rather than Bun startup performance.
 

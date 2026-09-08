@@ -12,5 +12,5 @@ export function validateState(this: WindowsManager, state: State) {
   }
 
   this.expectedCurrentNumMasterWindows = spaceState.numMasterWindows;
-  writeState(state);
+  writeState(this.runtime, state);
 }

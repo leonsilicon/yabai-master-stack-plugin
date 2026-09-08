@@ -8,7 +8,7 @@ export function getLeftLineXCoordinate(this: WindowsManager): number {
 }
 
 export function getDividingLineXCoordinate(this: WindowsManager): number {
-  return getConfig().masterPosition === "right"
+  return getConfig(this.runtime).masterPosition === "right"
     ? (this.getTopRightWindow()?.frame.x ?? this.display.frame.x)
     : this.getLeftLineXCoordinate() + 1;
 }

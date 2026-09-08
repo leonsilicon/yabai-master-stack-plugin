@@ -6,7 +6,7 @@ import type { WindowsManager } from "#utils/windows-manager/class.ts";
 
 function hasAerospaceFullscreen(wm: WindowsManager) {
   return (
-    usesAerospace() &&
+    usesAerospace(wm.runtime) &&
     wm.allWindowsData.some(
       (w) => w.space === wm.space.index && w["is-native-fullscreen"] && !w["is-hidden"],
     )
@@ -56,7 +56,7 @@ export async function relayoutWindows(this: WindowsManager, topMasterWindow?: Wi
     .sort((a, b) => a.frame.y - b.frame.y);
   const masters = rest.slice(0, count - 1);
   const stacks = rest.slice(count - 1);
-  if (usesAerospace()) return rebuildAerospace(this, [top, ...masters], stacks);
+  if (usesAerospace(this.runtime)) return rebuildAerospace(this, [top, ...masters], stacks);
   const floated = new Set<number>();
   try {
     for (const window of rest) {
@@ -65,7 +65,7 @@ export async function relayoutWindows(this: WindowsManager, topMasterWindow?: Wi
     }
     if (stacks[0]) {
       await this.executeYabaiCommand(
-        `-m window ${top.id} --insert ${getConfig().masterPosition === "right" ? "west" : "east"}`,
+        `-m window ${top.id} --insert ${getConfig(this.runtime).masterPosition === "right" ? "west" : "east"}`,
       );
       await this.setWindowFloating(stacks[0].id, false);
       floated.delete(stacks[0].id);

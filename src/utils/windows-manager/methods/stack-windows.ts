@@ -8,7 +8,9 @@ import type { WindowsManager } from "#utils/windows-manager/class.ts";
 */
 export function isStackWindow(this: WindowsManager, window: Window) {
   const line = this.getDividingLineXCoordinate();
-  return getConfig().masterPosition === "right" ? window.frame.x < line : window.frame.x >= line;
+  return getConfig(this.runtime).masterPosition === "right"
+    ? window.frame.x < line
+    : window.frame.x >= line;
 }
 
 export function getWidestStackWindow(this: WindowsManager) {
@@ -34,7 +36,7 @@ export function getBottomStackWindow(this: WindowsManager) {
 	In the event that the windows get badly rearranged, we force all windows to become vertically split to ensure that there exists a stack.
 	*/
 export async function createStack(this: WindowsManager) {
-  debug(() => "Creating stack...");
+  debug(this.runtime, () => "Creating stack...");
 
   for (const window of this.windowsData) {
     const splitType = window["split-type"];
@@ -67,7 +69,7 @@ export function doesStackExist(this: WindowsManager) {
 */
 export async function columnizeStackWindows(this: WindowsManager) {
   if (this.expectedCurrentNumMasterWindows === this.windowsData.length) {
-    debug(() => "Skipped columnizing stack windows because there is no stack.");
+    debug(this.runtime, () => "Skipped columnizing stack windows because there is no stack.");
     return;
   }
 

@@ -4,7 +4,7 @@ import { queryWindows, queryFocusedWindow } from "#utils/window-manager-backend.
 import invariant from "tiny-invariant";
 
 export async function getWindowsData(this: WindowsManager) {
-  this.allWindowsData = await queryWindows();
+  this.allWindowsData = await queryWindows(this.runtime);
   const windowsData = this.allWindowsData.filter((window) => {
     const isFloating = window["is-floating"];
 
@@ -33,7 +33,7 @@ export async function getWindowsData(this: WindowsManager) {
 export async function refreshWindowsData(this: WindowsManager) {
   const newWindowsData = await this.getWindowsData();
   this.windowsData = newWindowsData;
-  this.focusedWindowData = await queryFocusedWindow();
+  this.focusedWindowData = await queryFocusedWindow(this.runtime);
   this.focusQueryCompleted = true;
 }
 
