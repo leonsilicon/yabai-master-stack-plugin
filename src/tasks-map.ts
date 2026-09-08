@@ -6,6 +6,8 @@ export const tasksMap = {
   "focus-down-window": tasks.focusDownWindow,
   "focus-up-window": tasks.focusUpWindow,
   "increase-master-window-count": tasks.increaseMasterWindowCount,
+  "watch-aerospace": tasks.watchAerospace,
+  "on-window-manager-start": tasks.onWindowManagerStart,
   "on-yabai-start": tasks.onYabaiStart,
   "window-created": tasks.windowCreated,
   "window-moved": tasks.windowMoved,

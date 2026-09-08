@@ -12,6 +12,11 @@ const mocks = vi.hoisted(() => ({
   writeFileSync: vi.fn(),
   rmSync: vi.fn(),
   spawn: vi.fn(),
+  assertTaskLock: vi.fn(),
+}));
+vi.mock("../src/utils/task-context.ts", async (original) => ({
+  ...(await original<typeof import("../src/utils/task-context.ts")>()),
+  assertTaskLock: mocks.assertTaskLock,
 }));
 vi.mock("../src/utils/config.ts", () => ({ getConfig: () => mocks.config }));
 vi.mock("node:fs", () => ({
@@ -55,6 +60,7 @@ function manager() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.config.masterPosition = "right";
+  mocks.assertTaskLock.mockReset();
   mocks.readFileSync.mockReturnValue(process.pid.toString());
   mocks.spawn.mockImplementation(() => ({
     stdout: new Response("[]").body,
@@ -65,7 +71,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 test("the API exposes every task and manager method without invoking them", () => {
-  expect(Object.keys(api.tasksMap)).toHaveLength(26);
+  expect(Object.keys(api.tasksMap)).toHaveLength(28);
   for (const [name, task] of Object.entries(tasks)) {
     expect(api[name as keyof typeof api]).toBe(task);
     expect(Object.values(api.tasksMap)).toContain(task);
@@ -116,8 +122,10 @@ test("filters windows by display, space, visibility, and floating state", async 
   });
 });
 
-test("refuses commands after another process takes the lock", async () => {
-  mocks.readFileSync.mockReturnValue("another-pid");
+test("refuses commands without active task ownership", async () => {
+  mocks.assertTaskLock.mockImplementation(() => {
+    throw Object.assign(new Error("lock lost"), { code: "ELOCKED" });
+  });
   await expect(manager().executeYabaiCommand("-m window --focus east")).rejects.toMatchObject({
     code: "ELOCKED",
   });

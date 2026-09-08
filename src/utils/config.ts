@@ -1,18 +1,20 @@
 import type { YabaiMasterStackPluginConfig } from "#types";
 import * as fs from "node:fs";
-import os from "node:os";
+import { configDirectory } from "./config-directory.ts";
 import onetime from "onetime";
 import path from "pathe";
 
 export const getConfig = onetime(() => {
   try {
-    const configPath = path.join(os.homedir(), ".config/ymsp/ymsp.config.json");
+    const configPath = path.join(configDirectory, "ymsp.config.json");
 
     const config = JSON.parse(
       fs.readFileSync(configPath).toString(),
     ) as Partial<YabaiMasterStackPluginConfig>;
 
     const defaultConfig: YabaiMasterStackPluginConfig = {
+      windowManager: "yabai",
+      aerospacePath: "/opt/homebrew/bin/aerospace",
       masterPosition: "right",
       resizeIncrement: 50,
       moveNewWindowsToMaster: false,
@@ -21,6 +23,8 @@ export const getConfig = onetime(() => {
     };
 
     const result = { ...defaultConfig, ...config };
+    if (!["yabai", "aerospace"].includes(result.windowManager!))
+      throw new Error("windowManager must be yabai or aerospace");
     if (!["left", "right"].includes(result.masterPosition))
       throw new Error("masterPosition must be left or right");
     if (!Number.isFinite(result.resizeIncrement) || result.resizeIncrement! <= 0)

@@ -1,10 +1,12 @@
+import { usesAerospace } from "./window-manager-backend.ts";
 import { getDisplays, getFocusedDisplay } from "#utils/display.ts";
 import { getSpaces, getFocusedSpace } from "#utils/space.ts";
 import { readState } from "#utils/state.ts";
 import { WindowsManager } from "#utils/windows-manager/class.ts";
 import invariant from "tiny-invariant";
 
-export async function createInitializedWindowsManager(spaceIndex?: number) {
+export async function createInitializedWindowsManager(spaceIndex?: number | string) {
+  if (spaceIndex !== undefined && usesAerospace()) spaceIndex = String(spaceIndex);
   const state = await readState();
   const space =
     spaceIndex === undefined

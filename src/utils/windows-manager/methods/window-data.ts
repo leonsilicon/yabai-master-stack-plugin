@@ -1,18 +1,10 @@
 import type { Window } from "#types";
-import { getConfig } from "#utils/config.ts";
 import type { WindowsManager } from "#utils/windows-manager/class.ts";
-import { getYabaiOutput, queryFocusedWindow } from "#utils/yabai.ts";
+import { queryWindows, queryFocusedWindow } from "#utils/window-manager-backend.ts";
 import invariant from "tiny-invariant";
 
 export async function getWindowsData(this: WindowsManager) {
-  const { yabaiPath } = getConfig();
-  const yabaiProcess = Bun.spawn([yabaiPath, "-m", "query", "--windows"], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const yabaiOutputPromise = getYabaiOutput(yabaiProcess);
-  const yabaiOutput = await yabaiOutputPromise;
-  this.allWindowsData = JSON.parse(yabaiOutput) as Window[];
+  this.allWindowsData = await queryWindows();
   const windowsData = this.allWindowsData.filter((window) => {
     const isFloating = window["is-floating"];
 

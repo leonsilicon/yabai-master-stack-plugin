@@ -1,0 +1,13 @@
+# Isolated configuration for tests/aerospace.live.test.ts.
+# Existing personal windows stay floating. Vitest explicitly tiles its fixtures.
+config-version = 2
+start-at-login = false
+persistent-workspaces = ['1', 'YMSP-Vitest', 'YMSP-Vitest-Other']
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'horizontal'
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+[[on-window-detected]]
+if = 'true'
+run = 'layout floating'
+[mode.main.binding]

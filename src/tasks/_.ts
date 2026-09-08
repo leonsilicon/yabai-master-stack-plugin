@@ -24,3 +24,6 @@ export { minimizeFocusedWindow } from "./minimize-focused-window.ts";
 export { windowDestroyed } from "./window-destroyed.ts";
 export { focusSpace } from "./focus-space.ts";
 export { moveWindowToSpace } from "./move-window-to-space.ts";
+
+export { watchAerospace } from "./watch-aerospace.ts";
+export { onYabaiStart as onWindowManagerStart } from "./on-yabai-start.ts";

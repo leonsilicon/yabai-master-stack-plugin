@@ -1,11 +1,11 @@
 import type { Display, DisplayIndex } from "#types";
-import { runYabai } from "./yabai.ts";
+import { runWindowManager } from "./window-manager-backend.ts";
 export async function getDisplays(): Promise<Display[]> {
-  return JSON.parse(await runYabai("query", "--displays")) as Display[];
+  return JSON.parse(await runWindowManager("query", "--displays")) as Display[];
 }
 export async function getFocusedDisplay(): Promise<Display> {
-  return JSON.parse(await runYabai("query", "--displays", "--display")) as Display;
+  return JSON.parse(await runWindowManager("query", "--displays", "--display")) as Display;
 }
 export async function focusDisplay(displayIndex: DisplayIndex) {
-  await runYabai("display", "--focus", String(displayIndex));
+  await runWindowManager("display", "--focus", String(displayIndex));
 }

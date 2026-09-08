@@ -1,6 +1,17 @@
+import { usesAerospace } from "#utils/window-manager-backend.ts";
+import { rebuildAerospace } from "#utils/aerospace-layout.ts";
 import { getConfig } from "#utils/config.ts";
 import type { Window } from "#types";
 import type { WindowsManager } from "#utils/windows-manager/class.ts";
+
+function hasAerospaceFullscreen(wm: WindowsManager) {
+  return (
+    usesAerospace() &&
+    wm.allWindowsData.some(
+      (w) => w.space === wm.space.index && w["is-native-fullscreen"] && !w["is-hidden"],
+    )
+  );
+}
 
 export async function isValidLayout(
   this: WindowsManager,
@@ -33,6 +44,7 @@ export async function isValidLayout(
 /** Rebuild the BSP tree around a chosen top master, preserving vertical order. */
 export async function relayoutWindows(this: WindowsManager, topMasterWindow?: Window) {
   if (this.space.type && this.space.type !== "bsp") return;
+  if (hasAerospaceFullscreen(this)) return;
   const top = topMasterWindow ?? this.getTopMasterWindow();
   if (!top || !this.windowsData.some((w) => w.id === top.id)) return;
   const count = Math.min(
@@ -44,6 +56,7 @@ export async function relayoutWindows(this: WindowsManager, topMasterWindow?: Wi
     .sort((a, b) => a.frame.y - b.frame.y);
   const masters = rest.slice(0, count - 1);
   const stacks = rest.slice(count - 1);
+  if (usesAerospace()) return rebuildAerospace(this, [top, ...masters], stacks);
   const floated = new Set<number>();
   try {
     for (const window of rest) {
@@ -84,6 +97,7 @@ export async function updateWindows(
 ) {
   this.expectedCurrentNumMasterWindows = Math.max(1, targetNumMasterWindows);
   if (this.space.type && this.space.type !== "bsp") return;
+  if (hasAerospaceFullscreen(this)) return;
   if (!(await this.isValidLayout()).status) {
     await this.relayoutWindows();
     const result = await this.isValidLayout();

@@ -1,23 +1,10 @@
 import type { Space } from "#types";
-import { getConfig } from "./config.ts";
-import { getYabaiOutput } from "./yabai.ts";
+import { runWindowManager } from "./window-manager-backend.ts";
 
 export async function getSpaces() {
-  const { yabaiPath } = getConfig();
-  const yabaiProcess = Bun.spawn([yabaiPath, "-m", "query", "--spaces"], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const yabaiOutput = await getYabaiOutput(yabaiProcess);
-  return JSON.parse(yabaiOutput) as Space[];
+  return JSON.parse(await runWindowManager("query", "--spaces")) as Space[];
 }
 
 export async function getFocusedSpace() {
-  const { yabaiPath } = getConfig();
-  const yabaiProcess = Bun.spawn([yabaiPath, "-m", "query", "--spaces", "--space"], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const yabaiOutput = await getYabaiOutput(yabaiProcess);
-  return JSON.parse(yabaiOutput) as Space;
+  return JSON.parse(await runWindowManager("query", "--spaces", "--space")) as Space;
 }

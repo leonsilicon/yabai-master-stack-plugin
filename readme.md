@@ -1,5 +1,7 @@
 # Yabai Master-Stack Plugin
 
+Use the same master-stack commands with **yabai or AeroSpace**, selected in your YMSP configuration. Existing configurations continue to use yabai.
+
 [![npm version](https://img.shields.io/npm/v/ymsp)](https://npmjs.com/package/ymsp)
 
 ![A video of the Master-Stack plugin in action](./images/yabai-master-stack-plugin-usage.gif)
@@ -50,6 +52,7 @@ Remove old unlabelled ymsp signal registrations before adopting the labelled con
 
 ```json
 {
+  "windowManager": "yabai",
   "yabaiPath": "/opt/homebrew/bin/yabai",
   "masterPosition": "right",
   "moveNewWindowsToMaster": false,
@@ -59,6 +62,40 @@ Remove old unlabelled ymsp signal registrations before adopting the labelled con
 ```
 
 `masterPosition` accepts `left` or `right`. `resizeIncrement` is a positive pixel amount. When `moveNewWindowsToMaster` is enabled, each created window becomes the top master, even if the existing layout was valid. Floating windows, dialogs, hidden applications, minimized windows, and native fullscreen windows are excluded from tiling.
+
+### AeroSpace
+
+Set `windowManager` to `aerospace` and `aerospacePath` to the output of `which aerospace`:
+
+```json
+{
+  "windowManager": "aerospace",
+  "aerospacePath": "/opt/homebrew/bin/aerospace",
+  "masterPosition": "right",
+  "moveNewWindowsToMaster": false,
+  "resizeIncrement": 50
+}
+```
+
+Use AeroSpace 0.21.3-Beta with its normal Accessibility permission. Stop yabai and any Spoon layout handlers before starting AeroSpace. No yabai installation, Hammerspoon, or `jq` is needed for this backend. Keep both AeroSpace normalization options enabled and use tile workspaces. Merge the following into your AeroSpace config (do not duplicate existing keys):
+
+```toml
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'horizontal'
+after-startup-command = ['exec-and-forget ymsp watch-aerospace']
+
+[mode.main.binding]
+alt-j = 'exec-and-forget ymsp focus-down-window'
+alt-k = 'exec-and-forget ymsp focus-up-window'
+alt-shift-j = 'exec-and-forget ymsp move-window-down'
+alt-shift-k = 'exec-and-forget ymsp move-window-up'
+```
+
+Ensure Bun and `ymsp` are on AeroSpace's PATH. Start `ymsp watch-aerospace` once manually when adding this to an already-running AeroSpace session. The watcher repairs creation, removal, minimize/restore, and visibility changes within approximately one second, without reacting to its own resize operations. Duplicate watchers exit cleanly. Restart the watcher after changing YMSP settings; when switching backends, stop it with Ctrl+C or SIGTERM.
+
+Use `ymsp focus-space Work` or `ymsp move-window-to-space Work` for named workspaces. Numeric names such as `1` and `01` stay distinct. AeroSpace master counts are saved in `state.aerospace.json`, separate from yabai's `state.json`, and survive a workspace temporarily disappearing. Workspace transfers may briefly visit the destination to measure its windows before restoring the source. See [AeroSpace behavior and Vitest verification](docs/aerospace.md) for details and known differences.
 
 Master counts are saved per space in `~/.config/ymsp/state.json`, start at one, and survive closing or minimizing windows. Increasing the count beyond the current number of windows reserves capacity for future windows. This preserves the standalone plugin's per-space settings; the Spoon's global `hs.settings` value is not imported.
 
@@ -85,7 +122,7 @@ Master counts are saved per space in `~/.config/ymsp/state.json`, start at one, 
 | `window-destroyed`                                               | Repair visible BSP spaces after removal, minimize, or visibility changes.    |
 | `window-moved`, `on-yabai-start`                                 | Repair visible BSP spaces.                                                   |
 
-Space arguments are positive Mission Control indices, not yabai's persistent space IDs. Layout rebuilding temporarily floats managed windows and reinserts them as two columns. It can reset manually adjusted proportions. Configured float/stack spaces are not rebuilt.
+With yabai, space arguments are positive Mission Control indices, not persistent space IDs. Yabai layout rebuilding temporarily floats managed windows and reinserts them as two columns. AeroSpace accepts workspace names and rebuilds native tile containers. Rebuilding can reset manually adjusted proportions. Configured float/stack or accordion spaces are not rebuilt.
 
 For example, if you're using [skhd](https://github.com/koekeishiya/skhd), add the following into your `skhdrc` file:
 
@@ -105,13 +142,15 @@ alt + shift - d : ymsp decrease-master-window-count
 
 Use `ymsp relayout` to recover a malformed BSP tree. If a command fails, its exit status is nonzero and stderr includes the yabai error. Check that the configured executable exists, yabai is running, and its required permissions are enabled.
 
-Tasks serialize using `~/.config/ymsp/ymsp.lock`, release ownership on success or failure, and wait up to 30 seconds for another task. A dead owner's lock is recovered. Do not run the Spoon's layout handlers and this plugin's signals simultaneously.
+Tasks serialize through `proper-lockfile` using the directory `~/.config/ymsp/task.lock`. Both the CLI and embedded callers use the same settings: a heartbeat every 2 seconds, stale recovery after 10 seconds without a heartbeat, and approximately 30 seconds of acquisition retries. Ownership is released on success or failure. If ownership is compromised, the task rejects and its in-flight yabai subprocess is aborted. This is JavaScript-only and can be bundled into Chord without native addons or runtime dependency installation. Do not run the Spoon's layout handlers and this plugin's signals simultaneously.
+
+When upgrading from the PID-file implementation, update the CLI and rebuild/reload every embedded copy (including `chords-ymsp`) together. Older versions use `ymsp.lock` and do not coordinate with the new protocol. The old PID file is no longer used; do not delete an active `task.lock` directory to bypass contention.
 
 ## Development
 
 Run `vp install`, then `vp check`, `vp test`, and `vp pack`. Vite+ configures packaging, declaration generation, linting, type checking, formatting, staged hooks, tests, and benchmarks in `vite.config.ts`. `vp run dev` watches package builds.
 
-`src/_ymsp.ts` builds to `dist/_ymsp.mjs`, installed as the `ymsp` command. Bun remains the runtime for yabai subprocesses. Run `bun dist/_ymsp.mjs --help` to list all 26 tasks. Existing configuration and state stay in `~/.config/ymsp`.
+`src/_ymsp.ts` builds to `dist/_ymsp.mjs`, installed as the `ymsp` command. Bun remains the subprocess runtime. Run `bun dist/_ymsp.mjs --help` to list all 28 tasks, including `watch-aerospace` and the backend-neutral `on-window-manager-start` alias. Existing configuration and state stay in `~/.config/ymsp`; `YMSP_CONFIG_DIR` overrides that directory for isolated sessions and tests. All callers managing the same desktop should use the same directory so they share the task lock.
 
 ## Public API
 
@@ -125,8 +164,19 @@ const { wm } = await createInitializedWindowsManager();
 console.log(wm.getMasterWindows());
 ```
 
-Importing the API does not run the CLI or execute a task. Tasks acquire the process ownership lock; callers using mutating manager methods directly should run them inside `defineTask`. Standalone manager methods require a manager as their `this` value (for example `getMasterWindows.call(wm)`). `moveWindowToMaster` is the task; `moveManagedWindowToMaster` is the manager method. All manager methods are also exported as `windowsManagerMethods`. `tasksMap` and `TaskName` expose the CLI task registry.
+Importing the API does not run the CLI or execute a task. Tasks acquire the shared lock automatically. Callers using mutating manager methods directly should wrap them in `withTaskLock` or `defineTask`. A `withTaskLock` callback can await multiple tasks sequentially under one acquisition; unrelated calls queue, and nested tasks reuse their caller's ownership. Always await work before returning from the callback. Standalone manager methods require a manager as their `this` value (for example `getMasterWindows.call(wm)`). `moveWindowToMaster` is the task; `moveManagedWindowToMaster` is the manager method. All manager methods are also exported as `windowsManagerMethods`. `tasksMap` and `TaskName` expose the CLI task registry.
+
+```ts
+import { withTaskLock, relayout, focusMasterWindow } from "yabai-master-stack-plugin";
+
+await withTaskLock(async () => {
+  await relayout();
+  await focusMasterWindow();
+});
+```
 
 `vp run bench` runs the ported performance suite through Vite+. It requires a configured, running yabai session and moves real windows; it is separate from the mocked unit tests. The benchmark runner bridges Bun subprocess calls to Node child processes, so results measure end-to-end yabai operations rather than Bun startup performance.
 
 The [port audit](docs/master-stack-port.md) maps the Spoon behavior to this implementation and records intentional differences. `vp test` uses mocked window data and isolated temporary files; it does not move your desktop windows.
+
+The opt-in [AeroSpace live Vitest suite](docs/aerospace.md#automated-tests) tests real windows against AeroSpace 0.21.3-Beta. Public `queryWindows`, `queryFocusedWindow`, display/space helpers, and tasks honor the selected backend. The low-level `runYabai`/`runYabaiCommand` exports always invoke yabai; `runAerospace` always invokes AeroSpace. The legacy `executeYabaiCommand` manager method routes its supported internal operations to the selected backend.

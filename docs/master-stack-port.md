@@ -33,7 +33,7 @@ Source: `Spoons/Spoons/MasterStackLayout.spoon/src`, reviewed 2026-09-08. TypeSc
 - The source's `getHasFocus` warning is honored: query `--windows --window` instead of trusting `has-focus`. Socket failures propagate; an explicit no-window response is a no-op.
 - Preserve preferred counts, fix stale space-ID cleanup, and write state through an atomic rename.
 - Serialize complete tasks instead of allowing a new process to steal ownership during a rebuild. All task errors reject through the API and produce a failing CLI exit status.
-- The Spoon's partial `utils/aerospace.ts` wrappers are not a working alternate backend: its window/space/display classes and most methods still call yabai, and several wrappers use yabai-style commands. This package remains a yabai plugin and does not claim AeroSpace support.
+- The Spoon's partial `utils/aerospace.ts` wrappers are not a working alternate backend: its window/space/display classes and most methods still call yabai, and several wrappers use yabai-style commands. YMSP now provides an independent AeroSpace backend using the upstream 0.21.3 CLI, native frame reads, and the shared behavioral rules. See the [AeroSpace implementation and live Vitest tests](aerospace.md).
 
 ## Validation
 

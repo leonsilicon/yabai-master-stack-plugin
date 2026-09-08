@@ -7,7 +7,7 @@ export interface Window {
   role: string;
   subrole: string;
   display: number;
-  space: number;
+  space: number | string;
   level: number;
   "sub-level": number;
   layer: string;
@@ -36,7 +36,7 @@ type Distinct<T, N> = T & {
   __type: N;
 };
 
-export type SpaceId = Distinct<number, "space">;
+export type SpaceId = Distinct<number | string, "space">;
 export type DisplayId = Distinct<number, "display">;
 export type DisplayUuid = Distinct<number, "displayUuid">;
 export type DisplayIndex = Distinct<number, "displayIndex">;
@@ -59,7 +59,7 @@ export interface Display {
 export interface Space {
   id: SpaceId;
   uuid: string;
-  index: number;
+  index: number | string;
   label: string;
   type: string;
   display: number;
@@ -72,8 +72,10 @@ export interface Space {
 }
 
 export interface YabaiMasterStackPluginConfig {
+  windowManager?: "yabai" | "aerospace";
+  aerospacePath?: string;
   resizeIncrement?: number;
-  yabaiPath: string;
+  yabaiPath?: string;
   debug: boolean;
   moveNewWindowsToMaster: boolean;
   masterPosition: "left" | "right";

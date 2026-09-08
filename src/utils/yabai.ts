@@ -1,5 +1,6 @@
 import { getConfig } from "./config.ts";
 import type { Window } from "#types";
+import { getTaskSignal } from "./task-context.ts";
 
 export class YabaiError extends Error {
   constructor(
@@ -27,13 +28,21 @@ export async function getYabaiOutput(child: {
   return stdout;
 }
 
-export async function runYabai(...args: string[]): Promise<string> {
-  return getYabaiOutput(
-    Bun.spawn([getConfig().yabaiPath, "-m", ...args], {
+export async function runYabaiCommand(...args: string[]): Promise<string> {
+  const signal = getTaskSignal();
+  const result = await getYabaiOutput(
+    Bun.spawn([getConfig().yabaiPath ?? "/usr/local/bin/yabai", ...args], {
       stdout: "pipe",
       stderr: "pipe",
+      ...(signal ? { signal } : {}),
     }),
   );
+  getTaskSignal();
+  return result;
+}
+
+export async function runYabai(...args: string[]): Promise<string> {
+  return runYabaiCommand("-m", ...args);
 }
 
 export async function queryWindows(): Promise<Window[]> {

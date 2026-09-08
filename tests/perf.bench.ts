@@ -1,8 +1,7 @@
 import { afterAll, bench, vi } from "vite-plus/test";
 import { spawn } from "node:child_process";
 import { Readable } from "node:stream";
-import { writeFileSync } from "node:fs";
-import { createInitializedWindowsManager, lockfilePath } from "../src/+.ts";
+import { createInitializedWindowsManager, defineTask, withTaskLock } from "../src/+.ts";
 
 // Opt-in: these benchmarks control windows in the active yabai session.
 // Vite+ runs benchmarks in Node, so bridge the Bun subprocess API used by the app.
@@ -22,23 +21,31 @@ vi.stubGlobal("Bun", {
   },
 });
 afterAll(() => vi.unstubAllGlobals());
-writeFileSync(lockfilePath, process.pid.toString());
-const { wm, state } = await createInitializedWindowsManager();
+const { wm, state } = await withTaskLock(() => createInitializedWindowsManager());
 const window = wm.getFocusedWindow()!;
 const stackWindows = wm.getStackWindows();
 
-bench("columnizeStackWindows", async () => {
-  await wm.columnizeStackWindows();
-});
-bench("createStack", async () => {
-  await wm.createStack();
-});
+bench(
+  "columnizeStackWindows",
+  defineTask(async () => {
+    await wm.columnizeStackWindows();
+  }),
+);
+bench(
+  "createStack",
+  defineTask(async () => {
+    await wm.createStack();
+  }),
+);
 bench("doesStackExist", () => {
   wm.doesStackExist();
 });
-bench("executeYabaiCommand", async () => {
-  await wm.executeYabaiCommand("-m query --windows");
-});
+bench(
+  "executeYabaiCommand",
+  defineTask(async () => {
+    await wm.executeYabaiCommand("-m query --windows");
+  }),
+);
 bench("getBottomMasterWindow", () => {
   wm.getBottomMasterWindow();
 });
@@ -90,9 +97,12 @@ bench("getWidestStackWindow", () => {
 bench("getWindowData", () => {
   wm.getWindowData({ windowId: window.id.toString() });
 });
-bench("initialize", async () => {
-  await wm.initialize();
-});
+bench(
+  "initialize",
+  defineTask(async () => {
+    await wm.initialize();
+  }),
+);
 bench("isBottomWindow", () => {
   wm.isBottomWindow(stackWindows, window);
 });
@@ -108,24 +118,39 @@ bench("isStackWindow", () => {
 bench("isTopWindow", () => {
   wm.isTopWindow(stackWindows, window);
 });
-bench("isValidLayout", async () => {
-  await wm.isValidLayout();
-});
+bench(
+  "isValidLayout",
+  defineTask(async () => {
+    await wm.isValidLayout();
+  }),
+);
 bench("isWindowTouchingLeftEdge", () => {
   wm.isWindowTouchingLeftEdge(window);
 });
-bench("moveWindowToMaster", async () => {
-  await wm.moveWindowToMaster(window);
-});
-bench("moveWindowToStack", async () => {
-  await wm.moveWindowToStack(window);
-});
-bench("refreshWindowsData", async () => {
-  await wm.refreshWindowsData();
-});
-bench("updateWindows", async () => {
-  await wm.updateWindows({ targetNumMasterWindows: 1 });
-});
+bench(
+  "moveWindowToMaster",
+  defineTask(async () => {
+    await wm.moveWindowToMaster(window);
+  }),
+);
+bench(
+  "moveWindowToStack",
+  defineTask(async () => {
+    await wm.moveWindowToStack(window);
+  }),
+);
+bench(
+  "refreshWindowsData",
+  defineTask(async () => {
+    await wm.refreshWindowsData();
+  }),
+);
+bench(
+  "updateWindows",
+  defineTask(async () => {
+    await wm.updateWindows({ targetNumMasterWindows: 1 });
+  }),
+);
 bench("validateState", () => {
   wm.validateState(state);
 });

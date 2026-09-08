@@ -9,7 +9,8 @@ export * from "./utils/space.ts";
 export * from "./utils/state.ts";
 export * from "./utils/task.ts";
 export * from "./utils/windows-manager.ts";
-export * from "./utils/yabai.ts";
+export { runYabai, runYabaiCommand, getYabaiOutput, YabaiError } from "./utils/yabai.ts";
+export { queryWindows, queryFocusedWindow, usesAerospace } from "./utils/window-manager-backend.ts";
 export * from "./utils/windows-manager/class.ts";
 export {
   executeYabaiCommand,
@@ -65,3 +66,5 @@ export {
   getFocusedWindow,
 } from "./utils/windows-manager/methods/window-data.ts";
 export * as windowsManagerMethods from "./utils/windows-manager/methods/index.ts";
+
+export * from "./utils/aerospace.ts";
